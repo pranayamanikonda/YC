@@ -1,0 +1,27 @@
+{
+  "name": "@yc-software/qm",
+  "version": "0.1.0",
+  "description": "The standalone deployment CLI for QM. Interprets the portable deployment directory contract.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "bin": {
+    "qm": "bin/qm.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./contract": "./src/contract/index.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

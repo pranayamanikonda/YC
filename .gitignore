@@ -1,0 +1,10 @@
+# Deployment-local secrets are never committed (contract v1).
+.env
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+*.swp
