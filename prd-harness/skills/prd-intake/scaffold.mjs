@@ -35,6 +35,7 @@ export const PROJECT_TREE = Object.freeze([
   "src",
   "tests",
   "artifacts",
+  "assets",
   ".harness/ledger",
 ]);
 
@@ -158,6 +159,10 @@ export function scaffold(opts) {
   writeFileSync(join(projectDir, "design", "personas.md"), fillTemplate("personas.md", vars));
   writeFileSync(join(projectDir, "design", "decisions.md"), fillTemplate("decisions.md", vars));
 
+  // Durable curated memory (current state) — distinct from the append-only ledger.
+  writeFileSync(join(projectDir, "memory.md"), fillTemplate("memory.md", vars));
+  writeFileSync(join(projectDir, "assets", "README.md"), assetsReadme());
+
   const manifest = {
     project: slug,
     title,
@@ -166,6 +171,7 @@ export function scaffold(opts) {
     signals,
     securityFloored: forced,
     capabilities: opts.capabilities || {},
+    assets: [],
     created: date,
     // Intake always ran (this is it); masked stages start pending.
     stageStatus: {
@@ -184,6 +190,22 @@ export function scaffold(opts) {
   writeFileSync(join(projectDir, ".harness", "ledger", `${slug}.md`), ledger);
 
   return { projectDir, tier, mask, manifest };
+}
+
+/**
+ * @returns {string} The assets/ folder README documenting the intake convention.
+ */
+function assetsReadme() {
+  return (
+    `# Assets\n\n` +
+    `Source assets for this project — logos, brand files, reference PDFs, images.\n\n` +
+    `Ingest attached/uploaded files here (content-hashed, recorded in \`.harness/manifest.json\`):\n\n` +
+    "```bash\n" +
+    `node prd-harness/skills/assets-intake/ingest.mjs <projectDir> <file...>\n` +
+    "```\n\n" +
+    `Committed with the project, so they are durable. Keep large binaries out of git where a\n` +
+    `link (Figma/Drive) will do; record such links in \`design/figma-links.md\`.\n`
+  );
 }
 
 /**

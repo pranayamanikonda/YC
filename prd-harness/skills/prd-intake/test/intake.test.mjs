@@ -98,6 +98,8 @@ test("scaffold creates the full project tree and a valid backlog.xlsx", () => {
       "design/brief.md",
       "design/personas.md",
       "design/decisions.md",
+      "memory.md",
+      "assets/README.md",
       ".harness/manifest.json",
     ]) {
       assert.ok(existsSync(join(res.projectDir, f)), `missing file ${f}`);

@@ -149,6 +149,12 @@ See `rules/common/accessibility.md`.
 - **Ledger** — `<project>/.harness/ledger/<project>.md` is append-only. Every stage
   transition, gate decision, and refine round is recorded so a fresh agent (post-compaction)
   can resume cold.
+- **Memory** — `<project>/memory.md` is the curated *current state* (confirmed facts, key
+  decisions, entities, open threads). The ledger says what happened; memory says what is true
+  now. Read it first each session; keep it current.
+- **Assets** — attached files are ephemeral until ingested into `<project>/assets/` (content-
+  hashed, indexed in the manifest) via `assets-intake`. Storage & durability — what survives,
+  and where PRDs live — are documented in [`STORAGE.md`](./STORAGE.md).
 - **Self-improvement** — friction and gate-rejections can propose harness changes, but only
   behind an explicit `$improve-harness` invocation; never speculative.
 
