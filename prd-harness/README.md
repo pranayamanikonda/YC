@@ -65,7 +65,9 @@ prd-harness/
   agents/             16 specialist definitions (name·description·tools·model)
   skills/
     prd-intake/       Stage-0 scaffolder + size classifier + dependency-free xlsx writer
-    pipeline/         Stages 1–7 runner (declarative STAGE_SPEC · gates · hand-off)
+    pipeline/         Stages 1–7 runner (declarative STAGE_SPEC · gates · audit · tokens)
+    wiki/             LLM-maintained knowledge wiki (Ingest/Query/Lint; lint blocks gates)
+    assets-intake/    ingest uploaded files into assets/ (content-hashed, indexed)
     sync-rules/       regenerate .cursor/rules from the canonical source
   templates/          PRD · product-brief · epics · acceptance-criteria · design-brief ·
                       personas · decisions · ADR · exec-plan · validation-report
@@ -85,8 +87,10 @@ tokens** (`tokens.json`, DTCG 2025.10 — structure, tier model / leakage, inten
 coverage, WCAG contrast), and detects **staleness** — edit an upstream artefact and the
 dependent downstream stages are flagged `stale` and blocked from shipping until re-run
 (flag + block, never auto-rewrite). Uploaded **assets** are ingested
-into `assets/` (content-hashed, indexed); durable state lives in `memory.md` (curated) and the
-ledger (history) — see `STORAGE.md`. Covered by `npm test` (90 tests, including a full
+into `assets/` (content-hashed, indexed); durable state lives in `memory.md` (curated), the
+ledger (history), and a **compounding LLM-maintained `wiki/`** (Karpathy's pattern —
+Ingest/Query/Lint; the Lint blocks gates on broken links / missing provenance / stale pages) —
+see `STORAGE.md` and `skills/wiki`. Covered by `npm test` (90 tests, including a full
 end-to-end run through G1/G2/G3, change-propagation, and DTCG token validation). Figma
 drafting of design artefacts is performed live via the Figma MCP, driven by the design-stage
 specs.

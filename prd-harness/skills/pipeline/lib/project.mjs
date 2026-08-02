@@ -3,9 +3,21 @@
  * Compatible with what prd-intake writes (same manifest.json + ledger format).
  */
 
-import { readFileSync, writeFileSync, existsSync, appendFileSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, appendFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { createHash } from "node:crypto";
 import { GATES } from "./model.mjs";
+
+/**
+ * sha256 of a file's bytes — the shared basis for staleness detection (stage
+ * inputs and wiki source provenance).
+ * @param {string} path
+ * @returns {string | null} hex digest, or null when the path is not a file.
+ */
+export function hashFile(path) {
+  if (!existsSync(path) || !statSync(path).isFile()) return null;
+  return createHash("sha256").update(readFileSync(path)).digest("hex");
+}
 
 /**
  * @param {string} projectDir

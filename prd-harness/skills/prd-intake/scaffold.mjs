@@ -37,6 +37,11 @@ export const PROJECT_TREE = Object.freeze([
   "tests",
   "artifacts",
   "assets",
+  "wiki/entities",
+  "wiki/decisions",
+  "wiki/patterns",
+  "wiki/gotchas",
+  "wiki/glossary",
   ".harness/ledger",
 ]);
 
@@ -163,6 +168,10 @@ export function scaffold(opts) {
   // Durable curated memory (current state) — distinct from the append-only ledger.
   writeFileSync(join(projectDir, "memory.md"), fillTemplate("memory.md", vars));
   writeFileSync(join(projectDir, "assets", "README.md"), assetsReadme());
+
+  // LLM-maintained wiki (the compounding knowledge graph beside memory.md).
+  writeFileSync(join(projectDir, "wiki", "home.md"), fillTemplate("wiki-home.md", vars));
+  writeFileSync(join(projectDir, "wiki", "schema.json"), readFileSync(join(templatesDir, "wiki-schema.json"), "utf8"));
 
   // Documentation-OS deliverables: system overview, ship log, change records home.
   writeFileSync(join(projectDir, "docs", "system-overview.md"), fillTemplate("system-overview.md", vars));

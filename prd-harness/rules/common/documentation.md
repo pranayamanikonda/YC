@@ -14,8 +14,14 @@ chat memory as the only record; durable decisions live in the project (`AGENTS.m
 - **Ownership is always visible.** Mark each stage and high-impact decision as
   **User** / **Agent** / **Shared** / **Automated gate**. Never make a high-impact product,
   content, brand, or design decision without showing who owns it.
+- **Compound knowledge in the wiki.** Ingest meaningful new/changed sources into
+  `<project>/wiki/` (`wiki ingest`, then synthesize the page), link related pages, and cite the
+  raw source on every page. Query the wiki before re-deriving. Keep it lint-clean — broken
+  links, missing provenance, and stale pages block gates. The wiki is durable, cross-referenced
+  memory; `memory.md` is the at-a-glance current state.
 - **Keep source and generated separate.** Sources (PRD, tokens, specs) are edited; generated
   outputs are produced. Don't hand-edit a generated artefact — change its source and rebuild.
+  The wiki cites raw sources; it never rewrites them.
 - **The map stays true.** When you add a folder or surface, document its purpose, what it
   contains, who uses it, what it produces, and how it is validated.
 - **State status explicitly.** End work by saying what is complete, blocked, or awaiting

@@ -196,6 +196,13 @@ See `rules/common/accessibility.md`.
 - **Memory** — `<project>/memory.md` is the curated *current state* (confirmed facts, key
   decisions, entities, open threads). The ledger says what happened; memory says what is true
   now. Read it first each session; keep it current.
+- **Knowledge wiki** — `<project>/wiki/` is an **LLM-maintained, compounding** knowledge base
+  (Karpathy's wiki pattern): immutable raw sources (`prd/`, research, assets, ledger) → the
+  interlinked wiki → a schema. Operations: **Ingest** a source into a page (with provenance),
+  **Query** before re-deriving, **Lint** for health. The **Lint is folded into the audit** —
+  broken `[[wikilinks]]`, missing provenance, and **stale** pages (a cited source's sha256
+  changed, reusing the change-propagation hash) block the next gate. The agent synthesizes page
+  content; the engine enforces structure, the link graph, and the lint. See `skills/wiki`.
 - **Assets** — attached files are ephemeral until ingested into `<project>/assets/` (content-
   hashed, indexed in the manifest) via `assets-intake`. Storage & durability — what survives,
   and where PRDs live — are documented in [`STORAGE.md`](./STORAGE.md).

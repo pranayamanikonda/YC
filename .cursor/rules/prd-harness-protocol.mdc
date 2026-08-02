@@ -37,11 +37,15 @@ a stage skill overrides your default behavior. When they conflict, stop and ask.
   (the Iron Law). If a step was skipped or failed, say so.
 - **Docs are the hand-off.** End every stage by writing the HANDOFF block (see `process.md`)
   to the ledger and the artifact. The next stage reads files, not this conversation.
-- **Durable by default.** Read `<project>/memory.md` (curated current state) and the latest
-  ledger entries at the start of any session. Record events in `<project>/.harness/ledger/<project>.md`
-  as you go and keep `memory.md` current; assume your context can be compacted at any point and
-  a fresh agent resumes from these files. The container is ephemeral — only what is committed to
-  git or lives in an external service (Figma/Drive) survives (see `STORAGE.md`).
+- **Durable by default.** At the start of any session read `<project>/memory.md` (curated
+  current state), the latest ledger entries, and `<project>/wiki/home.md`; **`wiki query`
+  before re-deriving** anything. Record events in the ledger, keep `memory.md` current, and
+  **ingest meaningful new/changed sources into the wiki** (`wiki ingest …`, then synthesize the
+  page) — knowledge compounds there instead of being rebuilt each session. Keep the wiki
+  lint-clean (broken links / missing provenance / stale pages block gates). Assume your context
+  can be compacted at any point and a fresh agent resumes from these files. The container is
+  ephemeral — only committed git history or an external service (Figma/Drive) survives (see
+  `STORAGE.md`).
 - **Ingest assets, don't reference uploads.** An attached file is ephemeral until copied into
   `<project>/assets/` via `assets-intake`. Never treat an upload path as durable.
 - **Smallest coherent change.** Prefer reuse and simplicity. Do not scaffold speculative

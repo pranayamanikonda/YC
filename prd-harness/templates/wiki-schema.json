@@ -1,0 +1,20 @@
+{
+  "$comment": "Schema for the LLM-maintained wiki. Page types and the frontmatter every page must carry. wiki.mjs lint enforces this.",
+  "pageTypes": ["home", "entity", "decision", "pattern", "gotcha", "glossary"],
+  "requiredFrontmatter": ["type", "updated", "sources"],
+  "sourceEntry": { "path": "repo-relative path to an immutable raw source", "hash": "sha256 of that source at last ingest (for stale detection)" },
+  "layout": {
+    "entities": "people, systems, services, external dependencies",
+    "decisions": "decision pages; link to docs/decisions ADRs",
+    "patterns": "reusable patterns",
+    "gotchas": "pitfalls / do-not-repeat",
+    "glossary": "domain terms"
+  },
+  "rules": {
+    "everyPageCitesSources": "non-home pages must cite >=1 source; claims trace to raw sources",
+    "staleOnSourceChange": "a page is stale (error) when a cited source's current sha256 != the recorded hash",
+    "noBrokenLinks": "every [[wikilink]] must resolve to an existing page",
+    "noOrphans": "warn when a non-home page has no inbound links",
+    "linksNotDuplication": "link to the source or another page rather than copying its content"
+  }
+}
