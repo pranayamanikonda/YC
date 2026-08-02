@@ -28,6 +28,7 @@ export const DEFAULT_CONFIG: GardenConfig = {
   flowerMax: 17,
   stagger: 46,
   maxPlants: 64,
+  maxButterflies: 4,
   seed: "",
   selColor: SELECTION_GREEN,
   reducedPreview: false,

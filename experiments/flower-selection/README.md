@@ -1,13 +1,31 @@
 # Flower Selection — procedural text-selection garden
 
 Drag across the article and procedural SVG flowers grow out of the characters you
-hold; release or shrink the selection and they retract in reverse (petal → bud →
-leaf → stem). Everything is seeded, so the same passage always keeps the same
-quiet arrangement while you hold it, and a fresh arrangement appears on reload.
+hold, with butterflies flitting among them. Release, and the selection **commits
+to a persistent highlight** as the butterflies fly away and the flowers fold back
+in (petal → bud → leaf → stem). Everything is seeded, so the same passage always
+keeps the same quiet arrangement while you hold it, and a fresh arrangement
+appears on reload.
 
 This is the **React + TypeScript + Vite + Framer Motion** implementation. A
 self-contained vanilla single-file version lives in the repo scratchpad /
 published Artifact; both share the same algorithms.
+
+## Lifecycle
+
+The garden runs a small state machine (visible in the debug panel):
+
+| Phase | What happens |
+|---|---|
+| **selecting** | Live green highlight follows the drag; flowers grow progressively; butterflies appear. |
+| **committed** | On release, the selection's ranges are saved and registered as a **persistent custom highlight** (CSS Custom Highlight API); the native selection is cleared — the garden no longer depends on it. |
+| **departing** | Butterflies fly away along curved paths; the flowers linger a moment. |
+| **retracting** | Petals close, leaves fold, stems retract; each flower's SVG is removed only after its reverse exit animation finishes. |
+| **highlight-only** | Only the persistent highlight and its highlighted text remain — no flowers, no butterflies. Clicking elsewhere does **not** remove it. |
+
+Starting a new drag begins a fresh cycle and replaces the previous highlight.
+Where the Custom Highlight API is unavailable, the committed highlight falls back
+to persistent SVG rectangles (still decoupled from the native selection).
 
 ## Run
 
@@ -51,10 +69,18 @@ npm run preview    # serve the production build
   animate on inner elements (`transform-box: fill-box`), so the SVG position and
   the animated transform never fight.
 - **Highlight + layering** (`components/SelectionHighlight.tsx`, `styles.css`) —
-  a scoped `::selection` rule recolours the selected text white and makes the
-  native bar transparent; contrast-safe green rounded rects (`#167c3c`, ≈ 4.9:1
-  vs white) are drawn **below** the text as the visible highlight. Paint order is
-  botanical layer → green highlight → article text, so text stays fully readable.
+  while selecting, a scoped `::selection` rule recolours the selected text white
+  and makes the native bar transparent; contrast-safe green rounded rects
+  (`#167c3c`, ≈ 4.9:1 vs white) are drawn **below** the text as the live
+  highlight. On commit this converts to a `::highlight(garden-committed)` custom
+  highlight painted on the real text (`lib/persistentHighlight.ts`), so it
+  persists independently of the native selection. Paint order is botanical layer
+  → green highlight → article text → butterflies, so text stays fully readable.
+- **Butterflies** (`lib/butterflies.ts`, `components/Butterfly.tsx`) — derived
+  from the plants (~one per five, capped, seeded and keyed to a plant id so they
+  don't flicker). They hover with flapping wings while present and, when the list
+  empties on commit, play a curved fly-away `exit` before `<AnimatePresence>`
+  unmounts them. Suppressed entirely under reduced motion.
 
 ## Accessibility & performance
 
@@ -78,20 +104,23 @@ preview, highlight-rect outlines, plant-origin markers, and a reseed button.
 ```
 src/
   lib/
-    types.ts                    PlantConfig, GardenConfig, …
+    types.ts                    PlantConfig, GardenConfig, Phase, ButterflyConfig
     seededRandom.ts             xmur3 + sfc32 + rngFrom + randomSeed
-    selectionToCharIndex.ts     char maps, gardenSelection, highlightRects
+    selectionToCharIndex.ts     char maps, gardenSelection, highlightRects, rangesFor
     proceduralPlantGenerator.ts slotsFor + plantConfig
+    butterflies.ts              butterfliesFor
+    persistentHighlight.ts      CSS Custom Highlight API register/clear
     palette.ts                  colours + DEFAULT_CONFIG
     timing.ts                   grow/retract stage delays
     anim.ts                     Framer variant builder + easings
   hooks/
-    useTextSelection.ts         rAF-batched selection → plants + highlights
+    useTextSelection.ts         rAF-batched lifecycle → phase + plants + butterflies + highlights
     useSeededRandom.ts          stable seeded generator factory
   components/
     FlowerSelectionArticle.tsx  article + overlays (paint order)
     BotanicalOverlay.tsx        AnimatePresence of <Plant>
-    SelectionHighlight.tsx      green highlight rects
+    SelectionHighlight.tsx      live / fallback green highlight rects
+    ButterflyLayer.tsx  Butterfly.tsx
     Plant.tsx  Stem.tsx  Leaf.tsx  FlowerHead.tsx
     DebugPanel.tsx
   App.tsx  main.tsx  styles.css

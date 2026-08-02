@@ -5,19 +5,21 @@ import { randomSeed } from "./lib/seededRandom";
 import { FlowerSelectionArticle } from "./components/FlowerSelectionArticle";
 import { DebugPanel } from "./components/DebugPanel";
 
-/** Live plant count, read off the DOM for the debug label (cheap, on rAF). */
-function useLivePlantCount(seed: string) {
-  const [n, setN] = useState(0);
+/** Live plant count + phase, read off the DOM for the debug label (cheap, on rAF). */
+function useLiveStatus(seed: string) {
+  const [status, setStatus] = useState({ count: 0, phase: "idle" });
   useEffect(() => {
     let raf = 0;
     const tick = () => {
-      setN(document.querySelectorAll(".garden-svg [data-plant]").length);
+      const count = document.querySelectorAll(".garden-botanical [data-plant]").length;
+      const phase = document.querySelector("[data-garden]")?.getAttribute("data-phase") ?? "idle";
+      setStatus((s) => (s.count === count && s.phase === phase ? s : { count, phase }));
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [seed]);
-  return n;
+  return status;
 }
 
 export function App() {
@@ -34,7 +36,12 @@ export function App() {
   }, []);
 
   const reduced = systemReduced || cfg.reducedPreview;
-  const plantCount = useLivePlantCount(cfg.seed);
+  const { count: plantCount, phase } = useLiveStatus(cfg.seed);
+
+  // Expose the selection colour to the ::highlight() rule for the committed state.
+  useEffect(() => {
+    document.documentElement.style.setProperty("--garden-sel", cfg.selColor);
+  }, [cfg.selColor]);
 
   const patch = useMemo(() => (p: Partial<GardenConfig>) => setCfg((c) => ({ ...c, ...p })), []);
   const reseed = useMemo(() => () => setCfg((c) => ({ ...c, seed: randomSeed() })), []);
@@ -43,13 +50,14 @@ export function App() {
     <main className="garden-root">
       <FlowerSelectionArticle cfg={cfg} reduced={reduced} />
       <footer className="garden-footer">
-        <p>Drag across any paragraph. Release to let it fold back in.</p>
+        <p>Drag across any paragraph. Release, and it commits to a highlight as the garden clears.</p>
       </footer>
       <DebugPanel
         cfg={cfg}
         onChange={patch}
         onReseed={reseed}
         plantCount={plantCount}
+        phase={phase}
         systemReduced={systemReduced}
       />
     </main>

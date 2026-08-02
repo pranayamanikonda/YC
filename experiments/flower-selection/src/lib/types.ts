@@ -1,5 +1,30 @@
 export type FlowerType = "daisy" | "rounded" | "cluster" | "bud";
 
+/**
+ * The garden lifecycle. A drag runs `selecting`; releasing commits the range to
+ * a persistent custom highlight, then `departing` (butterflies leave, flowers
+ * linger) → `retracting` (flowers fold away) → `highlight-only` (just the
+ * persistent highlight remains, independent of the native selection).
+ */
+export type Phase = "idle" | "selecting" | "committed" | "departing" | "retracting" | "highlight-only";
+
+/** A butterfly that flits among the flowers, then flies away on commit. */
+export type ButterflyConfig = {
+  id: string;
+  /** anchor in article-relative px */
+  x: number;
+  y: number;
+  scale: number;
+  color: string;
+  accent: string;
+  /** flutter timing offset so butterflies desync */
+  phase: number;
+  /** departure end offset + mid-curve control (curved flight path) */
+  driftX: number;
+  driftY: number;
+  curve: number;
+};
+
 /** A single generated plant. Everything a <Plant> needs to render + animate. */
 export type PlantConfig = {
   id: string;
@@ -49,6 +74,7 @@ export type GardenConfig = {
   flowerMax: number;
   stagger: number;
   maxPlants: number;
+  maxButterflies: number;
   seed: string;
   selColor: string;
   reducedPreview: boolean;

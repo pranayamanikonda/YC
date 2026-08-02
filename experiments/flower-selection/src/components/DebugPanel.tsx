@@ -5,6 +5,7 @@ type Props = {
   onChange: (patch: Partial<GardenConfig>) => void;
   onReseed: () => void;
   plantCount: number;
+  phase: string;
   systemReduced: boolean;
 };
 
@@ -14,6 +15,7 @@ const FIELDS: NumField[] = [
   { key: "density", label: "Density (1 / N chars)", min: 1, max: 8, step: 1 },
   { key: "spacing", label: "Min spacing (px)", min: 6, max: 60, step: 1 },
   { key: "maxPlants", label: "Max plants", min: 4, max: 120, step: 1 },
+  { key: "maxButterflies", label: "Max butterflies", min: 0, max: 12, step: 1 },
   { key: "growMs", label: "Grow speed ×", min: 0.25, max: 3, step: 0.05 },
   { key: "reverseMs", label: "Retract speed ×", min: 0.25, max: 3, step: 0.05 },
   { key: "stagger", label: "Cross-plant stagger (ms)", min: 0, max: 140, step: 2 },
@@ -28,10 +30,12 @@ const FIELDS: NumField[] = [
  * writes straight into the garden config; changes that alter the slot set force
  * a clean recompute inside the selection hook.
  */
-export function DebugPanel({ cfg, onChange, onReseed, plantCount, systemReduced }: Props) {
+export function DebugPanel({ cfg, onChange, onReseed, plantCount, phase, systemReduced }: Props) {
   return (
     <details className="garden-debug">
-      <summary>Debug ({plantCount} live)</summary>
+      <summary>
+        Debug · {phase} · {plantCount} live
+      </summary>
       <div className="garden-debug-body">
         {FIELDS.map((f) => (
           <label key={f.key as string} className="garden-debug-row">

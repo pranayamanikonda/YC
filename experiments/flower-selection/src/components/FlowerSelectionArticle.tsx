@@ -3,6 +3,7 @@ import type { GardenConfig } from "../lib/types";
 import { useTextSelection } from "../hooks/useTextSelection";
 import { BotanicalOverlay } from "./BotanicalOverlay";
 import { SelectionHighlight } from "./SelectionHighlight";
+import { ButterflyLayer } from "./ButterflyLayer";
 
 type Props = { cfg: GardenConfig; reduced: boolean };
 
@@ -22,10 +23,10 @@ export function FlowerSelectionArticle({ cfg, reduced }: Props) {
     if (stage) paragraphsRef.current = Array.from(stage.querySelectorAll<HTMLElement>("[data-garden]"));
   }, []);
 
-  const { plants, highlights } = useTextSelection(stageRef, paragraphsRef, cfg);
+  const { phase, plants, butterflies, highlights } = useTextSelection(stageRef, paragraphsRef, cfg, reduced);
 
   return (
-    <div className="garden-stage" ref={stageRef} data-garden>
+    <div className="garden-stage" ref={stageRef} data-garden data-phase={phase}>
       <BotanicalOverlay plants={plants} cfg={cfg} reduced={reduced} />
       <SelectionHighlight rects={highlights} color={cfg.selColor} debugOutline={cfg.showRects} />
 
@@ -53,6 +54,8 @@ export function FlowerSelectionArticle({ cfg, reduced }: Props) {
           the choosing leaves something behind.
         </p>
       </article>
+
+      <ButterflyLayer butterflies={butterflies} reduced={reduced} />
     </div>
   );
 }

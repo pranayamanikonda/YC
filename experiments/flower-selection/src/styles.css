@@ -66,11 +66,24 @@ body {
 .garden-highlight {
   z-index: 2;
 }
+/* Butterflies flit above the text; still non-interactive. */
+.garden-butterflies {
+  z-index: 4;
+}
 
-/* Article text sits on top of both overlays and stays fully readable. */
+/* Article text sits on top of the highlight/botanical overlays and stays
+   fully readable. */
 .garden-article {
   position: relative;
   z-index: 3;
+}
+
+/* The committed selection: a persistent custom highlight (CSS Custom Highlight
+   API), painted on the real text and independent of the native selection, so it
+   survives clearing the selection and clicking elsewhere. */
+::highlight(garden-committed) {
+  background-color: var(--garden-sel, #167c3c);
+  color: #fff;
 }
 
 .garden-eyebrow {

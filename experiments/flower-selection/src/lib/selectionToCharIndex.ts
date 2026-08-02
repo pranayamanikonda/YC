@@ -69,6 +69,25 @@ export function charRect(
   return { cx: rc.left - box.left + rc.width / 2, bottom: rc.bottom - box.top };
 }
 
+/**
+ * DOM Ranges for the garden selection, one per paragraph — the input to the CSS
+ * Custom Highlight API. These are decoupled from `window.getSelection()`, so the
+ * highlight persists after the native selection is cleared.
+ */
+export function rangesFor(selection: GardenRange[], maps: Map<HTMLElement, CharMap>): Range[] {
+  const out: Range[] = [];
+  for (const { paragraph, start, end } of selection) {
+    const map = maps.get(paragraph);
+    if (!map || map.length === 0) continue;
+    const r = document.createRange();
+    r.setStart(map[start].node, map[start].offset);
+    const endA = map[Math.min(end, map.length - 1)];
+    r.setEnd(endA.node, end >= map.length ? endA.offset + 1 : endA.offset);
+    out.push(r);
+  }
+  return out;
+}
+
 /** Green highlight rectangles (one per line fragment) for the garden selection. */
 export function highlightRects(
   stage: HTMLElement,
