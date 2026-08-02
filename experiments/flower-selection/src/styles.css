@@ -1,0 +1,198 @@
+:root {
+  --paper: #f6f3ea;
+  --ink: #23211c;
+  --muted: #6f6a5e;
+  --rule: #d8d2c4;
+  --panel: #efeadf;
+  --panel-ink: #3a362e;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #14140f;
+    --ink: #e7e3d6;
+    --muted: #9a948a;
+    --rule: #2c2b24;
+    --panel: #1c1b15;
+    --panel-ink: #d7d2c4;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+    "Times New Roman", serif;
+  font-feature-settings: "liga" 1, "onum" 1, "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.6;
+}
+
+.garden-root {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 8vw, 6rem) clamp(1.25rem, 5vw, 2rem) 8rem;
+}
+
+/* The positioned stage: overlays live inside it, clipped to its box. */
+.garden-stage {
+  position: relative;
+}
+
+.garden-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.garden-botanical {
+  z-index: 1;
+}
+.garden-highlight {
+  z-index: 2;
+}
+
+/* Article text sits on top of both overlays and stays fully readable. */
+.garden-article {
+  position: relative;
+  z-index: 3;
+}
+
+.garden-eyebrow {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0 0 0.75rem;
+}
+
+.garden-article h1 {
+  font-size: clamp(2rem, 6vw, 3.1rem);
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.6rem;
+}
+
+.garden-article p[data-garden] {
+  font-size: 1.16rem;
+  margin: 0 0 1.4rem;
+  hyphens: auto;
+}
+
+/* Recolour the selected text white and hide the native bar; our green rects
+   (drawn below) become the visible highlight. Scoped to the garden only. */
+[data-garden] ::selection {
+  color: #fff;
+  background: transparent;
+}
+[data-garden] ::-moz-selection {
+  color: #fff;
+  background: transparent;
+}
+
+.garden-footer {
+  margin-top: 3rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.garden-footer p {
+  margin: 0;
+}
+
+/* Debug panel — collapsed by default, unobtrusive. */
+.garden-debug {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+  width: min(20rem, calc(100vw - 2rem));
+  background: var(--panel);
+  color: var(--panel-ink);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.78rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+.garden-debug > summary {
+  cursor: pointer;
+  padding: 0.55rem 0.8rem;
+  font-weight: 600;
+  list-style: none;
+}
+.garden-debug > summary::-webkit-details-marker {
+  display: none;
+}
+
+.garden-debug-body {
+  padding: 0.4rem 0.8rem 0.9rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.garden-debug-row {
+  display: block;
+  margin: 0.5rem 0;
+}
+.garden-debug-row > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+.garden-debug-row em {
+  font-style: normal;
+  color: var(--muted);
+}
+.garden-debug-row input[type="range"] {
+  width: 100%;
+}
+
+.garden-debug-check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.5rem 0;
+}
+
+.garden-debug-btn {
+  margin-top: 0.7rem;
+  width: 100%;
+  padding: 0.45rem;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.garden-debug-btn:hover {
+  background: rgba(127, 127, 127, 0.12);
+}
+
+.garden-debug-seed {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  word-break: break-all;
+}
