@@ -91,6 +91,7 @@ export const STAGE_SPEC = {
     artefacts: [
       { path: "design/visual/visual-design.md", marker: /Direction/, stub: designStub("Visual Design", "## Direction", "The chosen visual direction and hi-fi comps. Light+dark parity, contrast, focus, motion-reduce.") },
       { path: "design/design-system/tokens.md", marker: /token/, stub: designStub("Design Tokens", "## Tokens (primitive → semantic → component)", "Color, type, spacing, radius, shadow, motion — light and dark.") },
+      { path: "design/design-system/tokens.json", from: "tokens.json", marker: /"\$value"/ },
     ],
   },
   "6-engineering": {

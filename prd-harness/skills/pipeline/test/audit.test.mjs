@@ -8,6 +8,7 @@ import { STAGE_ARTEFACTS } from "../lib/model.mjs";
 import { STAGE_SPEC, runStage } from "../stage.mjs";
 import { audit, staleStages } from "../audit.mjs";
 import { approve, advance, status } from "../run.mjs";
+import { VALID_TOKENS_JSON } from "./fixtures.mjs";
 
 const DATE = "2026-08-02";
 const PRD = "# Audit Project\n\n## Requirements\n1. screen page service api schema integration\n2. dashboard endpoint\n\n## Assumptions\n- x? y?\n";
@@ -35,6 +36,9 @@ function fillStage(projectDir, stageId) {
         break;
       case "design/design-system/tokens.md":
         content = "# tokens\n## Color\npalette\n## Type\nfont scale\n## Spacing\ngap/padding\n";
+        break;
+      case "design/design-system/tokens.json":
+        content = VALID_TOKENS_JSON;
         break;
       default:
         content = `# ${art.path}\n\n${art.marker ? art.marker.source.replace(/[\\^$.*+?()[\]{}|]/g, "") : "x"}\n\nReal content.\n`;

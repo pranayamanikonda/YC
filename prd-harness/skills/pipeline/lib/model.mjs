@@ -55,7 +55,7 @@ export const STAGE_INPUTS = Object.freeze({
   "3-workflows": ["definition/acceptance-criteria.md", "design/ia/ia-map.md", "design/scenarios.md"],
   "4-wireframes": ["design/ia/ia-map.md", "design/flows/flows.md"],
   "5-visual": ["design/wireframes/index.md", "design/principles.md"],
-  "6-engineering": ["definition/acceptance-criteria.md", "design/wireframes/index.md", "design/visual/visual-design.md"],
+  "6-engineering": ["definition/acceptance-criteria.md", "design/wireframes/index.md", "design/visual/visual-design.md", "design/design-system/tokens.json"],
   "7-ship": ["docs/plans/active/exec-plan.md"],
 });
 
@@ -69,7 +69,7 @@ export const STAGE_ARTEFACTS = Object.freeze({
   "2-ia": ["design/ia/ia-map.md", "design/ia/ecosystem.md"],
   "3-workflows": ["design/flows/flows.md"],
   "4-wireframes": ["design/wireframes/index.md"],
-  "5-visual": ["design/visual/visual-design.md", "design/design-system/tokens.md"],
+  "5-visual": ["design/visual/visual-design.md", "design/design-system/tokens.md", "design/design-system/tokens.json"],
   "6-engineering": ["docs/plans/active/exec-plan.md"],
   "7-ship": ["docs/validation-report.md", "CHANGELOG.md"],
 });

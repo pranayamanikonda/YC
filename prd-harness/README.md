@@ -80,10 +80,13 @@ All eight stages are runnable. Stage 0 (`prd-intake`) scaffolds and classifies; 
 (`pipeline`) scaffold each stage's artefact homes, enforce sequencing and the three gates,
 validate structural completion, and write the HANDOFF — the agent fills the creative content
 between runs, and human approval crosses each gate. An **audit** runs before every gate and
-on demand: it checks project-wide consistency + traceability and detects **staleness** — edit
-an upstream artefact and the dependent downstream stages are flagged `stale` and blocked from
-shipping until re-run (flag + block, never auto-rewrite). Uploaded **assets** are ingested
+on demand: it checks project-wide consistency + traceability, validates the **design-system
+tokens** (`tokens.json`, DTCG 2025.10 — structure, tier model / leakage, intent naming, theme
+coverage, WCAG contrast), and detects **staleness** — edit an upstream artefact and the
+dependent downstream stages are flagged `stale` and blocked from shipping until re-run
+(flag + block, never auto-rewrite). Uploaded **assets** are ingested
 into `assets/` (content-hashed, indexed); durable state lives in `memory.md` (curated) and the
 ledger (history) — see `STORAGE.md`. Covered by `npm test` (90 tests, including a full
-end-to-end run through G1/G2/G3 and change-propagation). Figma drafting of design artefacts is
-performed live via the Figma MCP, driven by the design-stage specs.
+end-to-end run through G1/G2/G3, change-propagation, and DTCG token validation). Figma
+drafting of design artefacts is performed live via the Figma MCP, driven by the design-stage
+specs.

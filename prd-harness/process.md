@@ -199,6 +199,11 @@ See `rules/common/accessibility.md`.
 - **Assets** — attached files are ephemeral until ingested into `<project>/assets/` (content-
   hashed, indexed in the manifest) via `assets-intake`. Storage & durability — what survives,
   and where PRDs live — are documented in [`STORAGE.md`](./STORAGE.md).
+- **Design-system proof** — Stage 5 emits `design/design-system/tokens.json` (DTCG 2025.10),
+  validated deterministically by `skills/pipeline/tokens.mjs`: structural validity, the
+  primitive → semantic → component tier model (tier leakage / upward refs error), intent-based
+  naming, theme coverage across `$themes`, and WCAG contrast on declared pairs. Token errors
+  block the gate like any audit error. `tokens.md` remains human prose beside it.
 - **Audit & change-propagation** — a consistency + traceability audit runs before every gate
   (and thus before ship) and on demand. Each stage records a hash of its inputs on completion;
   editing an upstream artefact flags the dependent downstream stages `stale`. Policy: **flag +

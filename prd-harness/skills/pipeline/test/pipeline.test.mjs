@@ -8,6 +8,8 @@ import { nextStage, gateBefore, STAGES } from "../lib/model.mjs";
 import { runStage, STAGE_SPEC } from "../stage.mjs";
 import { status, approve, advance } from "../run.mjs";
 
+import { VALID_TOKENS_JSON } from "./fixtures.mjs";
+
 const DATE = "2026-08-02";
 const PRD = `# Big Product\n\n## Requirements\n1. screen page view service dashboard endpoint\n2. api schema integration migration\n\n## Assumptions to confirm\n- unclear? maybe?\n`;
 
@@ -36,6 +38,9 @@ function fillStage(projectDir, stageId) {
         break;
       case "design/design-system/tokens.md":
         content = "# tokens\n## Color\npalette\n## Type\nfont scale\n## Spacing\ngap/padding\n";
+        break;
+      case "design/design-system/tokens.json":
+        content = VALID_TOKENS_JSON;
         break;
       default:
         // Satisfy the marker; no [[FILL]], no forbidden placeholder.

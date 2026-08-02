@@ -18,6 +18,7 @@ import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { STAGES, STAGE_INPUTS, STAGE_ARTEFACTS, gateBefore } from "./lib/model.mjs";
 import { loadManifest } from "./lib/project.mjs";
+import { validateTokens } from "./tokens.mjs";
 
 /**
  * @param {string} path
@@ -99,9 +100,12 @@ export function designLint(projectDir, manifest) {
   const rel = (p) => p.slice(projectDir.length + 1);
   const visualDone = manifest.stageStatus?.["5-visual"] === "done";
   const tokensPath = join(projectDir, "design", "design-system", "tokens.md");
+  const hasTokensJson = existsSync(join(projectDir, "design", "design-system", "tokens.json"));
 
-  // Tokens must define the core groups once the visual stage is done.
-  if (visualDone) {
+  // Tokens must define the core groups once the visual stage is done. When a
+  // machine-readable tokens.json exists, validateTokens() is authoritative and
+  // this prose check is skipped; it stays as a fallback for prose-only projects.
+  if (visualDone && !hasTokensJson) {
     if (!existsSync(tokensPath)) {
       issues.push({ sev: "error", msg: "design-lint: visual done but design-system/tokens.md is missing" });
     } else {
@@ -192,7 +196,8 @@ export function audit(projectDir) {
     if (!hasTests) warn("engineering done but no test files found under tests/");
   }
 
-  // 5. Design-lint (heuristic proof of the design system).
+  // 5. Design-system proof: real DTCG token validation + design-lint prose checks.
+  for (const iss of validateTokens(projectDir)) issues.push(iss);
   for (const iss of designLint(projectDir, m)) issues.push(iss);
 
   // 6. Staleness (change-propagation).

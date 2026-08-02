@@ -20,7 +20,9 @@ node prd-harness/skills/pipeline/run.mjs audit   <projectDir>            # consi
 ## Audit & change-propagation
 The **audit** checks the whole project is coherent — no leftover `[[FILL]]` in a done stage,
 indexed assets exist, gate state matches stage state, acceptance criteria present, engineering
-has tests — and detects **staleness**. Each stage records a hash of its inputs on completion
+has tests, and the **design-system tokens** (`design/design-system/tokens.json`, DTCG 2025.10)
+are valid: structure, tier model (no component→primitive leakage), intent-based naming, theme
+coverage, and WCAG contrast — and detects **staleness**. Each stage records a hash of its inputs on completion
 (`stageInputs`); if you edit an upstream artefact after a downstream stage is done, that stage
 and everything downstream are flagged `stale`.
 
