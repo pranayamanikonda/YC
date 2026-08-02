@@ -13,8 +13,14 @@ the same way every time.
 ## Quick start
 
 ```bash
-# Stage 0 — scaffold a project from a PRD, then STOP at gate G1.
+# Stage 0 — scaffold a project from a PRD (then it stops at gate G1).
 node prd-harness/skills/prd-intake/scaffold.mjs prd-harness/examples/sample-prd/PRD.md ./out
+P=./out/team-standup-digest
+
+# Stages 1–7 — drive the pipeline; it stops at gates and unfinished stages.
+node prd-harness/skills/pipeline/run.mjs status  "$P"
+node prd-harness/skills/pipeline/run.mjs approve "$P" G1   # record human gate approval
+node prd-harness/skills/pipeline/run.mjs advance "$P"      # run until blocked
 
 # regenerate Cursor rules after editing AGENTS.md or rules/
 node prd-harness/skills/sync-rules/sync.mjs
@@ -55,6 +61,7 @@ prd-harness/
   agents/             16 specialist definitions (name·description·tools·model)
   skills/
     prd-intake/       Stage-0 scaffolder + size classifier + dependency-free xlsx writer
+    pipeline/         Stages 1–7 runner (declarative STAGE_SPEC · gates · hand-off)
     sync-rules/       regenerate .cursor/rules from the canonical source
   templates/          PRD · product-brief · epics · acceptance-criteria · design-brief ·
                       personas · decisions · ADR · exec-plan · validation-report
@@ -65,7 +72,9 @@ prd-harness/
 
 ## Status
 
-First slice: the process spec, the portable protocol + rules, the 16 agent definitions, the
-Stage-0 intake scaffolder (with a real `backlog.xlsx` generator), templates, and a worked
-example — covered by `npm test`. Stages 1–7 are fully specified in `process.md` and land as
-skill bodies stage-by-stage.
+All eight stages are runnable. Stage 0 (`prd-intake`) scaffolds and classifies; Stages 1–7
+(`pipeline`) scaffold each stage's artefact homes, enforce sequencing and the three gates,
+validate structural completion, and write the HANDOFF — the agent fills the creative content
+between runs, and human approval crosses each gate. Covered by `npm test` (79 tests,
+including a full end-to-end run through G1/G2/G3). The Figma drafting of design artefacts is
+performed live via the Figma MCP, driven by the design-stage specs.
