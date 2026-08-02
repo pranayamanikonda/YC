@@ -29,6 +29,7 @@ export const PROJECT_TREE = Object.freeze([
   "design/visual",
   "design/design-system",
   "docs/decisions",
+  "docs/changes",
   "docs/plans/active",
   "docs/plans/completed",
   "docs/runbooks",
@@ -162,6 +163,14 @@ export function scaffold(opts) {
   // Durable curated memory (current state) — distinct from the append-only ledger.
   writeFileSync(join(projectDir, "memory.md"), fillTemplate("memory.md", vars));
   writeFileSync(join(projectDir, "assets", "README.md"), assetsReadme());
+
+  // Documentation-OS deliverables: system overview, ship log, change records home.
+  writeFileSync(join(projectDir, "docs", "system-overview.md"), fillTemplate("system-overview.md", vars));
+  writeFileSync(join(projectDir, "ship-log.md"), fillTemplate("ship-log.md", vars));
+  writeFileSync(
+    join(projectDir, "docs", "changes", "README.md"),
+    `# Change records\n\nOne record per meaningful change, as \`NNNN-slug.md\` (see\n\`prd-harness/templates/change-record.md\`). The durable why-behind-each-change; do not leave\nreasoning only in chat.\n`,
+  );
 
   const manifest = {
     project: slug,

@@ -19,6 +19,22 @@ export const STAGES = Object.freeze([
 export const GATES = Object.freeze(["G1", "G2", "G3"]);
 
 /**
+ * Who owns each stage's decisions: `Agent` (autonomous), `Shared` (agent produces,
+ * human reviews/approves), or `User` (needs human judgment). Gates are the
+ * `Automated gate` (audit) + `User` (approval) checkpoints between stages.
+ */
+export const OWNERSHIP = Object.freeze({
+  "0-intake": "Agent",
+  "1-definition": "Shared",
+  "2-ia": "Agent",
+  "3-workflows": "Agent",
+  "4-wireframes": "Shared",
+  "5-visual": "Shared",
+  "6-engineering": "Agent",
+  "7-ship": "Shared",
+});
+
+/**
  * A gate that must be human-approved *before* entering the keyed stage.
  * G1 before Definition, G2 before Engineering, G3 before Ship — robust to any
  * phase mask, since the gate binds to the stage transition, not a fixed index.

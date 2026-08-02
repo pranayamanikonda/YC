@@ -11,16 +11,41 @@ agent *how to behave*; this file tells it *what the pipeline is*.
 
 ## Core idea
 
+The project's operating model is four layers — **Source → Build → Proof → Shared system**:
+
+- **Source** (editable truth) — `prd/PRD.md`, `definition/` acceptance criteria,
+  `design/design-system/tokens.md`, specs, configuration, approved decisions.
+- **Build** (source → output) — the stage pipeline (`skills/pipeline`, `prd-intake`) that
+  scaffolds artefacts, generates the backlog, renders designs, and implements code.
+- **Proof** (confirm the output) — the `audit` (consistency + traceability + design-lint),
+  the three gates, the reviewers (`code`/`security`/`a11y`), and the G3 Iron-Law verifier.
+- **Shared system** (reused every iteration) — `rules/`, `templates/`, the `agents/` roster,
+  and `AGENTS.md`, so neither human nor agent reinvents the project each pass.
+
 Four constants hold on every run:
 
 - **PRD is the source of truth.** Everything downstream traces to a normalized `prd/PRD.md`.
-- **Docs are the hand-off.** Each stage writes an artifact plus a HANDOFF verdict naming the
-  next stage. The next stage reads files, never conversation memory. State survives
-  compaction in a durable ledger.
-- **Gates, not autonomy, at the risky seams.** Three human gates bound the run; work flows
-  freely between them.
+- **Docs are the hand-off, and the record.** Each stage writes an artifact + a HANDOFF; every
+  meaningful change writes a change record; every ship appends to the ship log. State survives
+  compaction in durable files, never chat memory.
+- **Gates, not autonomy, at the risky seams.** Three gates (audit + human approval) bound the
+  run; work flows freely between them.
 - **Author ≠ reviewer.** Whoever produces an artifact never signs off on it. Review is a
   different agent, ideally a different model.
+
+### Folder crosswalk (doc-OS name → this harness)
+
+| Doc-OS role | In this harness |
+| ----------- | --------------- |
+| `sources/` | `prd/`, `definition/`, `design/design-system/tokens.md` |
+| `harnesses/` (rules & contracts) | `prd-harness/rules/`, `agents/`, `AGENTS.md`, `process.md` |
+| `scripts/` (build/automation) | `prd-harness/skills/` (`prd-intake`, `pipeline`, `assets-intake`, `sync-rules`) |
+| `audits/` (proof) | `pipeline/audit.mjs`, the three gates, `docs/validation-report.md` |
+| `generated/` | `design/` outputs, `artifacts/`, `src/` |
+| `documentation/` | `docs/`, `memory.md`, `docs/system-overview.md` |
+| `ship-log/` | `ship-log.md` + `.harness/ledger/` |
+
+Names are adapted to this project, as the doc-OS itself advises — the roles map 1:1.
 
 ## The stage graph
 
@@ -91,16 +116,35 @@ resolved tier, mask, and agent assignments are written to `<project>/.harness/ma
 
 ## Stages, agents, and deliverables
 
-| # | Stage | Lead agent (+ support) | Deliverable → format |
-| - | ----- | ---------------------- | -------------------- |
-| 0 | Intake & Framing | `product-analyst` (+ `researcher`, `ux-researcher`) | normalized `prd/PRD.md` · `product-brief` → **DOCX** · **design brief** · **personas** · **ecosystem map** → **Figma/FigJam** · research notes → MD |
-| 1 | Definition | `product-manager` (+ `ux-researcher`) | `epics.md` · **`backlog.xlsx`** (epics · stories · AC) · `acceptance-criteria.md` (AC-NNN) · **design principles (DPs)** · **scenarios** |
-| 2 | Information Architecture | `ia-architect` | site/app map + entity model → **FigJam** + mermaid |
-| 3 | Task Flows | `ux-flows` | journeys + task flows incl. empty/error/edge, walked through the **scenarios** → **FigJam/Figma** + mermaid |
-| 4 | Wireframes (lo-fi) | `wireframe-designer` (+ `a11y-reviewer`) | clickable frames → **Figma** + HTML artifacts |
-| 5 | Visual Design & System | `visual-designer` (+ `design-system`, `theme-factory` skills, `a11y-reviewer`) | tokens (light+dark) + hi-fi comps → **Figma** + tokens-in-code · brand guide → **PDF** |
-| 6 | Engineering | `architect` → `implementer` + `test-author` → `code-reviewer` + `security-reviewer` | code + tests + PRs (TDD, author≠reviewer) |
-| 7 | Ship & Log | orchestrator | commit/push · ADRs · changelog · stakeholder deck → **PPTX/PDF** |
+| # | Stage | Owner | Lead agent (+ support) | Deliverable → format |
+| - | ----- | ----- | ---------------------- | -------------------- |
+| 0 | Intake & Framing | Agent | `product-analyst` (+ `researcher`, `ux-researcher`) | normalized `prd/PRD.md` · `product-brief` → **DOCX** · **design brief** · **personas** · **ecosystem map** → **Figma/FigJam** · research notes → MD |
+| 1 | Definition | Shared | `product-manager` (+ `ux-researcher`) | `epics.md` · **`backlog.xlsx`** (epics · stories · AC) · `acceptance-criteria.md` (AC-NNN) · **design principles (DPs)** · **scenarios** |
+| 2 | Information Architecture | Agent | `ia-architect` | site/app map + entity model → **FigJam** + mermaid |
+| 3 | Task Flows | Agent | `ux-flows` | journeys + task flows incl. empty/error/edge, walked through the **scenarios** → **FigJam/Figma** + mermaid |
+| 4 | Wireframes (lo-fi) | Shared | `wireframe-designer` (+ `a11y-reviewer`) | clickable frames → **Figma** + HTML artifacts |
+| 5 | Visual Design & System | Shared | `visual-designer` (+ `design-system`, `theme-factory` skills, `a11y-reviewer`) | tokens (light+dark) + hi-fi comps → **Figma** + tokens-in-code · brand guide → **PDF** |
+| 6 | Engineering | Agent | `architect` → `implementer` + `test-author` → `code-reviewer` + `security-reviewer` | code + tests + PRs (TDD, author≠reviewer) |
+| 7 | Ship & Log | Shared | orchestrator | commit/push · ADRs · changelog · **ship-log** · stakeholder deck → **PPTX/PDF** |
+
+**Ownership taxonomy** (visible on every stage and high-impact decision, so the agent never
+silently makes a product/design call): **Agent** — autonomous; **Shared** — agent produces,
+human reviews/approves; **User** — needs human judgment; **Automated gate** — a rule (the
+audit) decides whether the flow may continue. The three gates are `Automated gate` (audit
+runs) **+** `User` (approval); no gate crosses on the audit alone or on approval over a failing
+audit.
+
+### Per-stage contract (input · action · output · validation · failure · recovery)
+
+| Stage | Input | Action | Output | Validation rule | Failure → recovery |
+| ----- | ----- | ------ | ------ | --------------- | ------------------ |
+| 1 Definition | `prd/PRD.md` | decompose into epics/stories/AC | AC-NNN, backlog, DPs, scenarios | every requirement → ≥1 AC; no placeholders | missing AC → re-run definition |
+| 2 IA | PRD + AC | map surfaces/entities/nav | IA map + ecosystem | landmark/nav/focus order present | gap → revise IA |
+| 3 Task Flows | AC + IA + scenarios | design journeys incl. edge states | flows | empty/error/edge covered; no colour-only | missing state → add it |
+| 4 Wireframes | IA + flows | lay out clickable frames | wireframes | reading order, target sizes, labels; a11y audit | a11y blocker → fix before G2 |
+| 5 Visual | wireframes + DPs | direction + tokens (light/dark) | visual + tokens | contrast, focus, states, responsive (design-lint) | lint fail → correct tokens/states |
+| 6 Engineering | AC + wireframes + visual | WorkUnit DAG, TDD | code + tests | each AC → ≥1 test; author≠reviewer | red → fix loop (≤3) → breaker |
+| 7 Ship | verified build | commit/push, record | ship-log + changelog + ADRs | G3 verdict READY; audit clean | not ready → back to 6 |
 
 Cross-cutting agents: **`council`** (architect + skeptic + pragmatist + critic, fresh
 parallel subagents) for any go/no-go decision; **`verifier`** owns the G3 report;

@@ -34,6 +34,9 @@ function fillStage(projectDir, stageId) {
       case "docs/validation-report.md":
         content = "# Validation Report\nVerdict: READY\n";
         break;
+      case "design/design-system/tokens.md":
+        content = "# tokens\n## Color\npalette\n## Type\nfont scale\n## Spacing\ngap/padding\n";
+        break;
       default:
         // Satisfy the marker; no [[FILL]], no forbidden placeholder.
         content = `# ${art.path}\n\n${art.marker ? art.marker.source.replace(/[\\^$.*+?()[\]{}|]/g, "") : "content"}\n\nReal content here.\n`;

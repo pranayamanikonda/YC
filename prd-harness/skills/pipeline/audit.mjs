@@ -71,6 +71,79 @@ export function staleStages(projectDir, manifest = loadManifest(projectDir)) {
 }
 
 /**
+ * Recursively list `.md` files under a directory.
+ * @param {string} dir
+ * @returns {string[]}
+ */
+function listMarkdown(dir) {
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...listMarkdown(full));
+    else if (entry.name.endsWith(".md")) out.push(full);
+  }
+  return out;
+}
+
+/**
+ * Heuristic design-system lint. Not a full token engine — it enforces the basics
+ * the doc OS asks for: tokens exist once visual is done, colors come from tokens
+ * (not raw hex), and component states + responsive behaviour are documented.
+ * @param {string} projectDir
+ * @param {any} manifest
+ * @returns {Array<{ sev: string, msg: string }>}
+ */
+export function designLint(projectDir, manifest) {
+  const issues = [];
+  const rel = (p) => p.slice(projectDir.length + 1);
+  const visualDone = manifest.stageStatus?.["5-visual"] === "done";
+  const tokensPath = join(projectDir, "design", "design-system", "tokens.md");
+
+  // Tokens must define the core groups once the visual stage is done.
+  if (visualDone) {
+    if (!existsSync(tokensPath)) {
+      issues.push({ sev: "error", msg: "design-lint: visual done but design-system/tokens.md is missing" });
+    } else {
+      const t = readFileSync(tokensPath, "utf8");
+      for (const [group, re] of [
+        ["color", /colou?r|palette|#[0-9a-f]{3,6}/i],
+        ["type", /font|typograph|type scale/i],
+        ["spacing", /spac|gap|margin|padding/i],
+      ]) {
+        if (!re.test(t)) issues.push({ sev: "error", msg: `design-lint: tokens.md defines no ${group} tokens` });
+      }
+    }
+  }
+
+  // Colors should come from tokens, not raw hex in other design docs.
+  for (const file of listMarkdown(join(projectDir, "design"))) {
+    if (file === tokensPath) continue;
+    const text = readFileSync(file, "utf8");
+    if (text.includes("[[FILL]]")) continue; // stub, not yet authored
+    if (/#[0-9a-fA-F]{6}\b/.test(text)) {
+      issues.push({ sev: "warn", msg: `design-lint: raw color in ${rel(file)} — define it as a token instead` });
+    }
+  }
+
+  // Component states + responsive behaviour must be documented once designed.
+  const designText = [join(projectDir, "design", "wireframes", "index.md"), join(projectDir, "design", "visual", "visual-design.md")]
+    .filter((p) => existsSync(p) && !readFileSync(p, "utf8").includes("[[FILL]]"))
+    .map((p) => readFileSync(p, "utf8"))
+    .join("\n");
+  if (designText) {
+    if (!/(hover|focus|disabled|error state|empty state|loading|active state)/i.test(designText)) {
+      issues.push({ sev: "warn", msg: "design-lint: no component states (hover/focus/disabled/error/empty/loading) documented" });
+    }
+    if (!/(responsive|breakpoint|mobile|viewport|small screen)/i.test(designText)) {
+      issues.push({ sev: "warn", msg: "design-lint: responsive behaviour not documented" });
+    }
+  }
+
+  return issues;
+}
+
+/**
  * Run the consistency + staleness audit.
  * @param {string} projectDir
  * @returns {{ ok: boolean, issues: Array<{ sev: string, msg: string }>, stale: Array<object> }}
@@ -119,7 +192,10 @@ export function audit(projectDir) {
     if (!hasTests) warn("engineering done but no test files found under tests/");
   }
 
-  // 5. Staleness (change-propagation).
+  // 5. Design-lint (heuristic proof of the design system).
+  for (const iss of designLint(projectDir, m)) issues.push(iss);
+
+  // 6. Staleness (change-propagation).
   const stale = staleStages(projectDir, m);
   for (const s of stale) {
     err(`stale: ${s.stage} (${s.reason}${s.changedInputs.length ? ": " + s.changedInputs.join(", ") : ""})`);

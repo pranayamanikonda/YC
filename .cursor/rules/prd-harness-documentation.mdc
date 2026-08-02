@@ -1,0 +1,26 @@
+---
+description: PRD Harness rule: documentation.
+alwaysApply: true
+---
+# Rule: Documentation
+
+Document all work as a repeatable, verifiable system — not scattered notes. Do not rely on
+chat memory as the only record; durable decisions live in the project (`AGENTS.md`,
+`process.md`, `docs/`, `memory.md`, `ship-log.md`).
+
+- **Every meaningful change leaves a change record.** Write one from
+  `templates/change-record.md` into `docs/changes/NNNN-slug.md`: what changed, why, the source
+  requirement, files affected, assumptions introduced, validation run, result, decision owner,
+  next step. Trivial edits (typos) are exempt; anything a reviewer would want explained is not.
+- **Every ship updates the ship log.** Append a row to `ship-log.md`: version/date, summary,
+  reason, owner, validation status, known limitations, follow-ups. The ledger is the fine
+  event log; the ship log is the release history.
+- **Ownership is always visible.** Mark each stage and high-impact decision as
+  **User** / **Agent** / **Shared** / **Automated gate**. Never make a high-impact product,
+  content, brand, or design decision without showing who owns it.
+- **Keep source and generated separate.** Sources (PRD, tokens, specs) are edited; generated
+  outputs are produced. Don't hand-edit a generated artefact — change its source and rebuild.
+- **The map stays true.** When you add a folder or surface, document its purpose, what it
+  contains, who uses it, what it produces, and how it is validated.
+- **State status explicitly.** End work by saying what is complete, blocked, or awaiting
+  approval — with the blocking reason if any.

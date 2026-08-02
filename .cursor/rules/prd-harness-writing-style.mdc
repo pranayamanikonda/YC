@@ -1,0 +1,17 @@
+---
+description: PRD Harness rule: writing-style.
+alwaysApply: true
+---
+# Rule: Writing style
+
+Documentation must be readable by someone who was not in the original conversation.
+
+- Use complete, understandable sentences; explain the reasoning without unnecessary jargon.
+- **State exactly what changed and why.** Ban vague claims like "improved the design",
+  "cleaned things up", "optimized" — say what and why ("raised body contrast to 5.2:1 to meet
+  WCAG AA", not "made it more accessible").
+- Include concrete examples; use diagrams or structured flows (mermaid) where they help.
+- Separate source rules from generated outputs; never blur the two.
+- Prefer specifics over adjectives; numbers over "better/faster"; name files, tokens, and
+  criteria by their real identifiers.
+- Write so a user, designer, developer, or another agent can act on it cold.
