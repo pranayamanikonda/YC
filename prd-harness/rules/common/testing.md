@@ -1,0 +1,8 @@
+# Rule: Testing
+
+- TDD in Stage 6: write the failing test, run it to see it fail, minimal implementation,
+  run to pass, refactor, commit.
+- Every acceptance criterion (AC-NNN) maps to at least one test. Trace tests back to ACs.
+- A bug fix starts as a new failing regression test that reproduces it.
+- Match the repo's existing test runner and conventions (here: `node --test`, no deps).
+- Coverage is a signal, not a target — but new behavior ships with tests, always.

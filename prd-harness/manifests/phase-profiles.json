@@ -1,0 +1,22 @@
+{
+  "$comment": "Size tier → the stages the pipeline runs (phase mask) and the lead agent per stage. The classifier (skills/prd-intake/lib/classify.mjs) is the source of truth for masks; this manifest documents the composition and per-stage ownership.",
+  "gates": { "G1": "after 0-intake", "G2": "after 5-visual", "G3": "before 7-ship" },
+  "stageLeads": {
+    "0-intake": ["product-analyst", "researcher", "ux-researcher"],
+    "1-definition": ["product-manager", "ux-researcher"],
+    "2-ia": ["ia-architect"],
+    "3-workflows": ["ux-flows"],
+    "4-wireframes": ["wireframe-designer", "a11y-reviewer"],
+    "5-visual": ["visual-designer", "a11y-reviewer"],
+    "6-engineering": ["architect", "implementer", "test-author", "code-reviewer", "security-reviewer"],
+    "7-ship": ["verifier"]
+  },
+  "crossCutting": ["council", "verifier", "a11y-reviewer"],
+  "profiles": {
+    "trivial": ["1-definition", "6-engineering", "7-ship"],
+    "small": ["1-definition", "4-wireframes", "6-engineering", "7-ship"],
+    "standard": ["1-definition", "2-ia", "3-workflows", "4-wireframes", "6-engineering", "7-ship"],
+    "large": ["0-intake", "1-definition", "2-ia", "3-workflows", "4-wireframes", "5-visual", "6-engineering", "7-ship"]
+  },
+  "securityFloor": "standard"
+}

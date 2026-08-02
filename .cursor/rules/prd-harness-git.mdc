@@ -1,0 +1,12 @@
+---
+description: PRD Harness rule: git.
+alwaysApply: true
+---
+# Rule: Git
+
+- Develop on the branch the session designates; never push elsewhere without permission.
+- Conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`. One
+  logical change per commit; one problem per PR.
+- Commit at stage boundaries and at each green verification, not in one giant drop.
+- Open a PR only when the human asks. Fill any PR template honestly; describe only the diff.
+- Never commit secrets, `.env`, tokens, or absolute host paths.
