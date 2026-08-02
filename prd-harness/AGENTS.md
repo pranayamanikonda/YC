@@ -22,6 +22,11 @@ a stage skill overrides your default behavior. When they conflict, stop and ask.
   code; business rules may not.
 - **Respect the gates.** Never cross **G1**, **G2**, or **G3** without explicit human
   approval. Do not write implementation code before G2. Do not claim completion before G3.
+- **Audit before every gate; staleness blocks ship.** The audit (consistency + change
+  propagation) runs before each gate. If you change an upstream artefact mid-pipeline, the
+  downstream stages that depended on it are flagged `stale` and the project cannot cross the
+  next gate — even an approved one — until you re-run them. Never silently ship stale work; do
+  not "redo everything" either — re-run only the affected stages.
 - **Author ≠ reviewer.** Never review or sign off on an artifact you produced. Dispatch a
   different agent (ideally a different model) to review.
 - **Evidence, not assertion.** "Done" requires a fresh run — build, typecheck, lint, tests,

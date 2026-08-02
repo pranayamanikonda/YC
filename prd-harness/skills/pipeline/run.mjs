@@ -16,6 +16,7 @@ import { basename } from "node:path";
 import { STAGES, GATES, gateBefore, nextStage } from "./lib/model.mjs";
 import { loadManifest, saveManifest, ledger } from "./lib/project.mjs";
 import { runStage, STAGE_SPEC } from "./stage.mjs";
+import { audit, staleStages } from "./audit.mjs";
 
 /**
  * @param {string} projectDir
@@ -24,14 +25,19 @@ import { runStage, STAGE_SPEC } from "./stage.mjs";
 export function status(projectDir) {
   const m = loadManifest(projectDir);
   const next = nextStage(m.phaseMask, m.stageStatus);
+  const stale = staleStages(projectDir, m);
   return {
     project: m.project,
     tier: m.tier,
     gates: m.gates,
-    stages: m.phaseMask.filter((s) => s !== "0-intake").map((s) => ({ stage: s, status: m.stageStatus[s] || "pending" })),
+    stages: m.phaseMask.filter((s) => s !== "0-intake").map((s) => ({
+      stage: s,
+      status: stale.some((x) => x.stage === s) ? "stale" : m.stageStatus[s] || "pending",
+    })),
     next,
     blockedBy: next ? (gateBefore(next) && m.gates[gateBefore(next)] !== "approved" ? gateBefore(next) : null) : null,
-    complete: next === null,
+    stale: stale.map((s) => s.stage),
+    complete: next === null && stale.length === 0,
   };
 }
 
@@ -66,8 +72,16 @@ export function advance(projectDir, opts = {}) {
     if (next === null) return { ran, stopped: { reason: "pipeline complete" } };
 
     const gate = gateBefore(next);
-    if (gate && m.gates[gate] !== "approved") {
-      return { ran, stopped: { stage: next, gate, reason: `awaiting ${gate} approval` } };
+    if (gate) {
+      // Auto-audit before every gate (and thus before ship). Blocks on any
+      // inconsistency or staleness — even if the gate is already approved.
+      const a = audit(projectDir);
+      if (!a.ok) {
+        return { ran, stopped: { stage: next, gate, reason: "audit blocked", issues: a.issues } };
+      }
+      if (m.gates[gate] !== "approved") {
+        return { ran, stopped: { stage: next, gate, reason: `awaiting ${gate} approval` } };
+      }
     }
 
     const res = runStage(projectDir, next, { date });
@@ -91,6 +105,12 @@ if (process.argv[1] && basename(process.argv[1]) === "run.mjs") {
 
   if (cmd === "status") {
     process.stdout.write(JSON.stringify(status(projectDir), null, 2) + "\n");
+  } else if (cmd === "audit") {
+    const a = audit(projectDir);
+    if (a.issues.length === 0) process.stdout.write("✓ audit clean\n");
+    for (const iss of a.issues) process.stdout.write(`  ${iss.sev === "error" ? "✗" : "!"} ${iss.msg}\n`);
+    process.stdout.write(a.ok ? "\naudit: PASS\n" : "\naudit: FAIL\n");
+    process.exit(a.ok ? 0 : 1);
   } else if (cmd === "approve") {
     if (!gate) die("usage: run.mjs approve <projectDir> <G1|G2|G3>");
     approve(projectDir, gate);
@@ -100,7 +120,10 @@ if (process.argv[1] && basename(process.argv[1]) === "run.mjs") {
     for (const s of res.ran) process.stdout.write(`✓ ran ${s} (${STAGE_SPEC[s].title})\n`);
     const st = res.stopped;
     if (st.reason === "pipeline complete") process.stdout.write("● pipeline complete\n");
-    else if (st.gate) process.stdout.write(`■ stopped at ${st.gate} before ${st.stage} — approve to continue\n`);
+    else if (st.reason === "audit blocked") {
+      process.stdout.write(`■ stopped before ${st.gate} — audit blocked:\n`);
+      for (const iss of st.issues.filter((i) => i.sev === "error")) process.stdout.write(`    ✗ ${iss.msg}\n`);
+    } else if (st.gate) process.stdout.write(`■ stopped at ${st.gate} before ${st.stage} — approve to continue\n`);
     else if (st.issues) {
       process.stdout.write(`■ stopped in ${st.stage} — agent must complete:\n`);
       for (const iss of st.issues) process.stdout.write(`    - ${iss}\n`);

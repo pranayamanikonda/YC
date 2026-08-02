@@ -30,6 +30,35 @@ export const GATE_BEFORE = Object.freeze({
 });
 
 /**
+ * Upstream artefacts each stage reads. When a stage completes, the runner hashes
+ * these; the audit re-hashes them to detect a mid-pipeline change (staleness).
+ */
+export const STAGE_INPUTS = Object.freeze({
+  "1-definition": ["prd/PRD.md"],
+  "2-ia": ["prd/PRD.md", "definition/acceptance-criteria.md"],
+  "3-workflows": ["definition/acceptance-criteria.md", "design/ia/ia-map.md", "design/scenarios.md"],
+  "4-wireframes": ["design/ia/ia-map.md", "design/flows/flows.md"],
+  "5-visual": ["design/wireframes/index.md", "design/principles.md"],
+  "6-engineering": ["definition/acceptance-criteria.md", "design/wireframes/index.md", "design/visual/visual-design.md"],
+  "7-ship": ["docs/plans/active/exec-plan.md"],
+});
+
+/**
+ * The artefacts each stage produces (paths only). The audit scans these for
+ * leftover `[[FILL]]` in stages marked done. STAGE_SPEC in stage.mjs is the
+ * authoritative detail; a test asserts these path sets agree.
+ */
+export const STAGE_ARTEFACTS = Object.freeze({
+  "1-definition": ["definition/acceptance-criteria.md", "design/principles.md", "design/scenarios.md"],
+  "2-ia": ["design/ia/ia-map.md", "design/ia/ecosystem.md"],
+  "3-workflows": ["design/flows/flows.md"],
+  "4-wireframes": ["design/wireframes/index.md"],
+  "5-visual": ["design/visual/visual-design.md", "design/design-system/tokens.md"],
+  "6-engineering": ["docs/plans/active/exec-plan.md"],
+  "7-ship": ["docs/validation-report.md", "CHANGELOG.md"],
+});
+
+/**
  * The next stage to run: the first stage that is in the mask and not yet done.
  * @param {string[]} mask Stages this project runs.
  * @param {Record<string, string>} stageStatus id -> "done" | other.

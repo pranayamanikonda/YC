@@ -15,6 +15,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { STAGES, gateBefore, nextStage } from "./lib/model.mjs";
 import { loadManifest, saveManifest, ledger } from "./lib/project.mjs";
+import { computeInputs } from "./audit.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const templatesDir = join(here, "..", "..", "templates");
@@ -189,8 +190,10 @@ export function runStage(projectDir, stageId, opts = {}) {
     return { ok: false, stage: stageId, scaffolded, issues };
   }
 
-  // Complete: mark done, hand off.
+  // Complete: mark done, record input hashes (for staleness detection), hand off.
   manifest.stageStatus[stageId] = "done";
+  manifest.stageInputs = manifest.stageInputs || {};
+  manifest.stageInputs[stageId] = computeInputs(projectDir, stageId);
   const next = nextStage(manifest.phaseMask, manifest.stageStatus);
   const nextLabel = next ? (gateBefore(next) && manifest.gates[gateBefore(next)] !== "approved" ? gateBefore(next) : next) : "complete";
   saveManifest(projectDir, manifest);

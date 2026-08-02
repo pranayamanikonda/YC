@@ -21,6 +21,10 @@ P=./out/team-standup-digest
 node prd-harness/skills/pipeline/run.mjs status  "$P"
 node prd-harness/skills/pipeline/run.mjs approve "$P" G1   # record human gate approval
 node prd-harness/skills/pipeline/run.mjs advance "$P"      # run until blocked
+node prd-harness/skills/pipeline/run.mjs audit   "$P"      # consistency + staleness
+
+# ingest an uploaded asset into the project (durable, content-hashed)
+node prd-harness/skills/assets-intake/ingest.mjs "$P" /path/to/logo.svg
 
 # regenerate Cursor rules after editing AGENTS.md or rules/
 node prd-harness/skills/sync-rules/sync.mjs
@@ -75,6 +79,11 @@ prd-harness/
 All eight stages are runnable. Stage 0 (`prd-intake`) scaffolds and classifies; Stages 1–7
 (`pipeline`) scaffold each stage's artefact homes, enforce sequencing and the three gates,
 validate structural completion, and write the HANDOFF — the agent fills the creative content
-between runs, and human approval crosses each gate. Covered by `npm test` (79 tests,
-including a full end-to-end run through G1/G2/G3). The Figma drafting of design artefacts is
+between runs, and human approval crosses each gate. An **audit** runs before every gate and
+on demand: it checks project-wide consistency + traceability and detects **staleness** — edit
+an upstream artefact and the dependent downstream stages are flagged `stale` and blocked from
+shipping until re-run (flag + block, never auto-rewrite). Uploaded **assets** are ingested
+into `assets/` (content-hashed, indexed); durable state lives in `memory.md` (curated) and the
+ledger (history) — see `STORAGE.md`. Covered by `npm test` (90 tests, including a full
+end-to-end run through G1/G2/G3 and change-propagation). Figma drafting of design artefacts is
 performed live via the Figma MCP, driven by the design-stage specs.

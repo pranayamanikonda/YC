@@ -155,6 +155,12 @@ See `rules/common/accessibility.md`.
 - **Assets** — attached files are ephemeral until ingested into `<project>/assets/` (content-
   hashed, indexed in the manifest) via `assets-intake`. Storage & durability — what survives,
   and where PRDs live — are documented in [`STORAGE.md`](./STORAGE.md).
+- **Audit & change-propagation** — a consistency + traceability audit runs before every gate
+  (and thus before ship) and on demand. Each stage records a hash of its inputs on completion;
+  editing an upstream artefact flags the dependent downstream stages `stale`. Policy: **flag +
+  block ship, never auto-rewrite** — a stale or inconsistent project cannot cross the next gate
+  even if approved, and the fix is to re-run only the affected stages. Run
+  `pipeline/run.mjs audit <project>` anytime.
 - **Self-improvement** — friction and gate-rejections can propose harness changes, but only
   behind an explicit `$improve-harness` invocation; never speculative.
 
