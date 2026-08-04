@@ -31,7 +31,7 @@ function fillStage(projectDir, stageId) {
         content = "### AC-001\n- Expected: a real observable result\n";
         break;
       case "docs/plans/active/exec-plan.md":
-        content = "# Exec Plan\n| id | deps | acceptance | tier | owner |\n| WU-1 | — | AC-001 | small | implementer |\n";
+        content = "# Exec Plan\n| id | deps | acceptance | tier | owner |\n| WU-1 | — | AC-001 | small | implementer |\n## Testing seam\n- Seam: api handler\n";
         break;
       case "docs/validation-report.md":
         content = "# Validation Report\nVerdict: READY\n";

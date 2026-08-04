@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync, readFileSync, mkdirSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync, readFileSync, mkdirSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { scaffold } from "../../prd-intake/scaffold.mjs";
@@ -8,6 +8,7 @@ import { STAGE_ARTEFACTS } from "../lib/model.mjs";
 import { STAGE_SPEC, runStage } from "../stage.mjs";
 import { audit, staleStages } from "../audit.mjs";
 import { approve, advance, status } from "../run.mjs";
+import { ticket, resolve } from "../../wayfinder/wayfinder.mjs";
 import { VALID_TOKENS_JSON } from "./fixtures.mjs";
 
 const DATE = "2026-08-02";
@@ -29,7 +30,7 @@ function fillStage(projectDir, stageId) {
         content = "### AC-001\n- Expected: a real observable result\n";
         break;
       case "docs/plans/active/exec-plan.md":
-        content = "# Exec Plan\n| WU-1 | — | AC-001 | small | implementer |\n";
+        content = "# Exec Plan\n| WU-1 | — | AC-001 | small | implementer |\n## Testing seam\n- Seam: api handler\n";
         break;
       case "docs/validation-report.md":
         content = "# Validation Report\nVerdict: READY\n";
@@ -85,6 +86,27 @@ test("audit flags an indexed asset that is missing on disk", () => {
     const a = audit(projectDir);
     assert.equal(a.ok, false);
     assert.match(a.issues.map((i) => i.msg).join(), /asset indexed but missing/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("an open wayfinder frontier ticket blocks G1 until resolved", () => {
+  const { root, projectDir } = fresh();
+  try {
+    // fresh() is a large PRD, so intake scaffolded a wayfinder map. Chart a fog ticket.
+    assert.ok(existsSync(join(projectDir, "wayfinder/map.md")), "large PRD should scaffold a wayfinder map");
+    ticket(projectDir, { type: "research", question: "Which channels?", date: DATE });
+
+    approve(projectDir, "G1", DATE);
+    const blocked = advance(projectDir, { date: DATE });
+    assert.equal(blocked.stopped.reason, "audit blocked");
+    assert.equal(blocked.stopped.gate, "G1");
+    assert.match(blocked.stopped.issues.map((i) => i.msg).join("\n"), /blocks the destination/);
+
+    // Resolve the frontier → audit clears and the gate opens.
+    resolve(projectDir, "WF-001", { resolution: "Slack only for v1.", date: DATE });
+    assert.equal(audit(projectDir).ok, true);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

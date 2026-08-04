@@ -61,16 +61,20 @@ is designed in from Stage 0, and is audited by `a11y-reviewer` before G2. See
 prd-harness/
   process.md          the pipeline (graph · gates · loops · roster · format map)
   AGENTS.md           agent protocol   (CLAUDE.md → symlink; .cursor/rules generated)
-  rules/common/       workflow · git · testing · security · review · design · accessibility
-  agents/             16 specialist definitions (name·description·tools·model)
+  rules/common/       workflow · git · testing · security · review · design · accessibility · authoring
+  agents/             17 specialist definitions (name·description·tools·model)
   skills/
     prd-intake/       Stage-0 scaffolder + size classifier + dependency-free xlsx writer
     pipeline/         Stages 1–7 runner (declarative STAGE_SPEC · gates · audit · tokens)
+    wayfinder/        chart large/foggy efforts as a map + tickets (frontier blocks G1)
+    grilling/         sequential gate interrogation (the `griller` agent)
+    handoff/          session-compaction snapshot (survives context compaction)
     wiki/             LLM-maintained knowledge wiki (Ingest/Query/Lint; lint blocks gates)
     assets-intake/    ingest uploaded files into assets/ (content-hashed, indexed)
     sync-rules/       regenerate .cursor/rules from the canonical source
   templates/          PRD · product-brief · epics · acceptance-criteria · design-brief ·
-                      personas · decisions · ADR · exec-plan · validation-report
+                      personas · decisions · ADR · exec-plan · validation-report ·
+                      wayfinder-map · wayfinder-ticket · handoff
   hooks/              SessionStart bootstrap
   manifests/          phase profiles (size → mask → stage leads)
   examples/sample-prd A worked PRD (Team Standup Digest)
@@ -90,7 +94,10 @@ dependent downstream stages are flagged `stale` and blocked from shipping until 
 into `assets/` (content-hashed, indexed); durable state lives in `memory.md` (curated), the
 ledger (history), and a **compounding LLM-maintained `wiki/`** (Karpathy's pattern —
 Ingest/Query/Lint; the Lint blocks gates on broken links / missing provenance / stale pages) —
-see `STORAGE.md` and `skills/wiki`. Covered by `npm test` (90 tests, including a full
-end-to-end run through G1/G2/G3, change-propagation, and DTCG token validation). Figma
-drafting of design artefacts is performed live via the Figma MCP, driven by the design-stage
-specs.
+see `STORAGE.md` and `skills/wiki`. Large or foggy PRDs are **charted** first with `wayfinder`
+(a map + investigation tickets; an open frontier ticket blocks G1); the human gates are
+**grilled** by the `griller` agent before approval; and `handoff` writes a secret-scrubbed
+compaction snapshot so a fresh agent resumes cleanly. Covered by `npm test` (139 tests,
+including a full end-to-end run through G1/G2/G3, wayfinder gating, change-propagation, and
+DTCG token validation). Figma drafting of design artefacts is performed live via the Figma
+MCP, driven by the design-stage specs.

@@ -40,9 +40,15 @@ a stage skill overrides your default behavior. When they conflict, stop and ask.
   **ingest meaningful new/changed sources into the wiki** (`wiki ingest …`, then synthesize the
   page) — knowledge compounds there instead of being rebuilt each session. Keep the wiki
   lint-clean (broken links / missing provenance / stale pages block gates). Assume your context
-  can be compacted at any point and a fresh agent resumes from these files. The container is
-  ephemeral — only committed git history or an external service (Figma/Drive) survives (see
-  `STORAGE.md`).
+  can be compacted at any point and a fresh agent resumes from these files. **Before context is
+  compacted (or when handing off), run `handoff`** — it writes a compaction snapshot to
+  `<project>/.harness/handoff/NNNN.md`; a resuming agent reads the newest one alongside
+  `memory.md` and `wiki/home.md`. The container is ephemeral — only committed git history or an
+  external service (Figma/Drive) survives (see `STORAGE.md`).
+- **Chart large or foggy efforts; grill the gates.** For a `large` or high-ambiguity PRD, intake
+  scaffolds a `wayfinder/` map: chart the fog as tickets and resolve the frontier before Stage 1
+  — an open frontier ticket blocks **G1**. Before the human approves **G1** or **G2**, dispatch
+  `griller` to interrogate the plan (see `skills/grilling`).
 - **Ingest assets, don't reference uploads.** An attached file is ephemeral until copied into
   `<project>/assets/` via `assets-intake`. Never treat an upload path as durable.
 - **Smallest coherent change.** Prefer reuse and simplicity. Do not scaffold speculative

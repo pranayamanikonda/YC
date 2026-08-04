@@ -96,6 +96,13 @@ are the gate rejection loops.
 Between gates, stages hand off automatically. A gate is the only place the pipeline stops
 for a human by default.
 
+**Grill before approving.** At **G1** and **G2**, dispatch `griller` to interrogate the plan
+before the human approves — sequentially, one question at a time, facts researched not asked,
+each open decision confirmed (see `skills/grilling`). This is the human-in-the-loop counterpart
+to `council` (the parallel, automated breaker). **G1 also depends on wayfinding**: for a `large`
+or high-ambiguity PRD, an open frontier ticket in `<project>/wayfinder/` fails the audit and
+holds G1 shut until the fog is resolved (see **Wayfinding** below).
+
 ## Size classifier → phase mask
 
 Stage 0 scores the PRD on three axes and takes the **highest** tier reached on any axis:
@@ -143,12 +150,13 @@ audit.
 | 3 Task Flows | AC + IA + scenarios | design journeys incl. edge states | flows | empty/error/edge covered; no colour-only | missing state → add it |
 | 4 Wireframes | IA + flows | lay out clickable frames | wireframes | reading order, target sizes, labels; a11y audit | a11y blocker → fix before G2 |
 | 5 Visual | wireframes + DPs | direction + tokens (light/dark) | visual + tokens | contrast, focus, states, responsive (design-lint) | lint fail → correct tokens/states |
-| 6 Engineering | AC + wireframes + visual | WorkUnit DAG, TDD | code + tests | each AC → ≥1 test; author≠reviewer | red → fix loop (≤3) → breaker |
+| 6 Engineering | AC + wireframes + visual | WorkUnit DAG, name the testing seam, TDD | code + tests | exec-plan names one testing seam; each AC → ≥1 test through it; author≠reviewer | red → fix loop (≤3) → breaker |
 | 7 Ship | verified build | commit/push, record | ship-log + changelog + ADRs | G3 verdict READY; audit clean | not ready → back to 6 |
 
 Cross-cutting agents: **`council`** (architect + skeptic + pragmatist + critic, fresh
-parallel subagents) for any go/no-go decision; **`verifier`** owns the G3 report;
-**`a11y-reviewer`** audits every design artefact against WCAG 2.2 AA (author ≠ reviewer).
+parallel subagents) for any go/no-go decision; **`griller`** (sequential human-in-the-loop
+gate interrogation at G1/G2); **`verifier`** owns the G3 report; **`a11y-reviewer`** audits
+every design artefact against WCAG 2.2 AA (author ≠ reviewer).
 
 ## UX/UI design artefacts (Figma-drafted)
 
@@ -196,6 +204,12 @@ See `rules/common/accessibility.md`.
 - **Memory** — `<project>/memory.md` is the curated *current state* (confirmed facts, key
   decisions, entities, open threads). The ledger says what happened; memory says what is true
   now. Read it first each session; keep it current.
+- **Handoff (compaction)** — before context is compacted (or when work changes hands),
+  `skills/handoff` writes a snapshot to `<project>/.harness/handoff/NNNN.md`: an agent-written
+  **Conversation Summary** plus **Current Status / Next Steps / Suggested Skills / References**
+  computed deterministically from the manifest, audit, and wayfinder. It is secret-scrubbed and
+  *references* artefacts rather than copying them. A resuming agent reads the newest one beside
+  `memory.md` and `wiki/home.md`. See `skills/handoff`.
 - **Knowledge wiki** — `<project>/wiki/` is an **LLM-maintained, compounding** knowledge base
   (Karpathy's wiki pattern): immutable raw sources (`prd/`, research, assets, ledger) → the
   interlinked wiki → a schema. Operations: **Ingest** a source into a page (with provenance),
@@ -203,6 +217,13 @@ See `rules/common/accessibility.md`.
   broken `[[wikilinks]]`, missing provenance, and **stale** pages (a cited source's sha256
   changed, reusing the change-propagation hash) block the next gate. The agent synthesizes page
   content; the engine enforces structure, the link graph, and the lint. See `skills/wiki`.
+- **Wayfinding** — for a `large` or high-ambiguity PRD, intake scaffolds `<project>/wayfinder/`:
+  a **map** (destination · notes · decisions · fog · out-of-scope) and **tickets** (one
+  investigation per open question — research / prototype / grilling / task — each blocking the
+  destination or another ticket). Its **lint is folded into the audit**: an open *frontier*
+  ticket (one that blocks the destination) fails the audit and holds **G1** shut until it is
+  resolved or moved out of scope. Chart the fog, resolve the frontier, then enter Stage 1.
+  See `skills/wayfinder`.
 - **Assets** — attached files are ephemeral until ingested into `<project>/assets/` (content-
   hashed, indexed in the manifest) via `assets-intake`. Storage & durability — what survives,
   and where PRDs live — are documented in [`STORAGE.md`](./STORAGE.md).
@@ -264,3 +285,11 @@ unavailable, the stage falls back to mermaid + HTML and the run still completes 
 `process.md` (this file) · `AGENTS.md` + rules + agent definitions · the `prd-intake`
 scaffolder and templates (incl. the `backlog.xlsx` generator) · a worked Stage 0→1 example.
 Stages 2–7 are specified here and land as skill bodies stage-by-stage. See `README.md`.
+
+## Prior art
+
+The pipeline synthesizes patterns from repository-harness, superpowers, qm, and ECC. The
+front-of-pipeline additions — **wayfinder** (investigation-ticket planning), **grilling**
+(sequential gate interrogation), **handoff** (session compaction), and the single **testing
+seam** — are adapted from [`mattpocock/skills`](https://github.com/mattpocock/skills); its
+`writing-great-skills` conventions inform `rules/common/authoring.md`.

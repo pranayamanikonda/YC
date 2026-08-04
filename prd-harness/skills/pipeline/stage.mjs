@@ -97,7 +97,7 @@ export const STAGE_SPEC = {
   "6-engineering": {
     title: "Engineering",
     artefacts: [
-      { path: "docs/plans/active/exec-plan.md", from: "exec-plan.md", marker: /WU-\d/, forbid: /<the outcome/ },
+      { path: "docs/plans/active/exec-plan.md", from: "exec-plan.md", marker: /(?=[\s\S]*WU-\d)(?=[\s\S]*testing seam)/i, forbid: /<the outcome/ },
     ],
   },
   "7-ship": {

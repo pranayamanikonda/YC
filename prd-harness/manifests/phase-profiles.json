@@ -22,7 +22,7 @@
     "6-engineering": ["architect", "implementer", "test-author", "code-reviewer", "security-reviewer"],
     "7-ship": ["verifier"]
   },
-  "crossCutting": ["council", "verifier", "a11y-reviewer"],
+  "crossCutting": ["council", "verifier", "a11y-reviewer", "griller"],
   "profiles": {
     "trivial": ["1-definition", "6-engineering", "7-ship"],
     "small": ["1-definition", "4-wireframes", "6-engineering", "7-ship"],

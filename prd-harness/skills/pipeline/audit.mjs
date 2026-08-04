@@ -20,6 +20,7 @@ import { STAGES, STAGE_INPUTS, STAGE_ARTEFACTS, gateBefore } from "./lib/model.m
 import { loadManifest } from "./lib/project.mjs";
 import { validateTokens } from "./tokens.mjs";
 import { lint as wikiLint } from "../wiki/wiki.mjs";
+import { lint as wayfinderLint } from "../wayfinder/wayfinder.mjs";
 
 /**
  * @param {string} path
@@ -203,6 +204,9 @@ export function audit(projectDir) {
 
   // 5b. LLM-maintained wiki lint (broken links, missing provenance, stale claims).
   for (const iss of wikiLint(projectDir)) issues.push(iss);
+
+  // 5c. Wayfinder lint (open frontier tickets block G1; broken ticket graph).
+  for (const iss of wayfinderLint(projectDir)) issues.push(iss);
 
   // 6. Staleness (change-propagation).
   const stale = staleStages(projectDir, m);

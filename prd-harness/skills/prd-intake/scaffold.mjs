@@ -14,6 +14,7 @@ import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { classify } from "./lib/classify.mjs";
 import { buildXlsx } from "./lib/xlsx.mjs";
+import { chart as wayfinderChart } from "../wayfinder/wayfinder.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const templatesDir = join(here, "..", "..", "templates");
@@ -137,6 +138,8 @@ export function scaffold(opts) {
 
   const { frontmatter, title } = readMeta(prdText);
   const { tier, mask, signals, forced } = classify(prdText, { tierHint: frontmatter.tier });
+  // Chart the fog before committing when the effort is large or highly ambiguous.
+  const needsChart = tier === "large" || (signals.ambiguityTier ?? 0) >= 2;
   const slug = slugify(title);
   const projectDir = join(outDir, slug);
   if (existsSync(projectDir)) throw new Error(`refusing to overwrite existing project: ${projectDir}`);
@@ -189,6 +192,7 @@ export function scaffold(opts) {
     signals,
     securityFloored: forced,
     capabilities: opts.capabilities || {},
+    wayfinder: needsChart,
     assets: [],
     created: date,
     // Intake always ran (this is it); masked stages start pending.
@@ -199,13 +203,21 @@ export function scaffold(opts) {
   };
   writeFileSync(join(projectDir, ".harness", "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
 
+  const chartLine = needsChart
+    ? `- ${date} · HANDOFF from 0-intake → wayfinding · status=needs-decision · ` +
+      `produced=[wayfinder/map.md]; chart the fog, resolve the frontier, then G1\n`
+    : "";
   const ledger =
     `# Ledger — ${title}\n\n` +
     `- ${date} · stage 0-intake · scaffolded project; tier=${tier}; mask=[${mask.join(", ")}]` +
-    `${forced ? "; security floor applied" : ""}\n` +
+    `${forced ? "; security floor applied" : ""}${needsChart ? "; wayfinding required" : ""}\n` +
+    chartLine +
     `- ${date} · HANDOFF from 0-intake → G1 · status=needs-decision · ` +
     `produced=[prd/PRD.md, prd/product-brief.md, definition/backlog.xlsx]\n`;
   writeFileSync(join(projectDir, ".harness", "ledger", `${slug}.md`), ledger);
+
+  // Scaffold the wayfinder map (after the ledger exists so the note lands there).
+  if (needsChart) wayfinderChart(projectDir, { destination: title, title, date });
 
   return { projectDir, tier, mask, manifest };
 }

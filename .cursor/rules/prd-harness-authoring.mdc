@@ -1,0 +1,24 @@
+---
+description: PRD Harness rule: authoring.
+alwaysApply: true
+---
+# Rule: Authoring skills
+
+How to write a harness skill so it earns its context. (Adapted from mattpocock/skills'
+`writing-great-skills`.)
+
+- **User-invoked vs model-invoked.** A model-invoked skill's `description` loads every turn,
+  so keep it only when the agent must reach the skill on its own. Otherwise set
+  `disable-model-invocation: true` — the description becomes human-facing and costs no context.
+- **Lead with the trigger.** For model-invoked skills, front-load the leading word and list
+  triggers; one trigger per distinct branch, synonyms collapsed. Cut identity that the body
+  already states.
+- **Progressive disclosure.** Three tiers: ordered steps in `SKILL.md` → in-skill reference →
+  external files loaded on demand. Push detail down the ladder to keep the top legible.
+- **Single source of truth.** Each fact lives in exactly one place; don't restate it across the
+  skill, its rules, and the process doc.
+- **The no-op test.** Read each sentence and ask "does this change what a capable agent would
+  do?" If not, delete it — don't reword it. Most prose that fails should go, not be rewritten.
+- **State the positive.** Steer by naming the target behaviour, not by prohibiting the wrong one.
+- **Split only when it pays.** Break out a model-invoked skill when it has a distinct leading
+  word worth triggering on; split later steps out when their presence tempts premature completion.

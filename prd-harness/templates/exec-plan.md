@@ -18,5 +18,13 @@ in parallel. The reviewer of a unit is never its implementer.
 - Layer 0: WU-1
 - Layer 1: WU-2
 
+## Testing seam
+<!--
+Name the ONE seam where these units are tested. Prefer an existing seam over a new
+one; a single integration point beats many. Every AC traces to a test at this seam.
+-->
+- Seam: <module / interface / boundary under test>
+- Existing tests to extend: <path or "none — new seam, justified below">
+
 ## Rollback
 <!-- Per-unit: how to revert if it fails verification. -->

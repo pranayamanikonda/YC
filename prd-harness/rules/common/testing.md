@@ -1,5 +1,9 @@
 # Rule: Testing
 
+- **One testing seam per feature.** Before building, name the single seam where the work
+  is exercised — the module, interface, or boundary the tests drive. Prefer an existing
+  seam over adding a new one; one integration point beats many scattered ones. Record it
+  in the exec-plan's **Testing seam** section, and route every AC's test through it.
 - TDD in Stage 6: write the failing test, run it to see it fail, minimal implementation,
   run to pass, refactor, commit.
 - Every acceptance criterion (AC-NNN) maps to at least one test. Trace tests back to ACs.
