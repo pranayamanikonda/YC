@@ -3,9 +3,11 @@
 **Try it:** https://claude.ai/code/artifact/5c8f55e2-cd7c-492d-abe0-f648f685119c
 **Week-1 write-up:** https://claude.ai/code/artifact/f88435e6-88e3-4516-8c14-09bd3673a441 ([source](docs/week1-assignment.md))
 
-Probe takes a brief, asks what the brief does not say, maps it, and then argues with
-its own map — naming alternative framings, flagging the assumptions each branch rests
-on, and asking questions whose answers change the map.
+Probe turns a brief into a map in one step, then argues with its own map on screen —
+naming alternative framings, flagging the assumptions each branch rests on, and asking
+the questions whose answers would change it. Nothing blocks: answer a question and the
+map is reworked in place, skip it and it becomes a visible assumption, ignore it and
+the map is still yours to edit.
 
 Built for Problem Statement 2 of the human-centred AI design course project.
 
@@ -24,7 +26,7 @@ python3 -m http.server 8000     # file:// pages cannot call the API
 
 | Mode | What it does | When you get it |
 | --- | --- | --- |
-| **Recorded** | Replays saved outputs of the v0.1 prompts for three briefs. No network, no key. | Default, and the only mode in the shared artifact link — artifact pages are blocked from calling external APIs. |
+| **Recorded** | Replays saved outputs of the prompt pack for three briefs, including a scripted effect for every clarifying question. No network, no key. | Default, and the only mode in the shared artifact link — artifact pages are blocked from calling external APIs. |
 | **Live** | Sends your brief to `api.anthropic.com` with your key and maps whatever you type. | When you serve the file yourself and add a key in Settings. The key lives in your browser's localStorage and goes nowhere else. |
 
 Everything after generation — editing, locking, deleting, undo, diff highlighting,

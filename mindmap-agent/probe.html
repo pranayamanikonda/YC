@@ -476,6 +476,14 @@ textarea:focus, input:focus, select:focus { border-color: var(--probe); outline:
   .topbar { padding: 9px 12px; gap: 10px; }
   .stepper { order: 3; width: 100%; }
 }
+
+/* ── the ask dock: one surface for every open question ────── */
+.dock__ask { font-size: 15.5px; font-weight: 500; flex: 1 1 100%; }
+.dock__why { font-size: 12.5px; color: var(--ink-soft); font-style: italic; }
+.dock__sugg { gap: 6px; }
+.maphead__acts { display: flex; gap: 6px; align-items: flex-start; margin-left: auto; }
+.assumes__gone { font-family: var(--mono); font-size: 10.5px; color: var(--probe); letter-spacing: .04em; }
+.node__toggle { font-variant-numeric: tabular-nums; }
 </style>
 <div id="app"></div>
 <noscript><p style="font-family:system-ui;padding:24px">Probe needs JavaScript — it runs entirely in your browser, with no server of its own.</p></noscript>
@@ -487,7 +495,7 @@ textarea:focus, input:focus, select:focus { border-color: var(--probe); outline:
    so before/after iterations are traceable (see CHANGELOG-agent.md).
    ───────────────────────────────────────────────────────────── */
 const PROMPTS = {
-  VERSION: 'v0.1',
+  VERSION: 'v0.2',
 
   /* The stance shared by every call: probe, don't please. */
   SYSTEM: [
@@ -551,8 +559,13 @@ const PROMPTS = {
       `Audience: ${brief.audience || 'not stated'}`,
       `Depth: ${brief.depth} levels below the centre.`,
       '',
-      'The user answered your clarifying questions:',
-      answers.map(a => `- ${a.question} → ${a.answered ? a.answer : `[SKIPPED — assume: ${a.assumeIfSkipped}]`}`).join('\n'),
+      answers.length
+        ? 'The user answered your clarifying questions:\n' +
+          answers.map(a => `- ${a.question} → ${a.answered ? a.answer : `[SKIPPED — assume: ${a.assumeIfSkipped}]`}`).join('\n')
+        : 'The user has not answered anything yet — you are mapping from the brief alone. ' +
+          'Map it anyway rather than stalling: make the assumptions you need, mark every node that ' +
+          'rests on one with source:"assumption", and list those assumptions in plain words in ' +
+          '"assumptions" so the user can see exactly what to correct.',
       '',
       'Rules for this map:',
       `- 4 to 6 first-level branches. Each must be a real division of THIS topic, not a lifecycle stage borrowed from a template.`,
@@ -621,7 +634,8 @@ const PROMPTS = {
 };
 /* ─────────────────────────────────────────────────────────────
    Recorded runs
-   These are outputs of the v0.1 prompts above, produced with
+   These are outputs of the prompt pack above (authored at v0.1, carried
+   forward through v0.2), produced with
    Claude (Opus) during the build session on 2026-08-23 and saved
    verbatim so the agent can be demonstrated without an API key.
    Recorded mode replays these; it never invents new content.
@@ -650,23 +664,42 @@ const RECORDED = [
       { id: 'q1', question: 'Is the drop-off concentrated at document upload, or spread across the whole KYC sequence?',
         why: 'Decides whether this is one deep usability study or a funnel-wide diagnostic.',
         suggestions: ['Concentrated at doc upload', 'Spread across steps', "We don't know yet"],
-        assumeIfSkipped: "You don't know yet — so the plan starts with a diagnostic week instead of a scripted test." },
+        assumeIfSkipped: "You don't know yet — so the plan starts with a diagnostic week instead of a scripted test.",
+        effect: { resolves: 0,
+          note: 'Where the loss sits is no longer a guess: branch 1 is now grounded in your answer instead of a default.',
+          ops: [{ set: { id: 'n1', source: 'user', confidence: 'high',
+            why: 'Grounded in what you told me: {{answer}}. The diagnostic work is scoped to that rather than to the whole funnel.' } }] } },
       { id: 'q2', question: 'Can you talk to people who abandoned, or only to people who completed?',
         why: 'Recruitment changes the method and the timeline more than any other choice here.',
         suggestions: ['We can reach abandoners', 'Only completers', 'Only internal / proxy users'],
-        assumeIfSkipped: 'Only completers are reachable, so abandonment gets inferred from behaviour rather than asked about.' },
+        assumeIfSkipped: 'Only completers are reachable, so abandonment gets inferred from behaviour rather than asked about.',
+        effect: {
+          note: 'Recruitment is the constraint that shapes the method, so branch 2 now follows what you can actually do.',
+          ops: [{ set: { id: 'n2', source: 'user', confidence: 'high',
+            why: 'Follows your recruitment reality: {{answer}}. Every method under it has to survive that constraint.' } }] } },
       { id: 'q3', question: 'What decision does this research feed — a redesign that is already scoped, or a choice of KYC vendor?',
         why: 'A scoped redesign needs a ranked fix list; a vendor decision needs comparison criteria.',
         suggestions: ['Redesign already scoped', 'Choosing / keeping a vendor', 'Convincing leadership to fund it'],
-        assumeIfSkipped: 'A redesign is already scoped, so the study aims at prioritised fixes, not a landscape report.' },
+        assumeIfSkipped: 'A redesign is already scoped, so the study aims at prioritised fixes, not a landscape report.',
+        effect: { resolves: 1,
+          note: 'Knowing which decision this feeds changes what the study has to deliver, so the last branch is re-aimed at it.',
+          ops: [{ set: { id: 'n5', source: 'user', confidence: 'high',
+            why: 'Aimed at the decision you named: {{answer}}. Findings that do not move that decision are noise.' } }] } },
       { id: 'q4', question: 'How much of this flow is fixed by the regulator, and how much is yours to change?',
         why: 'Testing a flow you cannot ship is the most common way this study gets wasted.',
         suggestions: ['Most of it is fixed', 'Sequence fixed, UI is ours', 'Largely ours'],
-        assumeIfSkipped: 'Sequence and required fields are fixed; wording, ordering within a step and feedback are yours.' },
+        assumeIfSkipped: 'Sequence and required fields are fixed; wording, ordering within a step and feedback are yours.',
+        effect: {
+          note: 'The compliance boundary is now yours rather than mine, so the branch is scoped to what you can actually change.',
+          ops: [{ set: { id: 'n4', source: 'user', confidence: 'high',
+            why: 'Scoped by what you said is changeable: {{answer}}. Testing outside that boundary would waste the round.' } }] } },
       { id: 'q5', question: 'How many weeks before the team needs findings they can act on?',
         why: 'Under two weeks rules out recruiting abandoners and changes the whole design.',
         suggestions: ['About 1 week', '3–4 weeks', 'No fixed date'],
-        assumeIfSkipped: '3–4 weeks, which allows one diagnostic week and one round of sessions.' }
+        assumeIfSkipped: '3–4 weeks, which allows one diagnostic week and one round of sessions.',
+        effect: {
+          note: 'Your timeline decides whether a diagnostic week is affordable, so it is now an open question on branch 1 rather than an assumption.',
+          ops: [{ addProbe: { id: 'n1', probe: 'You said the timeline is {{answer}} — does week 1 stay diagnostic, or do you need findings before instrumentation could deliver them?' } }] } }
     ],
     map: {
       title: 'KYC drop-off: a study that survives contact with compliance',
@@ -786,19 +819,35 @@ const RECORDED = [
       { id: 'q1', question: 'Are you delivering from restaurants, from campus canteens, or from home cooks?',
         why: 'Supply model decides margin, regulation and who you have to convince first.',
         suggestions: ['Restaurants near campus', 'Campus canteens', 'Home cooks / cloud kitchens'],
-        assumeIfSkipped: 'Restaurants near campus — the plan assumes an aggregator model.' },
+        assumeIfSkipped: 'Restaurants near campus — the plan assumes an aggregator model.',
+        effect: { resolves: 0,
+          note: 'What you are aggregating decides margin and who you have to convince, so the supply branch follows your answer.',
+          ops: [{ set: { id: 'm2', source: 'user', confidence: 'high',
+            why: 'Built on your supply model: {{answer}}. Margin, regulation and the first sales conversation all follow from it.' } }] } },
       { id: 'q2', question: 'One campus you intend to dominate, or several at once?',
         why: 'Density is the only advantage a campus player has over an incumbent; spreading gives it away.',
         suggestions: ['One campus, deep', 'Two or three nearby', 'City-wide from day one'],
-        assumeIfSkipped: 'One campus first, depth over coverage.' },
+        assumeIfSkipped: 'One campus first, depth over coverage.',
+        effect: { resolves: 1,
+          note: 'Coverage is the decision the whole plan hangs on, so the wedge branch is sized to what you said.',
+          ops: [{ set: { id: 'm1', source: 'user', confidence: 'high',
+            why: 'Sized to your coverage decision: {{answer}}. Density is the only advantage a campus player has, and this is how much of it you keep.' } }] } },
       { id: 'q3', question: 'Who pays for delivery — the student, the restaurant, or you for now?',
         why: 'This sets the unit economics that every other decision in the map has to survive.',
         suggestions: ['Student pays a small fee', 'Restaurant commission only', 'We subsidise to start'],
-        assumeIfSkipped: 'Student pays a small fee, partly subsidised at launch.' },
+        assumeIfSkipped: 'Student pays a small fee, partly subsidised at launch.',
+        effect: {
+          note: 'Who pays sets the unit economics every other branch has to survive, so branch 3 starts from your answer.',
+          ops: [{ set: { id: 'm3', source: 'user', confidence: 'high',
+            why: 'Starts from who pays: {{answer}}. Every cost lever below is judged against that.' } }] } },
       { id: 'q4', question: 'What can you do on this campus that the incumbent apps cannot?',
         why: 'If the honest answer is "nothing yet", the first job is finding one, not marketing.',
         suggestions: ['Cheaper for students', 'Faster inside campus gates', 'Menus they do not carry', 'Nothing durable yet'],
-        assumeIfSkipped: 'Nothing durable yet — so the plan treats finding the wedge as work, not as a given.' }
+        assumeIfSkipped: 'Nothing durable yet — so the plan treats finding the wedge as work, not as a given.',
+        effect: { resolves: 2,
+          note: 'Your edge has to be visible in the product, so the exclusivity node now carries it explicitly.',
+          ops: [{ set: { id: 'm2b', source: 'user', confidence: 'high',
+            why: 'Your stated edge: {{answer}}. If a student cannot feel this in the first order, it is not an edge yet.' } }] } }
     ],
     map: {
       title: 'Campus delivery: win one dinner window before winning a campus',
@@ -917,19 +966,35 @@ const RECORDED = [
       { id: 'q1', question: 'At week 12, what do you want to be able to do — ship a model at work, pass interviews, or read papers?',
         why: 'These three goals share maybe a third of their content; picking one doubles the useful hours.',
         suggestions: ['Ship something at work', 'Pass ML interviews', 'Read and follow papers'],
-        assumeIfSkipped: 'Ship a working model at work — the plan optimises for applied delivery.' },
+        assumeIfSkipped: 'Ship a working model at work — the plan optimises for applied delivery.',
+        effect: { resolves: 0,
+          note: 'The exit test is what the twelve weeks are built around, so branch 1 now states yours.',
+          ops: [{ set: { id: 'p1', source: 'user', confidence: 'high',
+            why: 'Your exit test: {{answer}}. Every checkpoint below is a step towards that and nothing else.' } }] } },
       { id: 'q2', question: 'Honestly, how many hours a week, and are they one block or scattered evenings?',
         why: 'Scattered hours rule out the long-project formats most curricula assume.',
         suggestions: ['4–6, scattered', '6–8, scattered', '10+, weekend blocks'],
-        assumeIfSkipped: '6–8 hours across scattered evenings.' },
+        assumeIfSkipped: '6–8 hours across scattered evenings.',
+        effect: { resolves: 1,
+          note: 'The plan now assumes the hours you actually have rather than an idealised week.',
+          ops: [{ set: { id: 'p5', source: 'user', confidence: 'high',
+            why: 'Planned around the time you actually have: {{answer}}. The unit of work is sized to fit it.' } }] } },
       { id: 'q3', question: 'What is already solid — Python, linear algebra, statistics?',
         why: 'The maths branch is either two weeks or six depending on this answer.',
         suggestions: ['Python solid, maths rusty', 'Both solid', 'Python solid, no maths since school'],
-        assumeIfSkipped: 'Python solid, maths rusty — refresh only where it blocks you.' },
+        assumeIfSkipped: 'Python solid, maths rusty — refresh only where it blocks you.',
+        effect: {
+          note: 'Maths is either two weeks or six depending on where you start, so that branch is scoped to your answer.',
+          ops: [{ set: { id: 'p2', source: 'user', confidence: 'high',
+            why: 'Scoped to your starting point: {{answer}}. Anything you already have is not revised.' } }] } },
       { id: 'q4', question: 'Is there a real dataset or problem at work you could attach this to?',
         why: 'A real problem changes retention more than any course choice on this list.',
         suggestions: ['Yes, with permission', 'Maybe, needs asking', 'No — use a public dataset'],
-        assumeIfSkipped: 'No — the plan supplies a public dataset project instead.' }
+        assumeIfSkipped: 'No — the plan supplies a public dataset project instead.',
+        effect: { resolves: 2,
+          note: 'A real dataset changes more of this plan than any course choice, so the project branch is anchored to your answer.',
+          ops: [{ set: { id: 'p3', source: 'user', confidence: 'high',
+            why: 'Anchored to: {{answer}}. The whole twelve weeks runs on this one problem.' } }] } }
     ],
     map: {
       title: 'Twelve weeks to a model you actually shipped',
@@ -1074,6 +1139,8 @@ const S = {
   answers: {},                // qid -> {answer, skipped}
   map: null,
   title: '', summary: '', assumptions: [], changeNote: '',
+  resolvedAssumptions: [],   // assumptions an answer has retired
+  extraAssumptions: [],      // defaults created by explicitly skipping a question
   selectedId: null,
   editingId: null,
   history: [], future: [],
@@ -1122,10 +1189,23 @@ function findParent(id) {
 }
 function snapshot() {
   if (!S.map) return;
-  S.history.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
+  S.history.push(stateShot());
   if (S.history.length > 40) S.history.shift();
   S.future = [];
 }
+function stateShot() {
+  return {
+    map: clone(S.map), assumptions: clone(S.assumptions),
+    resolved: clone(S.resolvedAssumptions), extra: clone(S.extraAssumptions),
+    changeNote: S.changeNote
+  };
+}
+function restoreShot(shot) {
+  S.map = shot.map; S.assumptions = shot.assumptions;
+  S.resolvedAssumptions = shot.resolved || []; S.extraAssumptions = shot.extra || [];
+  S.changeNote = shot.changeNote;
+}
+
 function newId(prefix) {
   let i = 1, id;
   do { id = (prefix || 'x') + i++; } while (findNode(id));
@@ -1282,8 +1362,34 @@ function applyOps(map, ops) {
   return map;
 }
 
-/* ── flow: brief → clarify ────────────────────────────────── */
-async function startFlow() {
+/* the map arrives open one level deep; deeper branches expand on click */
+function collapseBelow(depth) {
+  walk(S.map, (n, d) => { n.collapsed = d >= depth && (n.children || []).length > 0; });
+}
+function setAllCollapsed(state) {
+  walk(S.map, (n, d) => { if (d > 0 && (n.children || []).length) n.collapsed = state; });
+}
+function installMap(out) {
+  S.map = out.root;
+  S.title = out.title;
+  S.summary = out.summary;
+  S.assumptions = (out.assumptions || []).slice();
+  S.resolvedAssumptions = [];
+  S.extraAssumptions = [];
+  S.changeNote = '';
+  S.refineRound = 0;
+  collapseBelow(2);
+  S.screen = 'map';
+  S.selectedId = S.map.children[0] ? S.map.children[0].id : null;
+}
+/* what the map is currently resting on: base assumptions minus the ones an
+   answer retired, plus the defaults created by skipping a question outright */
+function assumptionsShown() {
+  return dedupe(S.assumptions.filter(a => S.resolvedAssumptions.indexOf(a) < 0).concat(S.extraAssumptions));
+}
+
+/* ── flow: brief → map (questions come with it, not before it) ─────── */
+async function startFlow(askFirst) {
   const topic = S.brief.topic.trim();
   if (topic.split(/\s+/).length < 4 || topic.length < 20) {
     S.error = { title: 'That brief is too thin to map well', body: PROMPTS.BRIEF_TOO_THIN,
@@ -1291,6 +1397,7 @@ async function startFlow() {
     logEvent('guardrail', { reason: 'brief_too_thin' });
     return render();
   }
+
   if (!isLive()) {
     if (!S.caseId) {
       S.error = {
@@ -1306,20 +1413,43 @@ async function startFlow() {
     const c = recordedCase(S.caseId);
     S.questions = clone(c.questions);
     S.answers = {};
-    S.screen = 'clarify';
-    logEvent('clarify_shown', { mode: 'recorded', n: S.questions.length });
+    if (askFirst) {
+      S.screen = 'clarify';
+      logEvent('clarify_shown', { mode: 'recorded', n: S.questions.length });
+      return render();
+    }
+    const m = clone(c.map);
+    normalise(m.root);
+    installMap(m);
+    logEvent('map_built', { mode: 'recorded', firstStep: 'map', nodes: countNodes(), openQuestions: S.questions.length });
     return render();
   }
-  await guarded('Reading your brief and working out what it does not tell me', async () => {
-    const out = await askModel(PROMPTS.clarify(S.brief), validateClarify, { maxTokens: 1500 });
-    S.questions = out.questions;
+
+  if (askFirst) {
+    return guarded('Working out what your brief does not tell me', async () => {
+      const out = await askModel(PROMPTS.clarify(S.brief), validateClarify, { maxTokens: 1500 });
+      S.questions = out.questions;
+      S.answers = {};
+      S.screen = 'clarify';
+      logEvent('clarify_shown', { mode: 'live', n: S.questions.length });
+    });
+  }
+
+  /* the default: map and questions are produced in parallel, so the map is
+     on screen in one step and the questions arrive with it */
+  await guarded('Mapping your brief — and working out what it does not tell me', async () => {
+    const [clar, mapOut] = await Promise.all([
+      askModel(PROMPTS.clarify(S.brief), validateClarify, { maxTokens: 1500 }),
+      askModel(PROMPTS.buildMap(S.brief, []), validateMap, { maxTokens: 6000 })
+    ]);
+    S.questions = clar.questions;
     S.answers = {};
-    S.screen = 'clarify';
-    logEvent('clarify_shown', { mode: 'live', n: S.questions.length });
+    installMap(mapOut);
+    logEvent('map_built', { mode: 'live', firstStep: 'map', nodes: countNodes(), openQuestions: S.questions.length });
   });
 }
 
-/* ── flow: clarify → map ──────────────────────────────────── */
+/* ── flow: clarify → map (only when the user asked to be asked first) ─ */
 async function buildMap() {
   const answers = S.questions.map(q => {
     const a = S.answers[q.id];
@@ -1337,33 +1467,44 @@ async function buildMap() {
     const c = recordedCase(S.caseId);
     const m = clone(c.map);
     normalise(m.root);
-    S.map = m.root; S.title = m.title; S.summary = m.summary;
-    S.assumptions = dedupe(m.assumptions.concat(
-      S.questions.filter(q => !(S.answers[q.id] && S.answers[q.id].answer)).map(q => q.assumeIfSkipped)
-    ));
-    applyUserAnswersToMap();
-    S.screen = 'map'; S.selectedId = S.map.children[0] ? S.map.children[0].id : null;
-    S.changeNote = '';
-    logEvent('map_built', { mode: 'recorded', nodes: countNodes() });
+    installMap(m);
+    S.extraAssumptions = S.questions.filter(q => !(S.answers[q.id] || {}).answer).map(q => q.assumeIfSkipped);
+    applyAnsweredQuestionsLocally();
+    logEvent('map_built', { mode: 'recorded', firstStep: 'clarify', nodes: countNodes() });
     return render();
   }
   await guarded('Building the map, then challenging it', async () => {
     const out = await askModel(PROMPTS.buildMap(S.brief, answers), validateMap, { maxTokens: 6000 });
-    S.map = out.root; S.title = out.title; S.summary = out.summary;
-    S.assumptions = dedupe(out.assumptions.concat(
-      S.questions.filter(q => !(S.answers[q.id] && S.answers[q.id].answer)).map(q => q.assumeIfSkipped)
-    ));
-    S.screen = 'map'; S.selectedId = S.map.children[0] ? S.map.children[0].id : null;
-    S.changeNote = '';
-    logEvent('map_built', { mode: 'live', nodes: countNodes() });
+    installMap(out);
+    S.extraAssumptions = S.questions.filter(q => !(S.answers[q.id] || {}).answer).map(q => q.assumeIfSkipped);
+    logEvent('map_built', { mode: 'live', firstStep: 'clarify', nodes: countNodes() });
   });
 }
 
-/* answered questions are the user's words: mark the nodes that rest on them */
-function applyUserAnswersToMap() {
-  const answered = S.questions.filter(q => S.answers[q.id] && S.answers[q.id].answer).length;
-  if (!answered || !S.map) return;
-  walk(S.map, n => { if (n.source === 'assumption' && n.status !== 'removed') n.userTouched = true; });
+/* ask-first + recorded: fold the answers already given into the recorded map */
+function applyAnsweredQuestionsLocally() {
+  S.questions.forEach(q => {
+    const a = (S.answers[q.id] || {}).answer;
+    if (!a || !q.effect) return;
+    applyOps(S.map, fillOps(q.effect.ops, a));
+    if (typeof q.effect.resolves === 'number') {
+      const t = S.assumptions[q.effect.resolves];
+      if (t) S.resolvedAssumptions.push(t);
+    }
+  });
+}
+
+/* the user's own words go into the nodes an answer touches */
+function fill(text, answer) {
+  return String(text).replace(/\{\{answer\}\}/g, String(answer).replace(/\s+/g, ' ').trim());
+}
+function fillOps(ops, answer) {
+  return clone(ops || []).map(op => {
+    if (op.set && op.set.why) op.set.why = fill(op.set.why, answer);
+    if (op.addProbe) op.addProbe.probe = fill(op.addProbe.probe, answer);
+    if (op.add && op.add.node && op.add.node.why) op.add.node.why = fill(op.add.node.why, answer);
+    return op;
+  });
 }
 
 /* two phrasings of the same assumption should not both show */
@@ -1378,27 +1519,32 @@ function dedupe(list) {
 
 function countNodes() { let c = 0; if (S.map) walk(S.map, () => c++); return c; }
 
-/* ── flow: refine ─────────────────────────────────────────── */
-async function refine(nodeId, question, answer) {
+/* ── refinement: one path, whether the answer came from a question or a probe ── */
+async function applyAnswer(question, answer, opts) {
+  opts = opts || {};
   if (!answer || !answer.trim()) return;
-  logEvent('probe_answered', { node: nodeId, question: question, answer: answer });
+  answer = answer.trim();
+  logEvent('answer_given', { kind: opts.kind || 'probe', node: opts.nodeId || null, question: question, answer: answer });
   const before = clone(S.map);
 
   if (!isLive()) {
-    const c = recordedCase(S.caseId);
-    const rec = (c.refinements || []).filter(r => r.probeId === nodeId && sameish(r.question, question))[0];
+    const rec = opts.recorded;
     if (!rec) {
       S.error = {
-        title: 'No recorded answer for that probe',
-        body: 'Recorded mode replays saved runs, so it can only refine the probes it has a recording for — marked with a ● in the inspector. Your answer was still saved to the session log.',
-        actions: [{ label: 'Show me a probe that is recorded', act: 'jump-recorded' }, { label: 'Close', act: 'dismiss' }]
+        title: 'No recorded rework for that one',
+        body: 'Recorded mode replays saved runs, so it can only rework the questions and probes it has a recording for — every clarifying question, and the probes marked ●. Your answer is still in the session log.',
+        actions: [{ label: 'Show me one that is recorded', act: 'jump-recorded' }, { label: 'Close', act: 'dismiss' }]
       };
       return render();
     }
     snapshot();
-    applyOps(S.map, rec.ops);
+    applyOps(S.map, fillOps(rec.ops, answer));
+    if (typeof rec.resolves === 'number') {
+      const t = S.assumptions[rec.resolves];
+      if (t && S.resolvedAssumptions.indexOf(t) < 0) S.resolvedAssumptions.push(t);
+    }
     markDiff(before, S.map);
-    S.changeNote = rec.note;
+    S.changeNote = fill(rec.note, answer);
     S.refineRound++;
     logEvent('map_refined', { mode: 'recorded', round: S.refineRound });
     return render();
@@ -1406,20 +1552,43 @@ async function refine(nodeId, question, answer) {
 
   const locked = [];
   walk(S.map, n => { if (n.locked) locked.push(n.label); });
-  await guarded('Rethinking the map around your answer', async () => {
+  await guarded('Reworking the map around your answer', async () => {
     const out = await askModel(
       PROMPTS.refine(S.brief, JSON.stringify(stripForPrompt(S.map)), { question: question, answer: answer }, locked),
       validateMap, { maxTokens: 6000 });
     snapshot();
-    S.map = out.root; S.title = out.title || S.title; S.summary = out.summary || S.summary;
-    if (Array.isArray(out.assumptions)) S.assumptions = out.assumptions;
+    const keepCollapse = {};
+    walk(S.map, n => { keepCollapse[n.id] = n.collapsed; });
+    S.map = out.root;
+    S.title = out.title || S.title;
+    S.summary = out.summary || S.summary;
+    if (Array.isArray(out.assumptions)) { S.assumptions = out.assumptions; S.resolvedAssumptions = []; }
     S.changeNote = out.changeNote || 'The map was rebuilt around your answer.';
     markDiff(before, S.map);
     relockFrom(before);
+    walk(S.map, (n, d) => { n.collapsed = (n.id in keepCollapse) ? keepCollapse[n.id] : d >= 2 && (n.children || []).length > 0; });
     S.refineRound++;
     logEvent('map_refined', { mode: 'live', round: S.refineRound });
   });
 }
+
+/* a clarifying question answered on the map */
+function answerQuestion(qid, answer) {
+  const q = S.questions.filter(x => x.id === qid)[0];
+  if (!q) return;
+  S.answers[qid] = { answer: answer, skipped: false };
+  return applyAnswer(q.question, answer, { kind: 'question', recorded: q.effect });
+}
+/* …or waved away, which is what creates a visible assumption */
+function skipQuestion(qid) {
+  const q = S.questions.filter(x => x.id === qid)[0];
+  if (!q) return;
+  S.answers[qid] = { answer: '', skipped: true };
+  if (S.extraAssumptions.indexOf(q.assumeIfSkipped) < 0) S.extraAssumptions.push(q.assumeIfSkipped);
+  logEvent('question_skipped', { q: qid });
+  render();
+}
+
 function sameish(a, b) { return String(a).slice(0, 40).toLowerCase() === String(b).slice(0, 40).toLowerCase(); }
 function stripForPrompt(node) {
   const c = clone(node);
@@ -1506,9 +1675,10 @@ function remember(fn) { lastAction = fn; return fn; }
 /* ── exports ──────────────────────────────────────────────── */
 function toMarkdown() {
   const lines = ['# ' + (S.title || S.brief.topic), '', S.summary, ''];
-  if (S.assumptions.length) {
+  const assumps = assumptionsShown();
+  if (assumps.length) {
     lines.push('**Assumptions this map rests on**', '');
-    S.assumptions.forEach(a => lines.push('- ' + a));
+    assumps.forEach(a => lines.push('- ' + a));
     lines.push('');
   }
   walk(S.map, (n, d) => {
@@ -1538,7 +1708,7 @@ function toJson() {
   return JSON.stringify({
     generator: 'Probe ' + PROMPTS.VERSION, mode: isLive() ? 'live' : 'recorded',
     model: isLive() ? S.model : 'recorded-' + S.caseId, generatedAt: now(),
-    brief: S.brief, title: S.title, summary: S.summary, assumptions: S.assumptions,
+    brief: S.brief, title: S.title, summary: S.summary, assumptions: assumptionsShown(),
     answers: S.questions.map(q => ({ question: q.question, answer: (S.answers[q.id] || {}).answer || null, assumedInstead: (S.answers[q.id] || {}).answer ? null : q.assumeIfSkipped })),
     map: stripForPrompt(S.map)
   }, null, 2);
@@ -1568,14 +1738,12 @@ async function copy(text) {
 
 const STEPS = [
   { key: 'brief', n: '1', label: 'Brief' },
-  { key: 'clarify', n: '2', label: 'Clarify' },
-  { key: 'map', n: '3', label: 'Map' },
-  { key: 'refine', n: '4', label: 'Refine' }
+  { key: 'map', n: '2', label: 'Map & refine' }
 ];
 
 function stepState(key) {
-  const order = ['brief', 'clarify', 'map', 'refine'];
-  const current = S.screen === 'map' && S.refineRound > 0 ? 'refine' : S.screen;
+  const current = S.screen === 'clarify' ? 'brief' : S.screen;
+  const order = ['brief', 'map'];
   const i = order.indexOf(key), j = order.indexOf(current);
   return i === j ? 'now' : (i < j ? 'done' : 'todo');
 }
@@ -1641,7 +1809,7 @@ function screenBrief() {
     '<div class="brief__head">' +
       '<div class="eyebrow">Step 1 · Brief</div>' +
       '<h1>Tell me what you are trying to work out.</h1>' +
-      '<p>I will ask what your brief does not say, map it, then argue with the map — naming the alternatives you did not ask for and the assumptions it rests on.</p>' +
+      '<p>You get a map straight away. The agent then argues with it on screen — naming the alternatives you did not ask for, the assumptions it had to make, and the questions whose answers would change it.</p>' +
     '</div>' +
 
     '<div class="card brief__panel">' +
@@ -1661,8 +1829,9 @@ function screenBrief() {
           '<select id="depth" data-bind="depth">' + [2, 3, 4].map(d => '<option value="' + d + '"' + (Number(S.brief.depth) === d ? ' selected' : '') + '>' + d + '</option>').join('') + '</select></div>' +
       '</div>' +
       '<div class="field"><span class="eyebrow">Or start from a recorded run</span><div class="examples">' + examples + '</div></div>' +
-      '<div class="row" style="align-items:center;gap:10px">' + btn('start', 'Ask me questions first →', { primary: true }) +
-        '<span class="hint">' + (isLive() ? 'Live mode: your key, your brief.' : (LIVE_BLOCKED
+      '<div class="row" style="align-items:center;gap:10px">' + btn('start', 'Map it →', { primary: true }) +
+        btn('start-ask', 'Ask me questions first', { ghost: true, title: 'The slower route: answer 3–5 questions before the first map is drawn' }) +
+        '<span class="hint">' + (isLive() ? 'The map comes first; the agent asks its questions on top of it.' : (LIVE_BLOCKED
           ? 'This shared preview replays recorded runs — pick an example above.'
           : 'No key set: pick a recorded example, or add a key in Settings to map your own brief.')) + '</span>' +
       '</div>' +
@@ -1756,7 +1925,7 @@ function renderNode(n, depth) {
 
   const head = '<div class="' + cls.join(' ') + '" data-node="' + esc(n.id) + '">' +
     '<button class="node__toggle' + (hasKids ? '' : ' node__toggle--hidden') + '" data-act="toggle" data-id="' + esc(n.id) + '" aria-label="Expand or collapse">' +
-      (n.collapsed ? '+' : '−') + '</button>' +
+      (n.collapsed ? kids.length : '−') + '</button>' +
     '<div class="node__body" data-act="select" data-id="' + esc(n.id) + '">' + label + meta + '</div>' +
     '</div>';
 
@@ -1819,6 +1988,23 @@ function inspector() {
     '</aside>';
 }
 
+/* everything the agent is still asking: unanswered clarifying questions first
+   (they change the map most), then the probes hanging off branches */
+function openAsks() {
+  const qs = S.questions
+    .filter(q => { const a = S.answers[q.id] || {}; return !a.answer && !a.skipped; })
+    .map(q => ({
+      kind: 'question', id: q.id, text: q.question, why: q.why,
+      suggestions: q.suggestions || [], assumeIfSkipped: q.assumeIfSkipped,
+      recorded: isLive() || !!q.effect
+    }));
+  const ps = openProbes().map(p => ({
+    kind: 'probe', id: p.nodeId, i: p.i, text: p.text, why: '',
+    suggestions: [], recorded: hasRecordedRefinement(p.nodeId, p.text)
+  }));
+  return qs.concat(ps);
+}
+
 function openProbes() {
   const out = [];
   if (!S.map) return out;
@@ -1841,33 +2027,67 @@ function dock() {
         '<span class="hint">Green edge = added · amber edge = reworded</span>' +
       '</div></div>';
   }
-  const probes = openProbes();
-  if (!probes.length) return '';
-  const p = probes[S.dockIndex % probes.length];
+  const asks = openAsks();
+  if (!asks.length) {
+    return '<div class="dock"><div class="dock__head">' +
+      '<span class="chip chip--user">nothing outstanding</span>' +
+      '<span style="font-size:13.5px">You have answered everything the agent asked. Deepen a branch, or start a new map.</span>' +
+      '</div></div>';
+  }
+  const a = asks[S.dockIndex % asks.length];
+  const openQ = asks.filter(x => x.kind === 'question').length;
+
+  const suggestions = a.suggestions.length
+    ? '<div class="dock__q dock__sugg">' + a.suggestions.map((sg, i) =>
+        '<button class="sugg" data-act="ask-sugg" data-id="' + esc(a.id) + '" data-i="' + i + '">' + esc(sg) + '</button>').join('') +
+      '</div>'
+    : '';
+
   return '<div class="dock">' +
-    '<div class="dock__head"><span class="ping"></span><span class="eyebrow">Step 4 · The agent is asking</span></div>' +
-    '<div class="dock__q"><span style="font-size:14.5px;font-weight:500;flex:1 1 100%">' + esc(p.text) + '</span></div>' +
+    '<div class="dock__head"><span class="ping"></span>' +
+      '<span class="eyebrow">' + (a.kind === 'question'
+        ? 'The map is guessing at this · ' + openQ + ' open question' + (openQ === 1 ? '' : 's')
+        : 'Probing question · this branch') + '</span>' +
+      (a.recorded ? '' : '<span class="chip chip--recorded" title="Recorded mode has no saved rework for this one">no recorded rework</span>') +
+    '</div>' +
+    '<div class="dock__q"><span class="dock__ask">' + esc(a.text) + '</span></div>' +
+    (a.why ? '<div class="dock__why">Why it matters: ' + esc(a.why) + '</div>' : '') +
+    suggestions +
     '<div class="dock__q">' +
-      '<input type="text" data-dock-input placeholder="Answer in a line — the map will change" aria-label="Answer the agent">' +
-      btn('dock-answer', 'Rework the map', { primary: true, id: p.nodeId, arg: String(p.i) }) +
-      btn('dock-next', 'Ask me a different one', { ghost: true }) +
-      btn('dock-jump', 'Show me the branch', { ghost: true, id: p.nodeId }) +
-    '</div></div>';
+      '<input type="text" data-dock-input placeholder="' + (a.kind === 'question' ? 'Answer in your own words' : 'Answer in a line — the map will change') + '" aria-label="Answer the agent">' +
+      btn('dock-answer', 'Update the map', { primary: true, id: a.id, arg: String(a.i == null ? '' : a.i), title: 'Rework the map around this answer' }) +
+      (a.kind === 'question'
+        ? btn('ask-skip', 'Skip — assume a default', { ghost: true, id: a.id, title: a.assumeIfSkipped })
+        : btn('dock-jump', 'Show me the branch', { ghost: true, id: a.id })) +
+      (asks.length > 1 ? btn('dock-next', 'Ask me a different one', { ghost: true }) : '') +
+      (a.kind === 'question' ? '<span class="hint" style="flex:1 1 220px">Skipping assumes: ' + esc(a.assumeIfSkipped) + '</span>' : '') +
+    '</div>' +
+    '</div>';
 }
 
 function screenMap() {
-  const assumptions = S.assumptions.length
+  const list = assumptionsShown();
+  const assumptions = list.length
     ? '<div class="assumes"><h4>What this map assumes</h4><ul>' +
-      S.assumptions.map(a => '<li>' + esc(a) + '</li>').join('') +
-      '</ul></div>'
+      list.map(a => '<li>' + esc(a) + '</li>').join('') +
+      '</ul>' +
+      (S.resolvedAssumptions.length ? '<div class="assumes__gone">' + S.resolvedAssumptions.length +
+        ' assumption' + (S.resolvedAssumptions.length === 1 ? '' : 's') + ' retired by your answers</div>' : '') +
+      '</div>'
     : '';
+  const openQ = S.questions.filter(q => { const a = S.answers[q.id] || {}; return !a.answer && !a.skipped; }).length;
 
   return '<div class="mapscreen"><div class="workspace">' +
     '<div class="canvas">' +
       '<div class="maphead"><div style="flex:1 1 320px">' +
-        '<div class="eyebrow">Step 3 · Map · ' + countNodes() + ' nodes' + (S.refineRound ? ' · round ' + (S.refineRound + 1) : '') + '</div>' +
+        '<div class="eyebrow">Map · ' + countNodes() + ' nodes' + (S.refineRound ? ' · round ' + (S.refineRound + 1) : '') +
+          (openQ ? ' · ' + openQ + ' open question' + (openQ === 1 ? '' : 's') : '') + '</div>' +
         '<h2>' + esc(S.title || S.brief.topic) + '</h2>' +
         (S.summary ? '<p>' + esc(S.summary) + '</p>' : '') + assumptions +
+      '</div>' +
+      '<div class="maphead__acts">' +
+        btn('expand-all', 'Expand all', { sm: true, ghost: true }) +
+        btn('collapse-all', 'Collapse all', { sm: true, ghost: true }) +
       '</div></div>' +
       '<div class="tree">' + renderNode(S.map, 0) + '</div>' +
     '</div>' +
@@ -2012,7 +2232,17 @@ function answerProbe(nodeId, index, answer) {
   if (!node || !answer || !answer.trim()) { toast('Write an answer first'); return; }
   const question = (node.probes || [])[index];
   node.answeredProbes = (node.answeredProbes || []).concat([index]);
-  invoke(() => refine(nodeId, question, answer.trim()));
+  const c = isLive() ? null : recordedCase(S.caseId);
+  const rec = c && (c.refinements || []).filter(r => r.probeId === nodeId && sameish(r.question, question))[0];
+  invoke(() => applyAnswer(question, answer.trim(), { kind: 'probe', nodeId: nodeId, recorded: rec }));
+}
+
+/* the dock can be showing either kind of ask */
+function answerCurrentAsk(id, argIndex, answer) {
+  if (!answer || !answer.trim()) { toast('Write an answer first'); return; }
+  const isQuestion = S.questions.some(q => q.id === id);
+  if (isQuestion) return invoke(() => answerQuestion(id, answer.trim()));
+  return answerProbe(id, Number(argIndex), answer);
 }
 
 app.addEventListener('click', e => {
@@ -2029,15 +2259,18 @@ app.addEventListener('click', e => {
       const c = recordedCase(arg);
       S.brief = clone(c.brief); S.caseId = c.id;
       logEvent('example_chosen', { case: c.id });
-      toast('Loaded the recorded brief — now ask for questions');
+      toast('Recorded brief loaded — map it');
       return render();
     }
+    case 'start-ask':
     case 'start': {
       if (!S.caseId || S.brief.topic !== (recordedCase(S.caseId) || {}).brief?.topic) {
         const match = RECORDED.filter(c => c.brief.topic === S.brief.topic)[0];
         S.caseId = match ? match.id : null;
       }
-      return invoke(startFlow);
+      const askFirst = act === 'start-ask';
+      logEvent('flow_chosen', { first: askFirst ? 'questions' : 'map' });
+      return invoke(() => startFlow(askFirst));
     }
 
     /* ── clarify ── */
@@ -2107,23 +2340,28 @@ app.addEventListener('click', e => {
 
     /* ── map: refine ── */
     case 'answer-probe': return answerProbe(id, Number(arg), val('[data-probe-input="' + id + '-' + arg + '"]'));
-    case 'dock-answer': return answerProbe(id, Number(arg), val('[data-dock-input]'));
+    case 'dock-answer': return answerCurrentAsk(id, arg, val('[data-dock-input]'));
+    case 'ask-sugg': {
+      const q = S.questions.filter(x => x.id === id)[0];
+      return invoke(() => answerQuestion(id, q.suggestions[Number(el.dataset.i)]));
+    }
+    case 'ask-skip': return skipQuestion(id);
+    case 'expand-all': setAllCollapsed(false); logEvent('expand_all', null); return render();
+    case 'collapse-all': setAllCollapsed(true); return render();
 
     /* ── history ── */
     case 'undo': {
       if (!S.history.length) return;
-      S.future.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
-      const prev = S.history.pop();
-      S.map = prev.map; S.assumptions = prev.assumptions; S.changeNote = prev.changeNote;
+      S.future.push(stateShot());
+      restoreShot(S.history.pop());
       logEvent('undo', null);
       toast('Reverted');
       return render();
     }
     case 'redo': {
       if (!S.future.length) return;
-      S.history.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
-      const next = S.future.pop();
-      S.map = next.map; S.assumptions = next.assumptions; S.changeNote = next.changeNote;
+      S.history.push(stateShot());
+      restoreShot(S.future.pop());
       return render();
     }
 
@@ -2156,7 +2394,8 @@ app.addEventListener('click', e => {
     case 'restart': {
       if (S.map && !confirm('Start a new map? The current one is not saved anywhere.')) return;
       S.screen = 'brief'; S.map = null; S.questions = []; S.answers = {}; S.history = []; S.future = [];
-      S.refineRound = 0; S.changeNote = ''; S.selectedId = null; S.assumptions = []; S.caseId = null;
+      S.refineRound = 0; S.changeNote = ''; S.selectedId = null; S.caseId = null;
+      S.assumptions = []; S.resolvedAssumptions = []; S.extraAssumptions = [];
       logEvent('restart', null);
       return render();
     }
@@ -2167,9 +2406,9 @@ app.addEventListener('click', e => {
     case 'to-brief': S.error = null; S.screen = 'brief'; return render();
     case 'jump-recorded': {
       S.error = null;
-      const c = recordedCase(S.caseId);
-      const r = c && c.refinements && c.refinements[0];
-      if (r) { S.selectedId = r.probeId; S.dockIndex = 0; }
+      const asks = openAsks();
+      const i = asks.map(a => a.recorded).indexOf(true);
+      if (i >= 0) { S.dockIndex = i; S.selectedId = asks[i].kind === 'probe' ? asks[i].id : S.selectedId; }
       return render();
     }
   }

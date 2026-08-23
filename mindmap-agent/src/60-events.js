@@ -59,7 +59,17 @@ function answerProbe(nodeId, index, answer) {
   if (!node || !answer || !answer.trim()) { toast('Write an answer first'); return; }
   const question = (node.probes || [])[index];
   node.answeredProbes = (node.answeredProbes || []).concat([index]);
-  invoke(() => refine(nodeId, question, answer.trim()));
+  const c = isLive() ? null : recordedCase(S.caseId);
+  const rec = c && (c.refinements || []).filter(r => r.probeId === nodeId && sameish(r.question, question))[0];
+  invoke(() => applyAnswer(question, answer.trim(), { kind: 'probe', nodeId: nodeId, recorded: rec }));
+}
+
+/* the dock can be showing either kind of ask */
+function answerCurrentAsk(id, argIndex, answer) {
+  if (!answer || !answer.trim()) { toast('Write an answer first'); return; }
+  const isQuestion = S.questions.some(q => q.id === id);
+  if (isQuestion) return invoke(() => answerQuestion(id, answer.trim()));
+  return answerProbe(id, Number(argIndex), answer);
 }
 
 app.addEventListener('click', e => {
@@ -76,15 +86,18 @@ app.addEventListener('click', e => {
       const c = recordedCase(arg);
       S.brief = clone(c.brief); S.caseId = c.id;
       logEvent('example_chosen', { case: c.id });
-      toast('Loaded the recorded brief — now ask for questions');
+      toast('Recorded brief loaded — map it');
       return render();
     }
+    case 'start-ask':
     case 'start': {
       if (!S.caseId || S.brief.topic !== (recordedCase(S.caseId) || {}).brief?.topic) {
         const match = RECORDED.filter(c => c.brief.topic === S.brief.topic)[0];
         S.caseId = match ? match.id : null;
       }
-      return invoke(startFlow);
+      const askFirst = act === 'start-ask';
+      logEvent('flow_chosen', { first: askFirst ? 'questions' : 'map' });
+      return invoke(() => startFlow(askFirst));
     }
 
     /* ── clarify ── */
@@ -154,23 +167,28 @@ app.addEventListener('click', e => {
 
     /* ── map: refine ── */
     case 'answer-probe': return answerProbe(id, Number(arg), val('[data-probe-input="' + id + '-' + arg + '"]'));
-    case 'dock-answer': return answerProbe(id, Number(arg), val('[data-dock-input]'));
+    case 'dock-answer': return answerCurrentAsk(id, arg, val('[data-dock-input]'));
+    case 'ask-sugg': {
+      const q = S.questions.filter(x => x.id === id)[0];
+      return invoke(() => answerQuestion(id, q.suggestions[Number(el.dataset.i)]));
+    }
+    case 'ask-skip': return skipQuestion(id);
+    case 'expand-all': setAllCollapsed(false); logEvent('expand_all', null); return render();
+    case 'collapse-all': setAllCollapsed(true); return render();
 
     /* ── history ── */
     case 'undo': {
       if (!S.history.length) return;
-      S.future.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
-      const prev = S.history.pop();
-      S.map = prev.map; S.assumptions = prev.assumptions; S.changeNote = prev.changeNote;
+      S.future.push(stateShot());
+      restoreShot(S.history.pop());
       logEvent('undo', null);
       toast('Reverted');
       return render();
     }
     case 'redo': {
       if (!S.future.length) return;
-      S.history.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
-      const next = S.future.pop();
-      S.map = next.map; S.assumptions = next.assumptions; S.changeNote = next.changeNote;
+      S.history.push(stateShot());
+      restoreShot(S.future.pop());
       return render();
     }
 
@@ -203,7 +221,8 @@ app.addEventListener('click', e => {
     case 'restart': {
       if (S.map && !confirm('Start a new map? The current one is not saved anywhere.')) return;
       S.screen = 'brief'; S.map = null; S.questions = []; S.answers = {}; S.history = []; S.future = [];
-      S.refineRound = 0; S.changeNote = ''; S.selectedId = null; S.assumptions = []; S.caseId = null;
+      S.refineRound = 0; S.changeNote = ''; S.selectedId = null; S.caseId = null;
+      S.assumptions = []; S.resolvedAssumptions = []; S.extraAssumptions = [];
       logEvent('restart', null);
       return render();
     }
@@ -214,9 +233,9 @@ app.addEventListener('click', e => {
     case 'to-brief': S.error = null; S.screen = 'brief'; return render();
     case 'jump-recorded': {
       S.error = null;
-      const c = recordedCase(S.caseId);
-      const r = c && c.refinements && c.refinements[0];
-      if (r) { S.selectedId = r.probeId; S.dockIndex = 0; }
+      const asks = openAsks();
+      const i = asks.map(a => a.recorded).indexOf(true);
+      if (i >= 0) { S.dockIndex = i; S.selectedId = asks[i].kind === 'probe' ? asks[i].id : S.selectedId; }
       return render();
     }
   }

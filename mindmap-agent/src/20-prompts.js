@@ -5,7 +5,7 @@
    so before/after iterations are traceable (see CHANGELOG-agent.md).
    ───────────────────────────────────────────────────────────── */
 const PROMPTS = {
-  VERSION: 'v0.1',
+  VERSION: 'v0.2',
 
   /* The stance shared by every call: probe, don't please. */
   SYSTEM: [
@@ -69,8 +69,13 @@ const PROMPTS = {
       `Audience: ${brief.audience || 'not stated'}`,
       `Depth: ${brief.depth} levels below the centre.`,
       '',
-      'The user answered your clarifying questions:',
-      answers.map(a => `- ${a.question} → ${a.answered ? a.answer : `[SKIPPED — assume: ${a.assumeIfSkipped}]`}`).join('\n'),
+      answers.length
+        ? 'The user answered your clarifying questions:\n' +
+          answers.map(a => `- ${a.question} → ${a.answered ? a.answer : `[SKIPPED — assume: ${a.assumeIfSkipped}]`}`).join('\n')
+        : 'The user has not answered anything yet — you are mapping from the brief alone. ' +
+          'Map it anyway rather than stalling: make the assumptions you need, mark every node that ' +
+          'rests on one with source:"assumption", and list those assumptions in plain words in ' +
+          '"assumptions" so the user can see exactly what to correct.',
       '',
       'Rules for this map:',
       `- 4 to 6 first-level branches. Each must be a real division of THIS topic, not a lifecycle stage borrowed from a template.`,

@@ -14,28 +14,33 @@ The brief asks for an agent that creates mind maps from a context or requirement
 *goes beyond generic structures* — researching alternatives, asking probing questions,
 challenging assumptions, and refining the map from the answers.
 
-I built **Probe**, a browser agent that runs a four-step loop:
+I built **Probe**, a browser agent with a deliberately short path to value:
 
 ```
-1 Brief  →  2 Clarify  →  3 Map  →  4 Refine
-            ↑                          │
-            └──────── the answers change the map ────┘
+1 Brief  →  2 Map        …and the agent keeps asking, on top of the map
+                ↑                                    │
+                └──── every answer reworks the map ──┘
 ```
 
-1. **Brief.** You say what you are trying to work out. Purpose, audience and depth are
-   optional.
-2. **Clarify.** Before mapping anything, the agent asks the 3–5 questions whose answers
-   would most change the shape of the map, each with the default it will assume if you
-   skip. Skipping is one click and always allowed.
-3. **Map.** A tree where every node carries *why it is there*, a **confidence** level,
+1. **Brief.** You say what you are trying to work out, and get a map. One step. Purpose,
+   audience and depth are optional.
+2. **Map.** A tree where every node carries *why it is there*, a **confidence** level,
    and a **source** — `your input`, `model`, or `assumption`. Every first-level branch
    also carries **alternatives** ("are these the only options?" answered concretely,
    each with its trade-off) and **probes** — questions to you that would change that
-   branch.
-4. **Refine.** The agent puts its hardest open question at the bottom of the screen.
-   Your one-line answer rebuilds the map, and the result is shown as a **diff** —
-   added nodes edged green, reworded ones amber, with a written change note and a
-   one-click undo.
+   branch. Because nothing was asked first, the assumptions the map had to make are
+   listed under its summary from the very first render.
+3. **The agent keeps asking — but never blocks.** A dock along the bottom holds
+   everything it still wants to know: first the clarifying questions whose answers would
+   most change the map's shape, then the probes hanging off individual branches. Each
+   question shows suggested answers one click away, why it matters, and exactly what
+   will be assumed if you skip it. Answer it and the map is reworked in place; skip it
+   and it becomes a visible assumption; ignore it and nothing is blocked.
+4. **Every rework is shown and reversible** — added nodes edged green, reworded ones
+   amber, with a written change note and one-click undo.
+
+This is the design's one significant iteration, and it came from a fair challenge:
+*does this need four steps?* It did not — see §5.
 
 The map is not read-only at any point: rename a node inline, add or delete children,
 lock a node so a regeneration cannot touch its wording, take an alternative framing in
@@ -46,7 +51,7 @@ generic. Undo/redo covers all of it.
 
 | Mode | What it is | Where |
 | --- | --- | --- |
-| **Recorded** | Replays saved outputs of the v0.1 prompts for three briefs. No key, no network. | The default, and the only mode available on the shared link above — artifact pages are blocked from calling external APIs. |
+| **Recorded** | Replays saved outputs of the prompt pack for three briefs, with a scripted effect behind every clarifying question. No key, no network. | The default, and the only mode available on the shared link above — artifact pages are blocked from calling external APIs. |
 | **Live** | Sends your own brief to the Anthropic API with your own key. | When you serve `probe.html` yourself and add a key in Settings. |
 
 This split is a constraint, not a design choice: a published artifact cannot call an
@@ -119,9 +124,9 @@ v0.2 targets.
 with one rater. It says the agent produces maps of the intended shape. It does not say
 the agent is good — that requires live runs and someone else scoring, which is Week 2.
 
-### (b) 35 automated end-to-end checks
+### (b) 42 automated end-to-end checks
 
-`test/flow.test.mjs` drives the real page in headless Chromium: **35/35 pass.** It
+`test/flow.test.mjs` drives the real page in headless Chromium: **42/42 pass.** It
 covers the full flow on two of the three cases, inline rename, delete and undo, lock,
 voting, branch expansion, all four exports, the diff highlighting, the mobile layout,
 and a contrast audit across all four theme states (system light, system dark, and both
@@ -159,32 +164,67 @@ explicit choices).
    gap and the first v0.2 change.
 2. **Confidence is compressed.** Almost everything is `high` or `medium`; a scale that
    never says `low` carries no information.
-3. **Recorded mode is a partial experience.** One expansion and one refinement per
-   case. Honest, but a reviewer without an API key sees a rehearsal, not the agent.
+3. **Recorded mode is a partial experience.** Every clarifying question reworks the map,
+   but only one probe refinement and one branch expansion per case are recorded. Honest,
+   but a reviewer without an API key still sees a rehearsal, not the agent.
 4. **No memory between sessions.** Close the tab and the map is gone. Exports exist,
    but a "resume" would cost little.
-5. **The probe dock shows one question at a time** with no sense of how many remain or
-   which matter most.
+5. **The dock asks in the order the model produced them.** It now shows how many are
+   open, but not which is worth answering first — it should sort by how much each
+   answer would change the map.
 6. **Nothing yet learns from the 👍/👎 signals.** They are captured in the session log
    and go nowhere. Week 3 should feed voted-down nodes back into the refine prompt.
 
 ---
 
-## 5. The seven concepts — where they stand after Week 1
+## 5. The iteration: four steps to two
+
+The first working version made you pass a five-question form before it would show you
+anything. Reviewed next to NotebookLM's mind maps — where a map appears immediately and
+you explore it by clicking — that gate looked indefensible. It also asked people to
+answer questions about a map they had not seen yet, which is the worst moment to ask.
+
+**What changed.** The clarifying questions did not go away; they moved onto the map.
+They now live in a dock under it, with suggested answers one click away, a "why it
+matters" line, and the exact assumption that will be made if you skip. Answering
+reworks the map in place. The old route is still there as a secondary button for people
+who prefer to be asked first.
+
+| | Before (v0.1) | After (v0.2) |
+| --- | --- | --- |
+| Screens before the first map | 3 | 1 |
+| Minimum clicks to a map | 3 | 1 |
+| When questions get answered | Before seeing anything | Against a map you can already read |
+| Cost of ignoring a question | Must still pass the form | None; it waits in the queue |
+| Assumptions visible at first render | Only after the form | Immediately, under the summary |
+
+**What it cost.** Mapping from the brief alone means the first map rests on more
+assumptions — two or three, stated up front, instead of none. That is the trade, and
+the app is explicit about it: the assumptions are listed under the map from the first
+render, each with the question that would retire it.
+
+**The prompt change behind it.** `buildMap` v0.1 assumed answers would always arrive.
+v0.2 has an explicit no-answers branch: map from the brief rather than stalling, mark
+every node resting on a guess as `source:"assumption"`, and state those assumptions in
+plain words. Both versions and the reasoning are in `CHANGELOG-agent.md`.
+
+---
+
+## 6. The seven concepts — where they stand after Week 1
 
 | Concept | In the build today | Week 2–3 |
 | --- | --- | --- |
 | **User needs** | Three target users, three tasks, every feature mapped to a need (§2); rely / do-not-rely printed on the first screen | Test the mapping with two people outside this project |
 | **Defining success** | Six-criterion rubric and a 10-brief evaluation set written; 3 recorded cases scored 11/12, 3/3 pass | Run all 9 briefs live, independent scorer, report the success rate before and after v0.2 |
-| **Data and model evolution** | Prompts isolated in one versioned pack; changelog records four build-session iterations with their observed effects | Ship v0.2, report per-criterion movement on the same evaluation set |
+| **Data and model evolution** | Prompts isolated in one versioned pack; v0.1 → v0.2 shipped with a before/after (§5), plus four smaller build-session iterations recorded with their observed effects | Ship v0.3 candidates, report per-criterion movement on the same evaluation set |
 | **Mental models** | Mode named in three places; capability/limit lists on the first screen; the agent refuses briefs it cannot map well rather than guessing | Add a first-run walkthrough of what a probe is and why skipping is safe |
 | **Trust and explanations** | Per-node `why`, confidence, and source tag; assumptions listed under the map; the exact prompt readable in-app | Make confidence carry information (v0.2 candidate 2); show *which answer* changed a node |
-| **Feedback and controls** | Edit, add, delete, lock, undo/redo, swap-in alternatives, 👍/👎, exportable session log | Feed voted-down nodes into the refine prompt so the map responds to the feedback |
+| **Feedback and controls** | Edit, add, delete, lock, undo/redo, swap-in alternatives, 👍/👎, exportable session log; answering or skipping a question is one click and always reversible | Feed voted-down nodes into the refine prompt so the map responds to the feedback |
 | **Errors and graceful failures** | Guardrail on thin briefs; two silent JSON repairs; four named recovery cards; recorded-mode limits stated instead of faked | Add resume-after-failure and a partial-map fallback when only some of the JSON parses |
 
 ---
 
-## 6. Timeline
+## 7. Timeline
 
 | When | What | Status |
 | --- | --- | --- |
@@ -194,7 +234,7 @@ explicit choices).
 
 ---
 
-## 7. Lessons learnt so far
+## 8. Lessons learnt so far
 
 1. **The interesting design work was in the refusals.** Deciding what the agent will
    *not* do — map a one-word brief, pretend recorded mode is live, hide a skipped
@@ -207,7 +247,12 @@ explicit choices).
    published artifact, so the honest options were "make the limit visible" or "fake it".
    Naming it produced a better artifact — and, unexpectedly, a good demonstration of
    graceful failure.
-5. **Design bugs hide in the gap between source and output.** The dock squeezing the
+5. **Ask for the thing, not the questionnaire.** The four-step flow felt rigorous and
+   was mostly a gate. Moving the questions on top of the map kept every one of them and
+   removed the wait — and answering them got *easier*, because there is now something
+   concrete on screen to answer them against. Looking at how a mature product
+   (NotebookLM) sequences the same job was faster than reasoning about it from scratch.
+6. **Design bugs hide in the gap between source and output.** The dock squeezing the
    canvas to a fifth of the window, and small text failing contrast in the light theme,
    were both invisible in code and obvious in a screenshot. Looking at the running
    thing found what reading it could not.

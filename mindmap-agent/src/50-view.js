@@ -4,14 +4,12 @@
 
 const STEPS = [
   { key: 'brief', n: '1', label: 'Brief' },
-  { key: 'clarify', n: '2', label: 'Clarify' },
-  { key: 'map', n: '3', label: 'Map' },
-  { key: 'refine', n: '4', label: 'Refine' }
+  { key: 'map', n: '2', label: 'Map & refine' }
 ];
 
 function stepState(key) {
-  const order = ['brief', 'clarify', 'map', 'refine'];
-  const current = S.screen === 'map' && S.refineRound > 0 ? 'refine' : S.screen;
+  const current = S.screen === 'clarify' ? 'brief' : S.screen;
+  const order = ['brief', 'map'];
   const i = order.indexOf(key), j = order.indexOf(current);
   return i === j ? 'now' : (i < j ? 'done' : 'todo');
 }
@@ -77,7 +75,7 @@ function screenBrief() {
     '<div class="brief__head">' +
       '<div class="eyebrow">Step 1 · Brief</div>' +
       '<h1>Tell me what you are trying to work out.</h1>' +
-      '<p>I will ask what your brief does not say, map it, then argue with the map — naming the alternatives you did not ask for and the assumptions it rests on.</p>' +
+      '<p>You get a map straight away. The agent then argues with it on screen — naming the alternatives you did not ask for, the assumptions it had to make, and the questions whose answers would change it.</p>' +
     '</div>' +
 
     '<div class="card brief__panel">' +
@@ -97,8 +95,9 @@ function screenBrief() {
           '<select id="depth" data-bind="depth">' + [2, 3, 4].map(d => '<option value="' + d + '"' + (Number(S.brief.depth) === d ? ' selected' : '') + '>' + d + '</option>').join('') + '</select></div>' +
       '</div>' +
       '<div class="field"><span class="eyebrow">Or start from a recorded run</span><div class="examples">' + examples + '</div></div>' +
-      '<div class="row" style="align-items:center;gap:10px">' + btn('start', 'Ask me questions first →', { primary: true }) +
-        '<span class="hint">' + (isLive() ? 'Live mode: your key, your brief.' : (LIVE_BLOCKED
+      '<div class="row" style="align-items:center;gap:10px">' + btn('start', 'Map it →', { primary: true }) +
+        btn('start-ask', 'Ask me questions first', { ghost: true, title: 'The slower route: answer 3–5 questions before the first map is drawn' }) +
+        '<span class="hint">' + (isLive() ? 'The map comes first; the agent asks its questions on top of it.' : (LIVE_BLOCKED
           ? 'This shared preview replays recorded runs — pick an example above.'
           : 'No key set: pick a recorded example, or add a key in Settings to map your own brief.')) + '</span>' +
       '</div>' +
@@ -192,7 +191,7 @@ function renderNode(n, depth) {
 
   const head = '<div class="' + cls.join(' ') + '" data-node="' + esc(n.id) + '">' +
     '<button class="node__toggle' + (hasKids ? '' : ' node__toggle--hidden') + '" data-act="toggle" data-id="' + esc(n.id) + '" aria-label="Expand or collapse">' +
-      (n.collapsed ? '+' : '−') + '</button>' +
+      (n.collapsed ? kids.length : '−') + '</button>' +
     '<div class="node__body" data-act="select" data-id="' + esc(n.id) + '">' + label + meta + '</div>' +
     '</div>';
 
@@ -255,6 +254,23 @@ function inspector() {
     '</aside>';
 }
 
+/* everything the agent is still asking: unanswered clarifying questions first
+   (they change the map most), then the probes hanging off branches */
+function openAsks() {
+  const qs = S.questions
+    .filter(q => { const a = S.answers[q.id] || {}; return !a.answer && !a.skipped; })
+    .map(q => ({
+      kind: 'question', id: q.id, text: q.question, why: q.why,
+      suggestions: q.suggestions || [], assumeIfSkipped: q.assumeIfSkipped,
+      recorded: isLive() || !!q.effect
+    }));
+  const ps = openProbes().map(p => ({
+    kind: 'probe', id: p.nodeId, i: p.i, text: p.text, why: '',
+    suggestions: [], recorded: hasRecordedRefinement(p.nodeId, p.text)
+  }));
+  return qs.concat(ps);
+}
+
 function openProbes() {
   const out = [];
   if (!S.map) return out;
@@ -277,33 +293,67 @@ function dock() {
         '<span class="hint">Green edge = added · amber edge = reworded</span>' +
       '</div></div>';
   }
-  const probes = openProbes();
-  if (!probes.length) return '';
-  const p = probes[S.dockIndex % probes.length];
+  const asks = openAsks();
+  if (!asks.length) {
+    return '<div class="dock"><div class="dock__head">' +
+      '<span class="chip chip--user">nothing outstanding</span>' +
+      '<span style="font-size:13.5px">You have answered everything the agent asked. Deepen a branch, or start a new map.</span>' +
+      '</div></div>';
+  }
+  const a = asks[S.dockIndex % asks.length];
+  const openQ = asks.filter(x => x.kind === 'question').length;
+
+  const suggestions = a.suggestions.length
+    ? '<div class="dock__q dock__sugg">' + a.suggestions.map((sg, i) =>
+        '<button class="sugg" data-act="ask-sugg" data-id="' + esc(a.id) + '" data-i="' + i + '">' + esc(sg) + '</button>').join('') +
+      '</div>'
+    : '';
+
   return '<div class="dock">' +
-    '<div class="dock__head"><span class="ping"></span><span class="eyebrow">Step 4 · The agent is asking</span></div>' +
-    '<div class="dock__q"><span style="font-size:14.5px;font-weight:500;flex:1 1 100%">' + esc(p.text) + '</span></div>' +
+    '<div class="dock__head"><span class="ping"></span>' +
+      '<span class="eyebrow">' + (a.kind === 'question'
+        ? 'The map is guessing at this · ' + openQ + ' open question' + (openQ === 1 ? '' : 's')
+        : 'Probing question · this branch') + '</span>' +
+      (a.recorded ? '' : '<span class="chip chip--recorded" title="Recorded mode has no saved rework for this one">no recorded rework</span>') +
+    '</div>' +
+    '<div class="dock__q"><span class="dock__ask">' + esc(a.text) + '</span></div>' +
+    (a.why ? '<div class="dock__why">Why it matters: ' + esc(a.why) + '</div>' : '') +
+    suggestions +
     '<div class="dock__q">' +
-      '<input type="text" data-dock-input placeholder="Answer in a line — the map will change" aria-label="Answer the agent">' +
-      btn('dock-answer', 'Rework the map', { primary: true, id: p.nodeId, arg: String(p.i) }) +
-      btn('dock-next', 'Ask me a different one', { ghost: true }) +
-      btn('dock-jump', 'Show me the branch', { ghost: true, id: p.nodeId }) +
-    '</div></div>';
+      '<input type="text" data-dock-input placeholder="' + (a.kind === 'question' ? 'Answer in your own words' : 'Answer in a line — the map will change') + '" aria-label="Answer the agent">' +
+      btn('dock-answer', 'Update the map', { primary: true, id: a.id, arg: String(a.i == null ? '' : a.i), title: 'Rework the map around this answer' }) +
+      (a.kind === 'question'
+        ? btn('ask-skip', 'Skip — assume a default', { ghost: true, id: a.id, title: a.assumeIfSkipped })
+        : btn('dock-jump', 'Show me the branch', { ghost: true, id: a.id })) +
+      (asks.length > 1 ? btn('dock-next', 'Ask me a different one', { ghost: true }) : '') +
+      (a.kind === 'question' ? '<span class="hint" style="flex:1 1 220px">Skipping assumes: ' + esc(a.assumeIfSkipped) + '</span>' : '') +
+    '</div>' +
+    '</div>';
 }
 
 function screenMap() {
-  const assumptions = S.assumptions.length
+  const list = assumptionsShown();
+  const assumptions = list.length
     ? '<div class="assumes"><h4>What this map assumes</h4><ul>' +
-      S.assumptions.map(a => '<li>' + esc(a) + '</li>').join('') +
-      '</ul></div>'
+      list.map(a => '<li>' + esc(a) + '</li>').join('') +
+      '</ul>' +
+      (S.resolvedAssumptions.length ? '<div class="assumes__gone">' + S.resolvedAssumptions.length +
+        ' assumption' + (S.resolvedAssumptions.length === 1 ? '' : 's') + ' retired by your answers</div>' : '') +
+      '</div>'
     : '';
+  const openQ = S.questions.filter(q => { const a = S.answers[q.id] || {}; return !a.answer && !a.skipped; }).length;
 
   return '<div class="mapscreen"><div class="workspace">' +
     '<div class="canvas">' +
       '<div class="maphead"><div style="flex:1 1 320px">' +
-        '<div class="eyebrow">Step 3 · Map · ' + countNodes() + ' nodes' + (S.refineRound ? ' · round ' + (S.refineRound + 1) : '') + '</div>' +
+        '<div class="eyebrow">Map · ' + countNodes() + ' nodes' + (S.refineRound ? ' · round ' + (S.refineRound + 1) : '') +
+          (openQ ? ' · ' + openQ + ' open question' + (openQ === 1 ? '' : 's') : '') + '</div>' +
         '<h2>' + esc(S.title || S.brief.topic) + '</h2>' +
         (S.summary ? '<p>' + esc(S.summary) + '</p>' : '') + assumptions +
+      '</div>' +
+      '<div class="maphead__acts">' +
+        btn('expand-all', 'Expand all', { sm: true, ghost: true }) +
+        btn('collapse-all', 'Collapse all', { sm: true, ghost: true }) +
       '</div></div>' +
       '<div class="tree">' + renderNode(S.map, 0) + '</div>' +
     '</div>' +

@@ -36,6 +36,8 @@ const S = {
   answers: {},                // qid -> {answer, skipped}
   map: null,
   title: '', summary: '', assumptions: [], changeNote: '',
+  resolvedAssumptions: [],   // assumptions an answer has retired
+  extraAssumptions: [],      // defaults created by explicitly skipping a question
   selectedId: null,
   editingId: null,
   history: [], future: [],
@@ -84,10 +86,23 @@ function findParent(id) {
 }
 function snapshot() {
   if (!S.map) return;
-  S.history.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
+  S.history.push(stateShot());
   if (S.history.length > 40) S.history.shift();
   S.future = [];
 }
+function stateShot() {
+  return {
+    map: clone(S.map), assumptions: clone(S.assumptions),
+    resolved: clone(S.resolvedAssumptions), extra: clone(S.extraAssumptions),
+    changeNote: S.changeNote
+  };
+}
+function restoreShot(shot) {
+  S.map = shot.map; S.assumptions = shot.assumptions;
+  S.resolvedAssumptions = shot.resolved || []; S.extraAssumptions = shot.extra || [];
+  S.changeNote = shot.changeNote;
+}
+
 function newId(prefix) {
   let i = 1, id;
   do { id = (prefix || 'x') + i++; } while (findNode(id));
@@ -244,8 +259,34 @@ function applyOps(map, ops) {
   return map;
 }
 
-/* ── flow: brief → clarify ────────────────────────────────── */
-async function startFlow() {
+/* the map arrives open one level deep; deeper branches expand on click */
+function collapseBelow(depth) {
+  walk(S.map, (n, d) => { n.collapsed = d >= depth && (n.children || []).length > 0; });
+}
+function setAllCollapsed(state) {
+  walk(S.map, (n, d) => { if (d > 0 && (n.children || []).length) n.collapsed = state; });
+}
+function installMap(out) {
+  S.map = out.root;
+  S.title = out.title;
+  S.summary = out.summary;
+  S.assumptions = (out.assumptions || []).slice();
+  S.resolvedAssumptions = [];
+  S.extraAssumptions = [];
+  S.changeNote = '';
+  S.refineRound = 0;
+  collapseBelow(2);
+  S.screen = 'map';
+  S.selectedId = S.map.children[0] ? S.map.children[0].id : null;
+}
+/* what the map is currently resting on: base assumptions minus the ones an
+   answer retired, plus the defaults created by skipping a question outright */
+function assumptionsShown() {
+  return dedupe(S.assumptions.filter(a => S.resolvedAssumptions.indexOf(a) < 0).concat(S.extraAssumptions));
+}
+
+/* ── flow: brief → map (questions come with it, not before it) ─────── */
+async function startFlow(askFirst) {
   const topic = S.brief.topic.trim();
   if (topic.split(/\s+/).length < 4 || topic.length < 20) {
     S.error = { title: 'That brief is too thin to map well', body: PROMPTS.BRIEF_TOO_THIN,
@@ -253,6 +294,7 @@ async function startFlow() {
     logEvent('guardrail', { reason: 'brief_too_thin' });
     return render();
   }
+
   if (!isLive()) {
     if (!S.caseId) {
       S.error = {
@@ -268,20 +310,43 @@ async function startFlow() {
     const c = recordedCase(S.caseId);
     S.questions = clone(c.questions);
     S.answers = {};
-    S.screen = 'clarify';
-    logEvent('clarify_shown', { mode: 'recorded', n: S.questions.length });
+    if (askFirst) {
+      S.screen = 'clarify';
+      logEvent('clarify_shown', { mode: 'recorded', n: S.questions.length });
+      return render();
+    }
+    const m = clone(c.map);
+    normalise(m.root);
+    installMap(m);
+    logEvent('map_built', { mode: 'recorded', firstStep: 'map', nodes: countNodes(), openQuestions: S.questions.length });
     return render();
   }
-  await guarded('Reading your brief and working out what it does not tell me', async () => {
-    const out = await askModel(PROMPTS.clarify(S.brief), validateClarify, { maxTokens: 1500 });
-    S.questions = out.questions;
+
+  if (askFirst) {
+    return guarded('Working out what your brief does not tell me', async () => {
+      const out = await askModel(PROMPTS.clarify(S.brief), validateClarify, { maxTokens: 1500 });
+      S.questions = out.questions;
+      S.answers = {};
+      S.screen = 'clarify';
+      logEvent('clarify_shown', { mode: 'live', n: S.questions.length });
+    });
+  }
+
+  /* the default: map and questions are produced in parallel, so the map is
+     on screen in one step and the questions arrive with it */
+  await guarded('Mapping your brief — and working out what it does not tell me', async () => {
+    const [clar, mapOut] = await Promise.all([
+      askModel(PROMPTS.clarify(S.brief), validateClarify, { maxTokens: 1500 }),
+      askModel(PROMPTS.buildMap(S.brief, []), validateMap, { maxTokens: 6000 })
+    ]);
+    S.questions = clar.questions;
     S.answers = {};
-    S.screen = 'clarify';
-    logEvent('clarify_shown', { mode: 'live', n: S.questions.length });
+    installMap(mapOut);
+    logEvent('map_built', { mode: 'live', firstStep: 'map', nodes: countNodes(), openQuestions: S.questions.length });
   });
 }
 
-/* ── flow: clarify → map ──────────────────────────────────── */
+/* ── flow: clarify → map (only when the user asked to be asked first) ─ */
 async function buildMap() {
   const answers = S.questions.map(q => {
     const a = S.answers[q.id];
@@ -299,33 +364,44 @@ async function buildMap() {
     const c = recordedCase(S.caseId);
     const m = clone(c.map);
     normalise(m.root);
-    S.map = m.root; S.title = m.title; S.summary = m.summary;
-    S.assumptions = dedupe(m.assumptions.concat(
-      S.questions.filter(q => !(S.answers[q.id] && S.answers[q.id].answer)).map(q => q.assumeIfSkipped)
-    ));
-    applyUserAnswersToMap();
-    S.screen = 'map'; S.selectedId = S.map.children[0] ? S.map.children[0].id : null;
-    S.changeNote = '';
-    logEvent('map_built', { mode: 'recorded', nodes: countNodes() });
+    installMap(m);
+    S.extraAssumptions = S.questions.filter(q => !(S.answers[q.id] || {}).answer).map(q => q.assumeIfSkipped);
+    applyAnsweredQuestionsLocally();
+    logEvent('map_built', { mode: 'recorded', firstStep: 'clarify', nodes: countNodes() });
     return render();
   }
   await guarded('Building the map, then challenging it', async () => {
     const out = await askModel(PROMPTS.buildMap(S.brief, answers), validateMap, { maxTokens: 6000 });
-    S.map = out.root; S.title = out.title; S.summary = out.summary;
-    S.assumptions = dedupe(out.assumptions.concat(
-      S.questions.filter(q => !(S.answers[q.id] && S.answers[q.id].answer)).map(q => q.assumeIfSkipped)
-    ));
-    S.screen = 'map'; S.selectedId = S.map.children[0] ? S.map.children[0].id : null;
-    S.changeNote = '';
-    logEvent('map_built', { mode: 'live', nodes: countNodes() });
+    installMap(out);
+    S.extraAssumptions = S.questions.filter(q => !(S.answers[q.id] || {}).answer).map(q => q.assumeIfSkipped);
+    logEvent('map_built', { mode: 'live', firstStep: 'clarify', nodes: countNodes() });
   });
 }
 
-/* answered questions are the user's words: mark the nodes that rest on them */
-function applyUserAnswersToMap() {
-  const answered = S.questions.filter(q => S.answers[q.id] && S.answers[q.id].answer).length;
-  if (!answered || !S.map) return;
-  walk(S.map, n => { if (n.source === 'assumption' && n.status !== 'removed') n.userTouched = true; });
+/* ask-first + recorded: fold the answers already given into the recorded map */
+function applyAnsweredQuestionsLocally() {
+  S.questions.forEach(q => {
+    const a = (S.answers[q.id] || {}).answer;
+    if (!a || !q.effect) return;
+    applyOps(S.map, fillOps(q.effect.ops, a));
+    if (typeof q.effect.resolves === 'number') {
+      const t = S.assumptions[q.effect.resolves];
+      if (t) S.resolvedAssumptions.push(t);
+    }
+  });
+}
+
+/* the user's own words go into the nodes an answer touches */
+function fill(text, answer) {
+  return String(text).replace(/\{\{answer\}\}/g, String(answer).replace(/\s+/g, ' ').trim());
+}
+function fillOps(ops, answer) {
+  return clone(ops || []).map(op => {
+    if (op.set && op.set.why) op.set.why = fill(op.set.why, answer);
+    if (op.addProbe) op.addProbe.probe = fill(op.addProbe.probe, answer);
+    if (op.add && op.add.node && op.add.node.why) op.add.node.why = fill(op.add.node.why, answer);
+    return op;
+  });
 }
 
 /* two phrasings of the same assumption should not both show */
@@ -340,27 +416,32 @@ function dedupe(list) {
 
 function countNodes() { let c = 0; if (S.map) walk(S.map, () => c++); return c; }
 
-/* ── flow: refine ─────────────────────────────────────────── */
-async function refine(nodeId, question, answer) {
+/* ── refinement: one path, whether the answer came from a question or a probe ── */
+async function applyAnswer(question, answer, opts) {
+  opts = opts || {};
   if (!answer || !answer.trim()) return;
-  logEvent('probe_answered', { node: nodeId, question: question, answer: answer });
+  answer = answer.trim();
+  logEvent('answer_given', { kind: opts.kind || 'probe', node: opts.nodeId || null, question: question, answer: answer });
   const before = clone(S.map);
 
   if (!isLive()) {
-    const c = recordedCase(S.caseId);
-    const rec = (c.refinements || []).filter(r => r.probeId === nodeId && sameish(r.question, question))[0];
+    const rec = opts.recorded;
     if (!rec) {
       S.error = {
-        title: 'No recorded answer for that probe',
-        body: 'Recorded mode replays saved runs, so it can only refine the probes it has a recording for — marked with a ● in the inspector. Your answer was still saved to the session log.',
-        actions: [{ label: 'Show me a probe that is recorded', act: 'jump-recorded' }, { label: 'Close', act: 'dismiss' }]
+        title: 'No recorded rework for that one',
+        body: 'Recorded mode replays saved runs, so it can only rework the questions and probes it has a recording for — every clarifying question, and the probes marked ●. Your answer is still in the session log.',
+        actions: [{ label: 'Show me one that is recorded', act: 'jump-recorded' }, { label: 'Close', act: 'dismiss' }]
       };
       return render();
     }
     snapshot();
-    applyOps(S.map, rec.ops);
+    applyOps(S.map, fillOps(rec.ops, answer));
+    if (typeof rec.resolves === 'number') {
+      const t = S.assumptions[rec.resolves];
+      if (t && S.resolvedAssumptions.indexOf(t) < 0) S.resolvedAssumptions.push(t);
+    }
     markDiff(before, S.map);
-    S.changeNote = rec.note;
+    S.changeNote = fill(rec.note, answer);
     S.refineRound++;
     logEvent('map_refined', { mode: 'recorded', round: S.refineRound });
     return render();
@@ -368,20 +449,43 @@ async function refine(nodeId, question, answer) {
 
   const locked = [];
   walk(S.map, n => { if (n.locked) locked.push(n.label); });
-  await guarded('Rethinking the map around your answer', async () => {
+  await guarded('Reworking the map around your answer', async () => {
     const out = await askModel(
       PROMPTS.refine(S.brief, JSON.stringify(stripForPrompt(S.map)), { question: question, answer: answer }, locked),
       validateMap, { maxTokens: 6000 });
     snapshot();
-    S.map = out.root; S.title = out.title || S.title; S.summary = out.summary || S.summary;
-    if (Array.isArray(out.assumptions)) S.assumptions = out.assumptions;
+    const keepCollapse = {};
+    walk(S.map, n => { keepCollapse[n.id] = n.collapsed; });
+    S.map = out.root;
+    S.title = out.title || S.title;
+    S.summary = out.summary || S.summary;
+    if (Array.isArray(out.assumptions)) { S.assumptions = out.assumptions; S.resolvedAssumptions = []; }
     S.changeNote = out.changeNote || 'The map was rebuilt around your answer.';
     markDiff(before, S.map);
     relockFrom(before);
+    walk(S.map, (n, d) => { n.collapsed = (n.id in keepCollapse) ? keepCollapse[n.id] : d >= 2 && (n.children || []).length > 0; });
     S.refineRound++;
     logEvent('map_refined', { mode: 'live', round: S.refineRound });
   });
 }
+
+/* a clarifying question answered on the map */
+function answerQuestion(qid, answer) {
+  const q = S.questions.filter(x => x.id === qid)[0];
+  if (!q) return;
+  S.answers[qid] = { answer: answer, skipped: false };
+  return applyAnswer(q.question, answer, { kind: 'question', recorded: q.effect });
+}
+/* …or waved away, which is what creates a visible assumption */
+function skipQuestion(qid) {
+  const q = S.questions.filter(x => x.id === qid)[0];
+  if (!q) return;
+  S.answers[qid] = { answer: '', skipped: true };
+  if (S.extraAssumptions.indexOf(q.assumeIfSkipped) < 0) S.extraAssumptions.push(q.assumeIfSkipped);
+  logEvent('question_skipped', { q: qid });
+  render();
+}
+
 function sameish(a, b) { return String(a).slice(0, 40).toLowerCase() === String(b).slice(0, 40).toLowerCase(); }
 function stripForPrompt(node) {
   const c = clone(node);
@@ -468,9 +572,10 @@ function remember(fn) { lastAction = fn; return fn; }
 /* ── exports ──────────────────────────────────────────────── */
 function toMarkdown() {
   const lines = ['# ' + (S.title || S.brief.topic), '', S.summary, ''];
-  if (S.assumptions.length) {
+  const assumps = assumptionsShown();
+  if (assumps.length) {
     lines.push('**Assumptions this map rests on**', '');
-    S.assumptions.forEach(a => lines.push('- ' + a));
+    assumps.forEach(a => lines.push('- ' + a));
     lines.push('');
   }
   walk(S.map, (n, d) => {
@@ -500,7 +605,7 @@ function toJson() {
   return JSON.stringify({
     generator: 'Probe ' + PROMPTS.VERSION, mode: isLive() ? 'live' : 'recorded',
     model: isLive() ? S.model : 'recorded-' + S.caseId, generatedAt: now(),
-    brief: S.brief, title: S.title, summary: S.summary, assumptions: S.assumptions,
+    brief: S.brief, title: S.title, summary: S.summary, assumptions: assumptionsShown(),
     answers: S.questions.map(q => ({ question: q.question, answer: (S.answers[q.id] || {}).answer || null, assumedInstead: (S.answers[q.id] || {}).answer ? null : q.assumeIfSkipped })),
     map: stripForPrompt(S.map)
   }, null, 2);
