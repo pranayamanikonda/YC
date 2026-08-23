@@ -1,0 +1,2185 @@
+<title>Probe Mind-Map Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   Probe — design tokens
+   ground/ink neutrals carry a slight teal bias; the accent is a
+   deep sonar teal, amber marks assumptions, rose marks challenge.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --ground:      #EDF1F0;
+  --surface:     #FFFFFF;
+  --surface-2:   #F5F8F7;
+  --line:        #D2DCD9;
+  --line-strong: #B4C3BF;
+  --ink:         #131E1B;
+  --ink-soft:    #536260;
+  --ink-faint:   #5E6D69;
+
+  --probe:       #0B655C;
+  --probe-soft:  #DCEDEA;
+  --probe-ink:   #084A43;
+  --on-probe:    #FFFFFF;
+
+  --amber:       #855A02;
+  --amber-soft:  #F7EBD2;
+  --rose:        #A03F58;
+  --rose-soft:   #F7E3E8;
+  --green:       #2C6E4E;
+
+  --shadow-sm: 0 1px 2px rgba(19,30,27,.06), 0 2px 8px rgba(19,30,27,.05);
+  --shadow-md: 0 4px 12px rgba(19,30,27,.10), 0 12px 32px rgba(19,30,27,.08);
+
+  --sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+
+  --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+  --step: 4px;
+}
+:root:not([data-theme="light"]) {
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0D1413;
+    --surface:     #141D1B;
+    --surface-2:   #1A2523;
+    --line:        #26332F;
+    --line-strong: #3A4A46;
+    --ink:         #E4EBE8;
+    --ink-soft:    #9AAAA5;
+    --ink-faint:   #8B9A95;
+
+    --probe:       #4CC3B1;
+    --probe-soft:  #16332F;
+    --probe-ink:   #8FE0D2;
+    --on-probe:    #06201D;
+
+    --amber:       #D9A441;
+    --amber-soft:  #33280F;
+    --rose:        #E08199;
+    --rose-soft:   #331A20;
+    --green:       #63BC8E;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+    --shadow-md: 0 6px 20px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground:      #0D1413;
+  --surface:     #141D1B;
+  --surface-2:   #1A2523;
+  --line:        #26332F;
+  --line-strong: #3A4A46;
+  --ink:         #E4EBE8;
+  --ink-soft:    #9AAAA5;
+  --ink-faint:   #8B9A95;
+
+  --probe:       #4CC3B1;
+  --probe-soft:  #16332F;
+  --probe-ink:   #8FE0D2;
+  --on-probe:    #06201D;
+
+  --amber:       #D9A441;
+  --amber-soft:  #33280F;
+  --rose:        #E08199;
+  --rose-soft:   #331A20;
+  --green:       #63BC8E;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+  --shadow-md: 0 6px 20px rgba(0,0,0,.5);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--probe); outline-offset: 2px; border-radius: var(--r-sm); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+
+/* ── shared atoms ─────────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 13.5px; font-weight: 500;
+  transition: background .12s, border-color .12s, transform .06s;
+}
+.btn:hover:not(:disabled) { background: var(--surface-2); border-color: var(--probe); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn--primary {
+  background: var(--probe); border-color: var(--probe); color: var(--on-probe);
+}
+.btn--primary:hover:not(:disabled) { background: var(--probe-ink); border-color: var(--probe-ink); color: var(--ground); }
+.btn--ghost { border-color: transparent; background: transparent; }
+.btn--ghost:hover:not(:disabled) { background: var(--surface-2); border-color: var(--line); }
+.btn--sm { padding: 4px 9px; font-size: 12.5px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em;
+  padding: 2px 7px; border-radius: 999px;
+  border: 1px solid var(--line-strong); color: var(--ink-soft);
+  white-space: nowrap; max-width: 100%;
+}
+.chip--assumption { white-space: normal; text-align: left; }
+.chip--user   { border-color: var(--probe); color: var(--probe); background: var(--probe-soft); }
+.chip--model  { border-color: var(--line-strong); color: var(--ink-faint); }
+.chip--assumption { border-style: dashed; border-color: var(--amber); color: var(--amber); background: var(--amber-soft); }
+.chip--live   { border-color: var(--probe); color: var(--probe); background: var(--probe-soft); }
+.chip--recorded { border-color: var(--amber); color: var(--amber); background: var(--amber-soft); }
+
+/* confidence encodes level in shape as well as colour */
+.conf { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); }
+.conf i {
+  width: 9px; height: 9px; border-radius: 50%; display: inline-block;
+  border: 1.5px solid currentColor;
+}
+.conf--high   { color: var(--green); }
+.conf--high i { background: currentColor; }
+.conf--medium { color: var(--amber); }
+.conf--medium i { background: linear-gradient(to right, currentColor 50%, transparent 50%); }
+.conf--low    { color: var(--rose); }
+.conf--low i  { background: transparent; border-style: dashed; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── app frame ────────────────────────────────────────────── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+.topbar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 18px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 40;
+  flex-wrap: wrap;
+}
+.brandmark { display: flex; align-items: center; gap: 9px; }
+.brandmark svg { display: block; }
+.brandmark b { font-family: var(--serif); font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+.brandmark span { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); letter-spacing: .1em; text-transform: uppercase; }
+.topbar__spacer { flex: 1 1 auto; }
+.topbar__tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* stepper: the four states genuinely are a sequence */
+.stepper { display: flex; align-items: center; gap: 2px; }
+.stepper__item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+  padding: 3px 9px; border-radius: 999px; border: 1px solid transparent;
+}
+.stepper__item b { font-weight: 500; }
+.stepper__item--done { color: var(--ink-soft); }
+.stepper__item--now { color: var(--probe); border-color: var(--probe); background: var(--probe-soft); }
+.stepper__sep { color: var(--line-strong); font-size: 11px; }
+
+.trustline {
+  padding: 7px 18px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px; color: var(--ink-soft);
+  display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;
+}
+.trustline strong { color: var(--ink); font-weight: 600; }
+
+.main { flex: 1 1 auto; display: flex; min-height: 0; }
+
+/* on the map screen the chrome stays put and the canvas scrolls inside it */
+.app--map { height: 100vh; }
+.app--map .main { overflow: hidden; }
+.app--map .canvas, .app--map .inspector { overflow: auto; }
+.stage { flex: 1 1 auto; min-width: 0; padding: 24px 18px 60px; }
+.stage--center { display: flex; justify-content: center; }
+
+/* ── brief screen ─────────────────────────────────────────── */
+.brief { width: min(860px, 100%); display: flex; flex-direction: column; gap: 18px; }
+.brief__head h1 {
+  font-family: var(--serif); font-size: clamp(28px, 4vw, 40px); font-weight: 500;
+  letter-spacing: -.02em; line-height: 1.12; margin: 8px 0 6px;
+}
+.brief__head p { margin: 0; color: var(--ink-soft); max-width: 62ch; }
+.brief__panel { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; }
+.field .hint { font-size: 12px; color: var(--ink-faint); }
+textarea, input[type="text"], input[type="password"], select {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  background: var(--surface-2); color: var(--ink);
+  resize: vertical;
+}
+textarea:focus, input:focus, select:focus { border-color: var(--probe); outline: none; background: var(--surface); }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.row > .field { flex: 1 1 180px; min-width: 0; }
+.examples { display: flex; gap: 8px; flex-wrap: wrap; }
+.example {
+  text-align: left; cursor: pointer;
+  border: 1px dashed var(--line-strong); border-radius: var(--r-md);
+  background: transparent; padding: 8px 11px; font-size: 12.5px; color: var(--ink-soft);
+  max-width: 260px;
+}
+.example:hover { border-color: var(--probe); color: var(--probe); background: var(--probe-soft); }
+.example b { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px; }
+.example:hover b { color: var(--probe); }
+
+.expectations { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0; overflow: hidden; }
+.expectations > div { padding: 16px 18px; }
+.expectations > div + div { border-left: 1px solid var(--line); }
+.expectations h3 { font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.expectations ul { margin: 0; padding-left: 17px; display: flex; flex-direction: column; gap: 5px; }
+.expectations li { font-size: 13px; color: var(--ink-soft); }
+.expectations .yes h3 { color: var(--probe); }
+.expectations .no h3 { color: var(--rose); }
+@media (max-width: 620px) { .expectations > div + div { border-left: none; border-top: 1px solid var(--line); } }
+
+/* ── clarify screen ───────────────────────────────────────── */
+.clarify { width: min(760px, 100%); display: flex; flex-direction: column; gap: 14px; }
+.clarify__head { display: flex; flex-direction: column; gap: 6px; }
+.clarify__head h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; }
+.q { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.q__top { display: flex; gap: 10px; align-items: flex-start; }
+.q__n { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); padding-top: 3px; }
+.q__text { font-size: 15.5px; font-weight: 600; flex: 1; }
+.q__why { font-size: 12.5px; color: var(--ink-soft); font-style: italic; }
+.q__suggestions { display: flex; gap: 6px; flex-wrap: wrap; }
+.sugg {
+  cursor: pointer; padding: 5px 10px; font-size: 12.5px;
+  border: 1px solid var(--line-strong); border-radius: 999px; background: var(--surface-2);
+}
+.sugg:hover { border-color: var(--probe); color: var(--probe); }
+.sugg[aria-pressed="true"] { background: var(--probe); border-color: var(--probe); color: var(--on-probe); }
+.q__foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.q--skipped { background: var(--surface-2); }
+.q--skipped .q__text { color: var(--ink-soft); }
+.skipnote { font-size: 12px; color: var(--amber); font-family: var(--mono); }
+
+/* ── map workspace ────────────────────────────────────────── */
+.mapscreen { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; width: 100%; }
+.workspace { display: flex; flex: 1 1 auto; min-height: 0; min-width: 0; width: 100%; }
+.canvas {
+  flex: 1 1 auto; min-width: 0; overflow: auto;
+  padding: 22px 18px 80px;
+  background-image: radial-gradient(circle at 1px 1px, var(--line) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+.maphead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.maphead > div { min-width: 0; }
+.maphead h2 { font-family: var(--serif); font-size: 22px; font-weight: 500; }
+.maphead p { margin: 3px 0 0; font-size: 13px; color: var(--ink-soft); max-width: 70ch; }
+
+.tree { display: flex; flex-direction: column; gap: 4px; padding-left: 2px; }
+.branch { position: relative; padding-left: 22px; }
+.branch::before {
+  content: ""; position: absolute; left: 8px; top: 0; bottom: 12px;
+  border-left: 1px solid var(--line-strong);
+}
+.node { display: flex; align-items: flex-start; gap: 7px; position: relative; padding: 2px 0; }
+.node::before {
+  content: ""; position: absolute; left: -14px; top: 17px; width: 13px;
+  border-top: 1px solid var(--line-strong);
+}
+.tree > .node::before { display: none; }
+.node__toggle {
+  width: 18px; height: 18px; margin-top: 6px; flex: 0 0 auto;
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  background: var(--surface); cursor: pointer; color: var(--ink-soft);
+  display: grid; place-items: center; font-size: 11px; line-height: 1;
+  font-family: var(--mono);
+}
+.node__toggle:hover { border-color: var(--probe); color: var(--probe); }
+.node__toggle--hidden { visibility: hidden; }
+.node__body {
+  flex: 0 1 auto; min-width: 0; max-width: min(720px, 100%);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 5px 10px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface); cursor: pointer;
+  transition: border-color .12s, box-shadow .12s, background .12s;
+}
+.node__body:hover { border-color: var(--probe); }
+.node--selected > .node__body { border-color: var(--probe); box-shadow: 0 0 0 2px var(--probe-soft); }
+.node--root > .node__body {
+  background: var(--probe); border-color: var(--probe);
+  padding: 9px 14px;
+}
+.node--root .node__label { font-family: var(--serif); font-size: 19px; color: var(--on-probe); }
+.node--l1 > .node__body { border-left: 3px solid var(--probe); }
+.node__label { font-size: 14px; font-weight: 500; }
+.node--l1 .node__label { font-size: 15px; font-weight: 600; }
+.node__label[contenteditable="true"] {
+  outline: none; border-bottom: 1px dashed var(--probe); min-width: 40px;
+}
+.node__meta { display: flex; align-items: center; gap: 6px; margin-left: 12px; }
+.node__flag { font-family: var(--mono); font-size: 10px; padding: 1px 5px; border-radius: var(--r-sm); }
+.node--locked > .node__body { background: var(--surface-2); border-style: solid; border-color: var(--probe); }
+.node--added > .node__body { box-shadow: -3px 0 0 var(--green); }
+.node--changed > .node__body { box-shadow: -3px 0 0 var(--amber); }
+.node--voted-up > .node__body { border-color: var(--green); }
+.node--voted-down > .node__body { border-color: var(--rose); opacity: .72; }
+.node__probecount {
+  font-family: var(--mono); font-size: 10px; color: var(--rose);
+  border: 1px solid var(--rose); border-radius: 999px; padding: 0 5px;
+}
+
+/* ── inspector ────────────────────────────────────────────── */
+.inspector {
+  flex: 0 0 340px; width: 340px;
+  border-left: 1px solid var(--line);
+  background: var(--surface);
+  overflow: auto; padding: 18px 16px 60px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.inspector__empty { color: var(--ink-faint); font-size: 13px; }
+.insp__title { font-family: var(--serif); font-size: 20px; font-weight: 500; line-height: 1.2; }
+.insp__section { display: flex; flex-direction: column; gap: 7px; }
+.insp__section > h4 { font-size: 12px; margin: 0; display: flex; align-items: center; gap: 6px; }
+.insp__why { font-size: 13.5px; color: var(--ink-soft); }
+.alt { border: 1px solid var(--line); border-left: 3px solid var(--probe); border-radius: var(--r-sm); padding: 8px 10px; }
+.alt b { font-size: 13px; }
+.alt p { margin: 3px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+.alt__act { margin-top: 7px; }
+.probe-q {
+  border: 1px solid var(--rose); border-radius: var(--r-sm);
+  background: var(--rose-soft); padding: 8px 10px; font-size: 13px;
+}
+.probe-q__ask { margin-top: 7px; display: flex; gap: 6px; }
+.probe-q__ask input { flex: 1; }
+.insp__controls { display: flex; gap: 6px; flex-wrap: wrap; }
+.votebar { display: flex; gap: 6px; align-items: center; }
+
+/* ── refine dock ──────────────────────────────────────────── */
+.dock {
+  position: sticky; bottom: 0;
+  border-top: 1px solid var(--line); background: var(--surface);
+  padding: 12px 18px; display: flex; flex-direction: column; gap: 9px;
+  box-shadow: 0 -4px 16px rgba(19,30,27,.05);
+}
+.dock__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dock__q { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dock__q input { flex: 1 1 200px; min-width: 0; }
+.ping {
+  position: relative; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--rose); flex: 0 0 auto;
+}
+.ping::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 50%;
+  border: 1px solid var(--rose); animation: ping 2.4s ease-out infinite;
+}
+@keyframes ping { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ping::after { animation: none; } }
+
+/* ── status / notices ─────────────────────────────────────── */
+.notice {
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+  border-left: 3px solid var(--amber);
+}
+.notice h3 { font-size: 14.5px; }
+.notice p { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+.notice__acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+.notice--error { border-left-color: var(--rose); }
+.notice--info { border-left-color: var(--probe); }
+
+.loading { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 28px 0; }
+.loading__bar { width: 220px; height: 3px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.loading__bar i { display: block; height: 100%; width: 40%; background: var(--probe); animation: slide 1.3s ease-in-out infinite; }
+@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+@media (prefers-reduced-motion: reduce) { .loading__bar i { animation: none; width: 100%; } }
+.loading__what { font-size: 13.5px; color: var(--ink-soft); }
+
+.footbar {
+  border-top: 1px solid var(--line); background: var(--surface-2);
+  padding: 9px 18px; display: flex; gap: 14px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint);
+  letter-spacing: .04em;
+}
+
+/* ── modal ────────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(10,18,16,.5);
+  display: grid; place-items: center; padding: 20px; z-index: 90;
+}
+.modal { width: min(620px, 100%); max-height: 86vh; overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 13px; }
+.modal h3 { font-family: var(--serif); font-size: 21px; font-weight: 500; }
+.modal pre {
+  margin: 0; padding: 12px; background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r-md); font-family: var(--mono); font-size: 12px;
+  overflow-x: auto; max-height: 46vh; white-space: pre; tab-size: 2;
+}
+.modal__acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.tabs { display: flex; gap: 4px; }
+.tab { padding: 4px 10px; font-size: 12.5px; border: 1px solid var(--line-strong); background: var(--surface-2); border-radius: 999px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--probe); border-color: var(--probe); color: var(--on-probe); }
+
+.toast {
+  position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--ground);
+  padding: 9px 16px; border-radius: 999px; font-size: 13px; z-index: 120;
+  box-shadow: var(--shadow-md);
+}
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .app--map { height: auto; }
+  .app--map .main { overflow: visible; }
+  .workspace { flex-direction: column; }
+  .inspector { flex: 1 1 auto; width: 100%; border-left: none; border-top: 1px solid var(--line); max-height: 52vh; }
+  .canvas { max-height: none; }
+}
+
+/* the assumptions a map rests on — marginalia, not badges */
+.assumes {
+  margin-top: 12px; padding: 10px 0 10px 13px;
+  border-left: 2px dashed var(--amber);
+  display: flex; flex-direction: column; gap: 5px;
+  max-width: 68ch;
+}
+.assumes h4 { margin: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+.assumes li { font-size: 13px; color: var(--ink-soft); }
+.assumes ul { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+
+@media (max-width: 560px) {
+  .app { min-width: 0; }
+  .dock { padding: 10px 12px; max-width: 100%; }
+  .dock__q { gap: 6px; }
+  .dock__q input { flex: 1 1 100%; }
+  .canvas { padding: 16px 12px 60px; }
+  .topbar { padding: 9px 12px; gap: 10px; }
+  .stepper { order: 3; width: 100%; }
+}
+</style>
+<div id="app"></div>
+<noscript><p style="font-family:system-ui;padding:24px">Probe needs JavaScript — it runs entirely in your browser, with no server of its own.</p></noscript>
+<script>
+/* ─────────────────────────────────────────────────────────────
+   Agent configuration — prompt pack v0.1 (2026-08-23)
+   Every model call in the app comes from this object. Changing
+   behaviour means changing a prompt here and bumping VERSION,
+   so before/after iterations are traceable (see CHANGELOG-agent.md).
+   ───────────────────────────────────────────────────────────── */
+const PROMPTS = {
+  VERSION: 'v0.1',
+
+  /* The stance shared by every call: probe, don't please. */
+  SYSTEM: [
+    'You are Probe, a mind-mapping agent for people doing real planning and thinking work.',
+    'Your job is NOT to produce a tidy, generic tree. A map that could have been written',
+    'without reading the brief is a failed map.',
+    '',
+    'Operating rules:',
+    '1. SPECIFICITY. Every node must be something a knowledgeable colleague would actually',
+    '   say about THIS brief. Ban generic filler branches ("Planning", "Execution",',
+    '   "Best Practices", "Challenges", "Future Scope") unless the brief itself is about them.',
+    '2. CHALLENGE. For each major branch, name at least one alternative framing that a',
+    '   reasonable expert would prefer instead, and say what it trades off.',
+    '3. SURFACE ASSUMPTIONS. If you had to assume something to place a node, mark it',
+    '   source:"assumption" and state the assumption in plain words. Never smuggle one in.',
+    '4. CALIBRATE. confidence:"high" only for things that are well established for this',
+    '   domain; "low" when you are extrapolating. Do not inflate.',
+    '5. NO INVENTED FACTS. You have no web access here. Do not cite statistics, studies,',
+    '   prices, dates or named sources. Speak from general domain knowledge and say so.',
+    '6. PROBE. Probing questions must be answerable by the user and must change the map',
+    '   if answered ("Which of these two audiences pays?"), not rhetorical filler',
+    '   ("Have you considered your users?").',
+    '',
+    'Output rules: reply with a single JSON object and nothing else. No prose, no markdown',
+    'fences, no trailing commentary. Use plain double quotes. Keep every string under 220',
+    'characters.'
+  ].join('\n'),
+
+  /* Step 2 — seek context before mapping anything. */
+  clarify(brief) {
+    return [
+      'A user gave this brief for a mind map:',
+      '---',
+      `Topic: ${brief.topic}`,
+      `Purpose: ${brief.purpose}`,
+      `Audience: ${brief.audience || 'not stated'}`,
+      `Depth wanted: ${brief.depth} levels`,
+      '---',
+      '',
+      'Before mapping, ask the 3–5 questions whose answers would most change the shape of',
+      'the map. Prefer questions about scope boundaries, the decision behind the request,',
+      'constraints, and which of several plausible framings applies. Skip anything you can',
+      'reasonably infer from the brief — asking about the obvious wastes the user\'s time.',
+      '',
+      'For each question also give the default you will assume if the user skips it, so',
+      'skipping is safe and visible.',
+      '',
+      'Return JSON exactly:',
+      '{"questions":[{"id":"q1","question":"...","why":"one line: what this changes in the map",',
+      '"suggestions":["short option","short option","short option"],"assumeIfSkipped":"the default you will use"}]}'
+    ].join('\n');
+  },
+
+  /* Step 3 — build the map itself. */
+  buildMap(brief, answers) {
+    return [
+      'Build the mind map now.',
+      '',
+      `Topic: ${brief.topic}`,
+      `Purpose: ${brief.purpose}`,
+      `Audience: ${brief.audience || 'not stated'}`,
+      `Depth: ${brief.depth} levels below the centre.`,
+      '',
+      'The user answered your clarifying questions:',
+      answers.map(a => `- ${a.question} → ${a.answered ? a.answer : `[SKIPPED — assume: ${a.assumeIfSkipped}]`}`).join('\n'),
+      '',
+      'Rules for this map:',
+      `- 4 to 6 first-level branches. Each must be a real division of THIS topic, not a lifecycle stage borrowed from a template.`,
+      '- 2 to 4 children per branch. Children are concrete: a method, a decision, a risk, a named option.',
+      '- Anything that came from the user\'s answers gets source:"user". Anything resting on a',
+      '  skipped question or your own guess gets source:"assumption". Everything else "model".',
+      '- Give 2–3 "alternatives" on each first-level branch: a different way to cut this part of',
+      '  the problem, each with the trade-off it makes.',
+      '- Give 1–2 "probes" on each first-level branch: questions to the user that would change',
+      '  this branch. At least one probe somewhere in the map must challenge the brief itself.',
+      '',
+      'Return JSON exactly:',
+      '{"title":"short map title","summary":"2 sentences on how you cut the problem and why",',
+      '"assumptions":["plain-words assumption you made"],',
+      '"root":{"id":"n0","label":"centre","children":[',
+      '{"id":"n1","label":"branch","why":"one line: why this branch exists",',
+      '"confidence":"high|medium|low","source":"user|model|assumption",',
+      '"alternatives":[{"label":"other framing","tradeoff":"what it gains / gives up"}],',
+      '"probes":["question that would change this branch"],',
+      '"children":[{"id":"n1a","label":"child","why":"...","confidence":"...","source":"...","children":[]}]}]}}'
+    ].join('\n');
+  },
+
+  /* Step 4 — refine from the user's answer to a probe. */
+  refine(brief, mapJson, exchange, lockedLabels) {
+    return [
+      'Revise the map using the user\'s answer below. This is an iteration, not a fresh start.',
+      '',
+      `Topic: ${brief.topic}`,
+      'Current map (JSON):',
+      mapJson,
+      '',
+      `The agent asked: ${exchange.question}`,
+      `The user answered: ${exchange.answer}`,
+      '',
+      'Revision rules:',
+      '- Keep the id of every node that survives, so the change can be shown as a diff.',
+      '- Do not silently drop a branch: if the answer kills a branch, remove it and say so in "changeNote".',
+      '- Promote anything the answer makes central; demote what it makes marginal.',
+      '- Nodes the user locked must survive with their label unchanged: ' + (lockedLabels.length ? lockedLabels.join(' | ') : 'none'),
+      '- Anything now grounded in the user\'s words becomes source:"user" with higher confidence.',
+      '- Add at most 2 new probes, and make them harder than the last round.',
+      '',
+      'Return the same JSON shape as before, plus "changeNote":"1–2 lines on what you changed and why".'
+    ].join('\n');
+  },
+
+  /* Optional expansion of one branch. */
+  deepen(brief, nodeLabel, pathLabels) {
+    return [
+      `Topic: ${brief.topic}`,
+      `Expand exactly one branch: "${nodeLabel}" (path: ${pathLabels.join(' › ')}).`,
+      'Add 2–4 children that are specific enough to act on this week — a method, a decision,',
+      'a named option, or a risk with a trigger. No restating the parent in other words.',
+      'Include one child that a careful person would consider and reject, marked confidence:"low",',
+      'with "why" explaining when it would actually be the right call.',
+      '',
+      'Return JSON exactly:',
+      '{"children":[{"id":"new1","label":"...","why":"...","confidence":"high|medium|low",',
+      '"source":"model|assumption","children":[]}]}'
+    ].join('\n');
+  },
+
+  /* Guardrail: refuse to map nothing. */
+  BRIEF_TOO_THIN: 'Give me a bit more to work with — a sentence saying what you are trying to decide, plan or understand. "Marketing" or "AI" is a category, not a brief, and mapping it would just give you a generic tree.'
+};
+/* ─────────────────────────────────────────────────────────────
+   Recorded runs
+   These are outputs of the v0.1 prompts above, produced with
+   Claude (Opus) during the build session on 2026-08-23 and saved
+   verbatim so the agent can be demonstrated without an API key.
+   Recorded mode replays these; it never invents new content.
+   ───────────────────────────────────────────────────────────── */
+
+/* fills the defaults so the case data below stays readable */
+function mk(o) {
+  return Object.assign({
+    why: '', confidence: 'medium', source: 'model',
+    alternatives: [], probes: [], children: []
+  }, o);
+}
+
+const RECORDED = [
+  /* ── Case A — product / UX work ───────────────────────────── */
+  {
+    id: 'kyc',
+    label: 'UX research plan',
+    brief: {
+      topic: 'Plan a UX research study for our fintech app onboarding — new users drop off before finishing KYC and we do not know why.',
+      purpose: 'plan',
+      audience: 'Product and design team at an early-stage fintech',
+      depth: 3
+    },
+    questions: [
+      { id: 'q1', question: 'Is the drop-off concentrated at document upload, or spread across the whole KYC sequence?',
+        why: 'Decides whether this is one deep usability study or a funnel-wide diagnostic.',
+        suggestions: ['Concentrated at doc upload', 'Spread across steps', "We don't know yet"],
+        assumeIfSkipped: "You don't know yet — so the plan starts with a diagnostic week instead of a scripted test." },
+      { id: 'q2', question: 'Can you talk to people who abandoned, or only to people who completed?',
+        why: 'Recruitment changes the method and the timeline more than any other choice here.',
+        suggestions: ['We can reach abandoners', 'Only completers', 'Only internal / proxy users'],
+        assumeIfSkipped: 'Only completers are reachable, so abandonment gets inferred from behaviour rather than asked about.' },
+      { id: 'q3', question: 'What decision does this research feed — a redesign that is already scoped, or a choice of KYC vendor?',
+        why: 'A scoped redesign needs a ranked fix list; a vendor decision needs comparison criteria.',
+        suggestions: ['Redesign already scoped', 'Choosing / keeping a vendor', 'Convincing leadership to fund it'],
+        assumeIfSkipped: 'A redesign is already scoped, so the study aims at prioritised fixes, not a landscape report.' },
+      { id: 'q4', question: 'How much of this flow is fixed by the regulator, and how much is yours to change?',
+        why: 'Testing a flow you cannot ship is the most common way this study gets wasted.',
+        suggestions: ['Most of it is fixed', 'Sequence fixed, UI is ours', 'Largely ours'],
+        assumeIfSkipped: 'Sequence and required fields are fixed; wording, ordering within a step and feedback are yours.' },
+      { id: 'q5', question: 'How many weeks before the team needs findings they can act on?',
+        why: 'Under two weeks rules out recruiting abandoners and changes the whole design.',
+        suggestions: ['About 1 week', '3–4 weeks', 'No fixed date'],
+        assumeIfSkipped: '3–4 weeks, which allows one diagnostic week and one round of sessions.' }
+    ],
+    map: {
+      title: 'KYC drop-off: a study that survives contact with compliance',
+      summary: 'Cut by the four things that can each sink this study — not knowing where the loss is, not being able to reach the people who left, measuring the wrong thing, and testing a flow you are not allowed to ship. The fifth branch is about the findings actually being used.',
+      assumptions: [
+        "You don't yet know which KYC step loses the most people, so week 1 is diagnostic rather than a scripted usability test.",
+        'A redesign is already scoped, so the output is a ranked fix list rather than a landscape review.'
+      ],
+      root: mk({ id: 'n0', label: 'KYC onboarding drop-off study', source: 'user', confidence: 'high', children: [
+        mk({ id: 'n1', label: 'Locate the loss before scripting anything', confidence: 'high', source: 'assumption',
+          why: 'You cannot write a task script or recruit a sample for a problem whose location is unknown.',
+          alternatives: [
+            { label: 'Start with interviews and let the stories locate the break', tradeoff: 'Faster to a narrative, but you will fix the step people remember rather than the one that costs the most.' },
+            { label: 'Read support tickets and chat logs first', tradeoff: 'Cheapest signal and already consented, but it over-represents people motivated enough to complain.' }
+          ],
+          probes: [
+            "Do your analytics separate 'upload failed' from 'user gave up before uploading'? If not, that gap decides your first week.",
+            'Is drop-off worse on mid-range Android? If yes this may be a camera and file-size problem wearing a UX costume.'
+          ],
+          children: [
+            mk({ id: 'n1a', label: 'Event audit: one event per KYC step, per document type', confidence: 'high', why: 'Most KYC funnels log the step but not the failure reason, which is the number you actually need.' }),
+            mk({ id: 'n1b', label: 'Split the funnel by device tier, ID type and returning vs new', confidence: 'medium', why: 'Aggregate drop-off hides the segment that is actually failing.' }),
+            mk({ id: 'n1c', label: 'Session replay of abandoned attempts, where consent allows', confidence: 'medium', source: 'assumption', why: 'The only way to watch abandonment without recruiting anyone — if your consent basis covers it.' })
+          ] }),
+        mk({ id: 'n2', label: 'Reaching people who left', confidence: 'high', source: 'assumption',
+          why: 'Completers are exactly the people the flow did not stop; a study built on them answers the wrong question.',
+          alternatives: [
+            { label: 'Study completers only and infer the barrier', tradeoff: 'Ethically and legally simplest, but survivorship bias is baked into every finding.' },
+            { label: 'Panel of people who abandoned some other fintech onboarding', tradeoff: 'Fast and clean consent, but their reasons belong to a different product.' }
+          ],
+          probes: [
+            'Under your current consent basis, may you contact someone who started KYC and never finished? That single answer decides the recruitment plan.',
+            'What could you offer an abandoner that does not feel like the company that just rejected them asking for a favour?'
+          ],
+          children: [
+            mk({ id: 'n2a', label: 'One-question exit intercept at the moment of abandonment', confidence: 'medium', why: 'Catches intent while it is live; low effort, but the sample skews to people willing to answer anything.' }),
+            mk({ id: 'n2b', label: 'Re-contact partially completed sign-ups — check the legal basis first', confidence: 'medium', source: 'assumption', why: 'The highest-signal sample you can get, and the one most likely to be blocked by privacy counsel.' }),
+            mk({ id: 'n2c', label: 'Proxy users with a rehearsal script — smoke test only', confidence: 'low', why: 'Use it to find the broken parts of your own script, never as evidence about real abandonment.' })
+          ] }),
+        mk({ id: 'n3', label: 'What counts as success', confidence: 'high', source: 'model',
+          why: 'Completion rate alone will reward a flow that pushes people through a step they do not understand.',
+          alternatives: [
+            { label: 'Benchmark usability test with a standard questionnaire', tradeoff: 'Comparable across rounds and easy to report, but it will not tell you which step to fix.' },
+            { label: 'Instrument only, no sessions', tradeoff: 'Cheap and continuous, and you will see exactly where they leave and never why.' }
+          ],
+          probes: ['If completion went up but support contacts also went up, would you still call the redesign a win?'],
+          children: [
+            mk({ id: 'n3a', label: 'Unassisted verified account as the task-success bar', confidence: 'high', why: 'Assisted completion in a lab hides the exact friction you are hunting.' }),
+            mk({ id: 'n3b', label: 'Time to first blocker, not total time on task', confidence: 'medium', why: 'Total time flatters flows where people quietly struggle at the end.' }),
+            mk({ id: 'n3c', label: 'Recovery rate after a rejected document', confidence: 'high', why: 'Rejection handling is where most KYC funnels lose people permanently.' })
+          ] }),
+        mk({ id: 'n4', label: 'The compliance boundary', confidence: 'medium', source: 'assumption',
+          why: 'Half of what looks like bad UX here is a field someone believes is mandatory. Some of those beliefs are wrong.',
+          alternatives: [
+            { label: 'Design freely, clear it with compliance at the end', tradeoff: 'Preserves creative range, at the risk of testing a flow you can never ship.' },
+            { label: 'Treat the whole flow as fixed and study only wording', tradeoff: 'Safe and quick, and it caps the size of any improvement you can find.' }
+          ],
+          probes: ['Which fields in this flow has anyone traced to an actual regulation this year, rather than inherited from the first version?'],
+          children: [
+            mk({ id: 'n4a', label: 'Field-by-field trace: which rule requires this, in what form', confidence: 'medium', why: 'Turns a vague "compliance says so" into a list you can negotiate against.' }),
+            mk({ id: 'n4b', label: 'Bring compliance into the review before the sessions, not after', confidence: 'high', why: 'Late compliance review is the standard way a research finding dies quietly.' }),
+            mk({ id: 'n4c', label: 'Design the failure path for IDs that will never verify', confidence: 'medium', why: 'Every KYC flow has these users; most products leave them in a dead end.' })
+          ] }),
+        mk({ id: 'n5', label: 'Getting the findings used', confidence: 'medium', source: 'model',
+          why: 'A ranked fix list only moves if the people who prioritise saw the failure with their own eyes.',
+          alternatives: [
+            { label: 'Write and circulate a report', tradeoff: 'Durable and citable, and typically read once.' },
+            { label: 'Engineers observe sessions live, no report', tradeoff: 'Findings land immediately, but only what those two people saw survives the month.' }
+          ],
+          probes: ['Who has to say yes for a fix to ship — and will they see any of this research first-hand?'],
+          children: [
+            mk({ id: 'n5a', label: 'Score by severity × how many users hit it, tied to funnel loss', confidence: 'high', why: 'Ranking by funnel cost is the language the redesign scope is already written in.' }),
+            mk({ id: 'n5b', label: 'Two abandonment clips, ten minutes, with the exec sponsor in the room', confidence: 'medium', why: 'One watched clip generally outperforms a whole findings deck.' })
+          ] })
+      ] })
+    },
+    /* one recorded refinement, keyed to the probe the user answers */
+    refinements: [{
+      probeId: 'n1',
+      question: "Do your analytics separate 'upload failed' from 'user gave up before uploading'?",
+      answer: "No — we only log a single kyc_step_exit event with no reason attached.",
+      note: 'Your logging cannot tell failure from abandonment, so a diagnostic week is no longer optional: instrumentation moves ahead of everything and the exit intercept gets promoted, because it is the only reason-capture you can ship this week.',
+      ops: [
+        { set: { id: 'n1', label: 'Instrument first — week 0 is not optional', confidence: 'high', source: 'user',
+          why: 'You confirmed there is one exit event with no reason, so nothing downstream can be planned until failure and abandonment are distinguishable.' } },
+        { set: { id: 'n1a', label: 'Add a failure-reason field to the upload event', confidence: 'high', source: 'user',
+          why: 'The single change that converts your existing funnel into a diagnostic instrument.' } },
+        { add: { parentId: 'n1', node: mk({ id: 'n1d', label: 'Ship a one-week logging patch before recruiting anyone', confidence: 'high', source: 'user',
+          why: 'Recruiting now would spend your only round of sessions on a question the logs could answer for free.' }) } },
+        { set: { id: 'n2a', label: 'Exit intercept — now the fastest reason-capture you have', confidence: 'high', source: 'user',
+          why: 'With no reason in the logs, one question at the moment of abandonment becomes the highest-value thing you can ship this week.' } },
+        { addProbe: { id: 'n1', probe: 'If the logging patch shows the loss is at document capture rather than the form, are you prepared to make the camera step the whole study?' } }
+      ]
+    }],
+    /* one recorded branch expansion */
+    deepen: {
+      nodeId: 'n2',
+      children: [
+        mk({ id: 'n2d', label: 'Ask the KYC vendor for their aggregate rejection reasons', confidence: 'medium', why: 'Vendors sit on the reason codes your logs are missing, and rarely volunteer them.' }),
+        mk({ id: 'n2e', label: 'Recruit through the rejection email itself', confidence: 'medium', source: 'assumption', why: 'The one message an abandoner definitely received; needs compliance sign-off on wording.' }),
+        mk({ id: 'n2f', label: 'Pay for a full quota of abandoners before knowing the segment', confidence: 'low', why: 'Considered and rejected: only worth it once the funnel split tells you which segment to buy.' })
+      ]
+    }
+  },
+
+  /* ── Case B — business / startup strategy ─────────────────── */
+  {
+    id: 'gtm',
+    label: 'Go-to-market plan',
+    brief: {
+      topic: 'Go-to-market for a campus food delivery app we are launching next semester.',
+      purpose: 'plan',
+      audience: 'Two-person founding team, students themselves',
+      depth: 3
+    },
+    questions: [
+      { id: 'q1', question: 'Are you delivering from restaurants, from campus canteens, or from home cooks?',
+        why: 'Supply model decides margin, regulation and who you have to convince first.',
+        suggestions: ['Restaurants near campus', 'Campus canteens', 'Home cooks / cloud kitchens'],
+        assumeIfSkipped: 'Restaurants near campus — the plan assumes an aggregator model.' },
+      { id: 'q2', question: 'One campus you intend to dominate, or several at once?',
+        why: 'Density is the only advantage a campus player has over an incumbent; spreading gives it away.',
+        suggestions: ['One campus, deep', 'Two or three nearby', 'City-wide from day one'],
+        assumeIfSkipped: 'One campus first, depth over coverage.' },
+      { id: 'q3', question: 'Who pays for delivery — the student, the restaurant, or you for now?',
+        why: 'This sets the unit economics that every other decision in the map has to survive.',
+        suggestions: ['Student pays a small fee', 'Restaurant commission only', 'We subsidise to start'],
+        assumeIfSkipped: 'Student pays a small fee, partly subsidised at launch.' },
+      { id: 'q4', question: 'What can you do on this campus that the incumbent apps cannot?',
+        why: 'If the honest answer is "nothing yet", the first job is finding one, not marketing.',
+        suggestions: ['Cheaper for students', 'Faster inside campus gates', 'Menus they do not carry', 'Nothing durable yet'],
+        assumeIfSkipped: 'Nothing durable yet — so the plan treats finding the wedge as work, not as a given.' }
+    ],
+    map: {
+      title: 'Campus delivery: win one dinner window before winning a campus',
+      summary: 'Cut by the sequence that actually decides survival — pick a wedge narrow enough to dominate, lock supply before demand, make one delivery pay for itself, then buy attention with channels that cost time rather than money. The last branch is what kills it.',
+      assumptions: [
+        'Aggregating nearby restaurants rather than canteens or home cooks.',
+        'One campus first: the plan optimises for density, not coverage.',
+        'No durable advantage over incumbents yet, so finding one is treated as the first job.'
+      ],
+      root: mk({ id: 'm0', label: 'Campus food delivery — go to market', source: 'user', confidence: 'high', children: [
+        mk({ id: 'm1', label: 'A wedge narrow enough to actually own', confidence: 'high', source: 'assumption',
+          why: 'Against a funded incumbent, the only winnable game is being the obvious choice for one group at one time of day.',
+          alternatives: [
+            { label: 'Launch three campuses at once to look like a network', tradeoff: 'Better investor story, and you will be second-best everywhere, which kills word of mouth.' },
+            { label: 'Start with one hostel block as a closed beta', tradeoff: 'Tightest feedback loop, but the volume stays too small for restaurants to take you seriously.' }
+          ],
+          probes: [
+            'What number, by what date, would tell you the wedge failed rather than needed more time?',
+            'Which meal do students on this campus complain about most? That complaint is your wedge, not the meal with the biggest market.'
+          ],
+          children: [
+            mk({ id: 'm1a', label: 'Choose the campus by hostel density within 1 km, not by size', confidence: 'high', why: 'Delivery economics are decided by walking distance between drops, not by enrolment.' }),
+            mk({ id: 'm1b', label: 'Own dinner 8–11pm before touching lunch', confidence: 'medium', why: 'Late dinner is where campus demand concentrates and where incumbents are slowest.' }),
+            mk({ id: 'm1c', label: 'Define "dominant" numerically before launch', confidence: 'medium', source: 'assumption', why: 'Without a number, every result looks like progress.' })
+          ] }),
+        mk({ id: 'm2', label: 'Supply before demand', confidence: 'high', source: 'model',
+          why: 'Students leave permanently after one bad first order, so the menu has to be right before anyone is invited.',
+          alternatives: [
+            { label: 'List everything, sort quality out later', tradeoff: 'Fills the app fast, and spends your one first impression on your worst restaurant.' },
+            { label: 'Run your own single-menu kitchen', tradeoff: 'Margin and consistency become yours; so does a restaurant business you did not intend to start.' }
+          ],
+          probes: ['If two restaurants supply most of your orders, what is your plan for the week one of them leaves?'],
+          children: [
+            mk({ id: 'm2a', label: 'Sign the 8–12 places students already name, not the 30 that will sign fastest', confidence: 'high', why: 'Demand follows names people already trust; a long tail of unknown listings adds nothing.' }),
+            mk({ id: 'm2b', label: 'One dish or price available only through you', confidence: 'medium', why: 'Without exclusivity you are a worse version of an app they already have installed.' }),
+            mk({ id: 'm2c', label: 'Check peak kitchen capacity, not just willingness', confidence: 'medium', why: 'The restaurant that says yes may already be at its limit exactly when you need it.' })
+          ] }),
+        mk({ id: 'm3', label: 'Make one delivery pay for itself', confidence: 'high', source: 'assumption',
+          why: 'A subsidised order is a marketing expense; if it never converges, growth is just a faster way to run out of money.',
+          alternatives: [
+            { label: 'Pickup points instead of door delivery', tradeoff: 'Removes the hardest cost line, and puts you in competition with walking.' },
+            { label: 'Charge restaurants a flat monthly listing fee', tradeoff: 'Predictable revenue that does not scale with orders, and a harder first sale.' }
+          ],
+          probes: [
+            'At what basket size does a delivery stop losing money — and does your menu even contain baskets that size?',
+            'Would students accept a 10-minute wait for a batched order in exchange for no fee?'
+          ],
+          children: [
+            mk({ id: 'm3a', label: 'Student riders between classes vs dedicated riders', confidence: 'medium', why: 'Cheaper and more flexible, but availability collapses exactly at exam time.' }),
+            mk({ id: 'm3b', label: 'Batching orders to the same hostel is the only real lever', confidence: 'high', why: 'Nothing else moves cost per delivery as much at campus distances.' }),
+            mk({ id: 'm3c', label: 'Write down the cost per delivery this week, before any growth', confidence: 'high', source: 'assumption', why: 'The number is easier to fix at 20 orders a day than at 200.' })
+          ] }),
+        mk({ id: 'm4', label: 'The first 500 students', confidence: 'medium', source: 'model',
+          why: 'Campus demand is won in the channels students already use, which are mostly free and mostly not advertising.',
+          alternatives: [
+            { label: 'Paid social targeted to the campus radius', tradeoff: 'Scales without people, and rarely pays back on a small average order.' },
+            { label: 'Sponsor a campus event for launch volume', tradeoff: 'One good spike and useful footage; retention from event traffic is usually poor.' }
+          ],
+          probes: ['Which of these can you run with zero budget — and what stops it working by week three?'],
+          children: [
+            mk({ id: 'm4a', label: 'Hostel WhatsApp groups timed to mess closing', confidence: 'high', why: 'The message lands at the moment the need appears, which is worth more than reach.' }),
+            mk({ id: 'm4b', label: 'One paid ambassador per hostel block', confidence: 'medium', why: 'Distribution that maps exactly onto your delivery geography.' }),
+            mk({ id: 'm4c', label: 'Referral paid in food, not cash', confidence: 'medium', why: 'Keeps the reward inside the product and costs you margin rather than money.' })
+          ] }),
+        mk({ id: 'm5', label: 'What kills this', confidence: 'medium', source: 'model',
+          why: 'Campus businesses fail on a small number of predictable events; naming them early is cheaper than reacting.',
+          alternatives: [
+            { label: 'Ignore incumbents and focus on your own execution', tradeoff: 'Keeps the team focused, and leaves you with no plan for the month they discount your campus.' }
+          ],
+          probes: ['Which of these would you not survive — and what is the cheapest early warning you could set up for it?'],
+          children: [
+            mk({ id: 'm5a', label: 'An incumbent drops fees on your campus for a month', confidence: 'low', why: 'Unlikely early, fatal if it lands before you have habit.' }),
+            mk({ id: 'm5b', label: 'Exams and holidays: roughly a quarter of the year near zero', confidence: 'high', why: 'Cash planning that assumes 12 trading months will break in the third month.' }),
+            mk({ id: 'm5c', label: 'One food-safety incident', confidence: 'medium', why: 'On a closed campus, reputation moves faster than any refund policy.' })
+          ] })
+      ] })
+    },
+    refinements: [{
+      probeId: 'm1',
+      question: 'What number, by what date, would tell you the wedge failed rather than needed more time?',
+      answer: 'If we are under 200 orders a week by week 8, we stop and rethink.',
+      note: '200 orders by week 8 becomes the spine of the plan: the wedge branch is now a stated target, and the growth branch is re-cut around what has to be true weekly to reach it, rather than around channels in general.',
+      ops: [
+        { set: { id: 'm1', label: 'The wedge: 200 orders a week by week 8', confidence: 'high', source: 'user',
+          why: 'Your kill number, stated up front, so every other branch is judged against it.' } },
+        { set: { id: 'm1c', label: 'Weekly target ladder: 25 → 60 → 120 → 200', confidence: 'high', source: 'user',
+          why: 'Breaks your week-8 number into a figure you can miss early enough to react to.' } },
+        { add: { parentId: 'm1', node: mk({ id: 'm1d', label: 'Week-4 checkpoint: under 60 means the wedge is wrong, not the marketing', confidence: 'medium', source: 'user',
+          why: 'Separates a demand problem from an awareness problem while there is still time to change one.' }) } },
+        { set: { id: 'm4', label: 'Getting to 200 a week', confidence: 'high', source: 'user',
+          why: 'Re-cut from "channels we could use" to "what has to be true each week to hit your number".' } },
+        { addProbe: { id: 'm3', probe: 'At 200 orders a week, does your cost per delivery reach break-even — or does hitting the target make the losses bigger?' } }
+      ]
+    }],
+    deepen: {
+      nodeId: 'm3',
+      children: [
+        mk({ id: 'm3d', label: 'Minimum order value tuned to the batching radius', confidence: 'medium', why: 'The simplest lever that lifts basket size without touching the menu.' }),
+        mk({ id: 'm3e', label: 'Rider pay per batch rather than per order', confidence: 'medium', source: 'assumption', why: 'Aligns the rider with the only cost lever you have; needs care to stay fair at low volume.' }),
+        mk({ id: 'm3f', label: 'Free delivery on everything, funded from commission', confidence: 'low', why: 'Considered and rejected for now: it only works once commission per order clears the true delivery cost.' })
+      ]
+    }
+  },
+
+  /* ── Case C — learning / study planning ───────────────────── */
+  {
+    id: 'ml12',
+    label: 'Learning plan',
+    brief: {
+      topic: 'Help me learn machine learning in 12 weeks. I am a working software engineer with evenings free.',
+      purpose: 'learn',
+      audience: 'Myself — backend engineer, five years experience',
+      depth: 3
+    },
+    questions: [
+      { id: 'q1', question: 'At week 12, what do you want to be able to do — ship a model at work, pass interviews, or read papers?',
+        why: 'These three goals share maybe a third of their content; picking one doubles the useful hours.',
+        suggestions: ['Ship something at work', 'Pass ML interviews', 'Read and follow papers'],
+        assumeIfSkipped: 'Ship a working model at work — the plan optimises for applied delivery.' },
+      { id: 'q2', question: 'Honestly, how many hours a week, and are they one block or scattered evenings?',
+        why: 'Scattered hours rule out the long-project formats most curricula assume.',
+        suggestions: ['4–6, scattered', '6–8, scattered', '10+, weekend blocks'],
+        assumeIfSkipped: '6–8 hours across scattered evenings.' },
+      { id: 'q3', question: 'What is already solid — Python, linear algebra, statistics?',
+        why: 'The maths branch is either two weeks or six depending on this answer.',
+        suggestions: ['Python solid, maths rusty', 'Both solid', 'Python solid, no maths since school'],
+        assumeIfSkipped: 'Python solid, maths rusty — refresh only where it blocks you.' },
+      { id: 'q4', question: 'Is there a real dataset or problem at work you could attach this to?',
+        why: 'A real problem changes retention more than any course choice on this list.',
+        suggestions: ['Yes, with permission', 'Maybe, needs asking', 'No — use a public dataset'],
+        assumeIfSkipped: 'No — the plan supplies a public dataset project instead.' }
+    ],
+    map: {
+      title: 'Twelve weeks to a model you actually shipped',
+      summary: 'Cut around the four reasons engineers stall on ML rather than around topics: no defined exit, maths taken in the wrong order, project churn, and the unglamorous parts nobody teaches. The last branch is about surviving all twelve weeks.',
+      assumptions: [
+        'The goal is shipping applied work rather than interviews or paper-reading.',
+        'Roughly 6–8 scattered evening hours a week.',
+        'No work dataset available, so the plan supplies its own project.'
+      ],
+      root: mk({ id: 'p0', label: 'Learn ML in 12 weeks', source: 'user', confidence: 'high', children: [
+        mk({ id: 'p1', label: 'Decide the exit test in week 1', confidence: 'high', source: 'assumption',
+          why: 'Without a stated week-12 artefact, "learning ML" expands to fill twelve weeks and produces nothing you can point at.',
+          alternatives: [
+            { label: 'Follow one course syllabus end to end', tradeoff: 'Momentum and complete coverage, and at week 12 you know what was taught rather than what you can build.' },
+            { label: 'Replicate one paper', tradeoff: 'Deep and impressive, and weeks 1–4 feel like failure, which is when most people quit.' }
+          ],
+          probes: [
+            'If you could only prove one thing at week 12, which would it be?',
+            'Would your manager count this as work time if it produced something the team used?'
+          ],
+          children: [
+            mk({ id: 'p1a', label: 'Write the week-12 artefact down now, in one sentence', confidence: 'high', why: 'It converts a vague goal into something that can be finished.' }),
+            mk({ id: 'p1b', label: 'Checkpoints at week 4 and week 8, each something that runs', confidence: 'high', why: 'Running code at a fixed date is the only reliable measure of progress here.' }),
+            mk({ id: 'p1c', label: 'Kill criterion: a week with no runnable output means the plan is wrong', confidence: 'medium', why: 'Distinguishes a bad plan from a lack of discipline, which is the usual misdiagnosis.' })
+          ] }),
+        mk({ id: 'p2', label: 'Maths, only where it bites', confidence: 'medium', source: 'assumption',
+          why: 'You need enough to debug, not enough to derive; the usual ordering spends your whole budget before anything trains.',
+          alternatives: [
+            { label: 'Full maths foundation first, about eight weeks', tradeoff: 'You will never be blocked later, and two-thirds of the twelve weeks are gone before you train a model.' },
+            { label: 'Skip maths entirely, stay at library level', tradeoff: 'Fastest to a working model, with a hard ceiling the first time the results look wrong.' }
+          ],
+          probes: ['When a result looks wrong, do you want to be able to diagnose it yourself, or is asking someone acceptable for now?'],
+          children: [
+            mk({ id: 'p2a', label: 'Matrix shapes and what breaks when they mismatch', confidence: 'high', why: 'The single most common source of errors in the first month.' }),
+            mk({ id: 'p2b', label: 'Likelihood, priors, and why models are confidently wrong', confidence: 'medium', why: 'Explains calibration failures you will otherwise treat as bugs.' }),
+            mk({ id: 'p2c', label: 'Defer calculus and analysis until something forces them', confidence: 'medium', why: 'Learning them on demand is efficient; learning them upfront is where plans die.' })
+          ] }),
+        mk({ id: 'p3', label: 'One project, carried the whole way', confidence: 'high', source: 'assumption',
+          why: 'Problems that only appear in week 6 — leakage, drift, messy labels — are the ones worth meeting, and a new project every fortnight never reaches them.',
+          alternatives: [
+            { label: 'A different small project every two weeks', tradeoff: 'Broader exposure and a fuller portfolio, and you never hit the interesting failures.' },
+            { label: 'Kaggle competitions', tradeoff: 'Clean data and fast feedback, and you skip the part of the job that is actually hard.' }
+          ],
+          probes: [
+            'Is there data at work you could get permission to use? That one answer would change most of this plan.',
+            'What would make this project useful to someone other than you?'
+          ],
+          children: [
+            mk({ id: 'p3a', label: 'Pick data from a domain you already understand', confidence: 'high', why: 'Domain knowledge is what lets you spot a wrong result; without it you cannot tell good from broken.' }),
+            mk({ id: 'p3b', label: 'Dumbest baseline that could work, by week 2', confidence: 'high', why: 'A baseline turns every later week into a comparison instead of a hope.' }),
+            mk({ id: 'p3c', label: 'Same project four times: baseline → features → proper model → deployed', confidence: 'medium', why: 'Repetition on one problem is what converts tutorials into judgement.' })
+          ] }),
+        mk({ id: 'p4', label: 'The parts nobody teaches', confidence: 'high', source: 'model',
+          why: 'Most applied failures are data and evaluation problems, not model-choice problems.',
+          alternatives: [
+            { label: 'Focus on architectures and current papers', tradeoff: 'Interview-friendly at senior level, and rarely what blocks a model from shipping.' }
+          ],
+          probes: ['Ship or interview? The two reading lists diverge around week 6.'],
+          children: [
+            mk({ id: 'p4a', label: 'Leakage and messy labels — where real failures live', confidence: 'high', why: 'A leaked feature produces a great score and a useless model.' }),
+            mk({ id: 'p4b', label: 'Pick the metric that matches the decision being made', confidence: 'high', why: 'Accuracy on imbalanced data is the classic way to be confidently wrong.' }),
+            mk({ id: 'p4c', label: 'Put it behind an API and watch it drift', confidence: 'medium', why: 'Deployment is where an engineer already has an advantage worth using.' })
+          ] }),
+        mk({ id: 'p5', label: 'Staying on it for twelve weeks', confidence: 'medium', source: 'model',
+          why: 'The plan will not fail on content; it will fail in week 5 on a busy evening.',
+          alternatives: [
+            { label: 'Cohort course with deadlines', tradeoff: 'External accountability works well, and you inherit their pace and their project.' },
+            { label: 'Study group with peers', tradeoff: 'Motivating and social, and it moves at the speed of the least available person.' }
+          ],
+          probes: ['Which past learning attempt died, and in which week? Plan around that failure mode specifically.'],
+          children: [
+            mk({ id: 'p5a', label: 'Fixed slot, small unit: 45 minutes beats a heroic Sunday', confidence: 'medium', why: 'Scattered evenings reward small repeatable units over long blocks.' }),
+            mk({ id: 'p5b', label: 'Public log of what ran and what broke', confidence: 'medium', why: 'Writing the failure down is what turns it into knowledge rather than frustration.' }),
+            mk({ id: 'p5c', label: 'One person who asks what you shipped', confidence: 'medium', source: 'assumption', why: 'Cheapest accountability that survives a bad week.' })
+          ] })
+      ] })
+    },
+    refinements: [{
+      probeId: 'p3',
+      question: 'Is there data at work you could get permission to use?',
+      answer: 'Yes — support ticket text, if I anonymise it first.',
+      note: 'A real work dataset changes the plan: the project branch is now built on your support tickets, text handling moves in ahead of general tabular work, and anonymisation becomes week-1 work rather than an afterthought.',
+      ops: [
+        { set: { id: 'p3', label: 'One project: support-ticket triage on your own data', confidence: 'high', source: 'user',
+          why: 'You have real text data with permission, which beats any public dataset for both learning and usefulness.' } },
+        { set: { id: 'p3a', label: 'Anonymise and sample the tickets — week 1 work', confidence: 'high', source: 'user',
+          why: 'Permission depends on it, and doing it first prevents a rebuild in week 6.' } },
+        { set: { id: 'p3b', label: 'Baseline: keyword rules on ticket text, week 2', confidence: 'high', source: 'user',
+          why: 'On text, a rules baseline is often uncomfortably competitive — which is exactly the lesson.' } },
+        { add: { parentId: 'p2', node: mk({ id: 'p2d', label: 'Text representation before anything fancier: counts, TF-IDF, embeddings', confidence: 'high', source: 'user',
+          why: 'Your data is text, so this moves ahead of the general tabular material.' }) } },
+        { set: { id: 'p4a', label: 'Leakage in ticket data: resolution notes written after the fact', confidence: 'high', source: 'user',
+          why: 'The specific leak your dataset will have, and the one most likely to fool you.' } },
+        { addProbe: { id: 'p3', probe: 'If the model is only as good as your keyword rules at week 8, is that a failure — or a finding worth shipping?' } }
+      ]
+    }],
+    deepen: {
+      nodeId: 'p1',
+      children: [
+        mk({ id: 'p1d', label: 'Artefact option: an internal tool a colleague uses weekly', confidence: 'high', why: 'Usage by someone else is the hardest bar and the most convincing evidence.' }),
+        mk({ id: 'p1e', label: 'Artefact option: a written post-mortem of one model that failed', confidence: 'medium', source: 'assumption', why: 'Cheaper to finish and unusually persuasive to hiring managers.' }),
+        mk({ id: 'p1f', label: 'Artefact option: a certificate', confidence: 'low', why: 'Considered and rejected: it proves attendance rather than capability, useful only where HR filters on it.' })
+      ]
+    }
+  }
+];
+/* ─────────────────────────────────────────────────────────────
+   Probe — application logic
+   Two run modes, one code path:
+     live      → calls the Anthropic API with the viewer's own key
+     recorded  → replays saved outputs of the same prompts
+   Everything after generation (editing, locking, undo, diffing,
+   export) is local and identical in both modes.
+   ───────────────────────────────────────────────────────────── */
+
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('probe.' + k); return v === null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('probe.' + k, v); } catch (e) { /* private mode */ } },
+  del(k) { try { localStorage.removeItem('probe.' + k); } catch (e) {} }
+};
+
+/* Artifact viewers block outbound requests, so live mode cannot run there.
+   Detect it rather than letting the viewer hit a confusing network error. */
+const LIVE_BLOCKED = (function () {
+  try {
+    if (typeof window !== 'undefined' && window.claude) return true;
+    return /(^|\.)claude\.ai$|claudeusercontent\.com$|artifacts?\..*anthropic/.test(location.hostname);
+  } catch (e) { return false; }
+})();
+
+const MODELS = [
+  { id: 'claude-sonnet-5', label: 'Sonnet 5 — balanced (default)' },
+  { id: 'claude-opus-5', label: 'Opus 5 — deepest, slowest' },
+  { id: 'claude-haiku-4-5-20251001', label: 'Haiku 4.5 — fastest, shallowest' }
+];
+
+const S = {
+  screen: 'brief',            // brief | clarify | map
+  brief: { topic: '', purpose: 'plan', audience: '', depth: 3 },
+  caseId: null,               // set when a recorded case is running
+  questions: [],
+  answers: {},                // qid -> {answer, skipped}
+  map: null,
+  title: '', summary: '', assumptions: [], changeNote: '',
+  selectedId: null,
+  editingId: null,
+  history: [], future: [],
+  busy: null,                 // {what:'...'} while a call is in flight
+  error: null,                // {title, body, actions:[{label, act}]}
+  modal: null,                // {kind, tab}
+  toast: null,
+  refineRound: 0,
+  log: [],                    // feedback + interaction signals for week 2
+  apiKey: LS.get('key', ''),
+  model: LS.get('model', MODELS[0].id)
+};
+
+const app = document.getElementById('app');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const now = () => new Date().toISOString();
+const isLive = () => !LIVE_BLOCKED && !!S.apiKey;
+
+function logEvent(type, detail) {
+  S.log.push({ at: now(), type: type, detail: detail || null, round: S.refineRound });
+}
+function toast(msg) {
+  S.toast = msg; render();
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { S.toast = null; render(); }, 2200);
+}
+
+/* ── tree helpers ─────────────────────────────────────────── */
+function walk(node, fn, depth, parent) {
+  depth = depth || 0;
+  fn(node, depth, parent || null);
+  (node.children || []).forEach(c => walk(c, fn, depth + 1, node));
+}
+function findNode(id, node) {
+  node = node || S.map;
+  if (!node) return null;
+  let hit = null;
+  walk(node, n => { if (n.id === id) hit = n; });
+  return hit;
+}
+function findParent(id) {
+  let hit = null;
+  walk(S.map, (n, d, p) => { if (n.id === id) hit = p; });
+  return hit;
+}
+function snapshot() {
+  if (!S.map) return;
+  S.history.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
+  if (S.history.length > 40) S.history.shift();
+  S.future = [];
+}
+function newId(prefix) {
+  let i = 1, id;
+  do { id = (prefix || 'x') + i++; } while (findNode(id));
+  return id;
+}
+function normalise(node, seen) {
+  seen = seen || new Set();
+  if (!node.id || seen.has(node.id)) node.id = 'g' + Math.random().toString(36).slice(2, 7);
+  seen.add(node.id);
+  node.label = String(node.label || 'Untitled').slice(0, 200);
+  node.why = String(node.why || '');
+  if (['high', 'medium', 'low'].indexOf(node.confidence) < 0) node.confidence = 'medium';
+  if (['user', 'model', 'assumption'].indexOf(node.source) < 0) node.source = 'model';
+  node.alternatives = Array.isArray(node.alternatives) ? node.alternatives.filter(a => a && a.label) : [];
+  node.probes = Array.isArray(node.probes) ? node.probes.filter(p => typeof p === 'string') : [];
+  node.children = Array.isArray(node.children) ? node.children : [];
+  node.children.forEach(c => normalise(c, seen));
+  return node;
+}
+
+/* ── diffing: what changed between two versions of the map ─── */
+function markDiff(before, after) {
+  const old = {};
+  if (before) walk(before, n => { old[n.id] = n.label; });
+  walk(after, n => {
+    if (!(n.id in old)) n.status = 'added';
+    else if (old[n.id] !== n.label) n.status = 'changed';
+    else n.status = null;
+  });
+  return after;
+}
+function clearDiff() { if (S.map) walk(S.map, n => { n.status = null; }); }
+
+/* ── model access (live mode) ─────────────────────────────── */
+function extractJson(text) {
+  let t = String(text || '').trim();
+  t = t.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a < 0 || b < a) throw new Error('No JSON object found in the reply.');
+  return JSON.parse(t.slice(a, b + 1));
+}
+
+async function anthropic(userPrompt, opts) {
+  opts = opts || {};
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), opts.timeout || 90000);
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': S.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: S.model,
+        max_tokens: opts.maxTokens || 4000,
+        system: PROMPTS.SYSTEM,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      const err = new Error('api_' + res.status);
+      err.status = res.status;
+      err.detail = detail.slice(0, 300);
+      throw err;
+    }
+    const data = await res.json();
+    return (data.content || []).map(b => b.text || '').join('');
+  } finally { clearTimeout(timer); }
+}
+
+/* one wrapper for every call: retry, JSON repair, then a clean failure */
+async function askModel(userPrompt, validate, opts) {
+  const attempts = [];
+  let raw = '';
+  for (let i = 0; i < 3; i++) {
+    try {
+      const prompt = i === 0 ? userPrompt
+        : userPrompt + '\n\nYour previous reply could not be used: ' + attempts[attempts.length - 1] +
+          '\nReturn only the JSON object described above, nothing else.';
+      raw = await anthropic(prompt, opts);
+      const parsed = extractJson(raw);
+      const problem = validate(parsed);
+      if (problem) throw new Error(problem);
+      logEvent('model_call', { ok: true, attempt: i + 1, model: S.model });
+      return parsed;
+    } catch (e) {
+      attempts.push(e.message);
+      logEvent('model_call', { ok: false, attempt: i + 1, error: e.message });
+      if (e.name === 'AbortError') throw tagged(e, 'timeout');
+      if (e.status === 401) throw tagged(e, 'auth');
+      if (e.status === 429) { await wait(1200 * (i + 1)); continue; }
+      if (e.status >= 500) { await wait(900 * (i + 1)); continue; }
+      if (e.message === 'Failed to fetch' || e.name === 'TypeError') throw tagged(e, 'network');
+      await wait(400);
+    }
+  }
+  throw tagged(new Error(attempts.join(' | ')), 'unusable');
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function tagged(e, kind) { e.kind = kind; return e; }
+
+/* ── validators: never render a shape we did not check ────── */
+function validateClarify(o) {
+  if (!o || !Array.isArray(o.questions) || !o.questions.length) return 'no questions array';
+  o.questions = o.questions.filter(q => q && q.question).slice(0, 6);
+  if (!o.questions.length) return 'questions were empty';
+  o.questions.forEach((q, i) => {
+    q.id = q.id || ('q' + (i + 1));
+    q.suggestions = Array.isArray(q.suggestions) ? q.suggestions.slice(0, 4) : [];
+    q.assumeIfSkipped = q.assumeIfSkipped || 'no default stated — treat this as unknown';
+    q.why = q.why || '';
+  });
+  return null;
+}
+function validateMap(o) {
+  if (!o || !o.root || !o.root.label) return 'no root node';
+  if (!Array.isArray(o.root.children) || o.root.children.length < 2) return 'root has fewer than two branches';
+  o.assumptions = Array.isArray(o.assumptions) ? o.assumptions : [];
+  o.title = o.title || S.brief.topic.slice(0, 60);
+  o.summary = o.summary || '';
+  normalise(o.root);
+  return null;
+}
+function validateChildren(o) {
+  if (!o || !Array.isArray(o.children) || !o.children.length) return 'no children returned';
+  o.children.forEach(c => normalise(c));
+  return null;
+}
+
+/* ── recorded mode ────────────────────────────────────────── */
+function recordedCase(id) { return RECORDED.filter(c => c.id === id)[0] || null; }
+
+function applyOps(map, ops) {
+  ops.forEach(op => {
+    if (op.set) {
+      const n = findNode(op.set.id, map);
+      if (n) Object.keys(op.set).forEach(k => { if (k !== 'id') n[k] = op.set[k]; });
+    } else if (op.add) {
+      const p = findNode(op.add.parentId, map);
+      if (p) p.children.push(clone(op.add.node));
+    } else if (op.remove) {
+      const p = findParent(op.remove);
+      if (p) p.children = p.children.filter(c => c.id !== op.remove);
+    } else if (op.addProbe) {
+      const n = findNode(op.addProbe.id, map);
+      if (n) n.probes = (n.probes || []).concat([op.addProbe.probe]);
+    }
+  });
+  return map;
+}
+
+/* ── flow: brief → clarify ────────────────────────────────── */
+async function startFlow() {
+  const topic = S.brief.topic.trim();
+  if (topic.split(/\s+/).length < 4 || topic.length < 20) {
+    S.error = { title: 'That brief is too thin to map well', body: PROMPTS.BRIEF_TOO_THIN,
+      actions: [{ label: 'Edit the brief', act: 'dismiss' }] };
+    logEvent('guardrail', { reason: 'brief_too_thin' });
+    return render();
+  }
+  if (!isLive()) {
+    if (!S.caseId) {
+      S.error = {
+        title: 'This build can only run the three recorded briefs',
+        body: LIVE_BLOCKED
+          ? 'Live calls are blocked inside a shared artifact preview, so your own brief cannot be generated here. Pick a recorded example below to see the full flow, or run the file locally with your own Anthropic key.'
+          : 'Add your Anthropic API key in Settings to map your own brief, or pick one of the recorded examples.',
+        actions: [{ label: 'Pick a recorded example', act: 'dismiss' }].concat(LIVE_BLOCKED ? [] : [{ label: 'Open settings', act: 'settings' }])
+      };
+      logEvent('mode_limit', { blocked: LIVE_BLOCKED });
+      return render();
+    }
+    const c = recordedCase(S.caseId);
+    S.questions = clone(c.questions);
+    S.answers = {};
+    S.screen = 'clarify';
+    logEvent('clarify_shown', { mode: 'recorded', n: S.questions.length });
+    return render();
+  }
+  await guarded('Reading your brief and working out what it does not tell me', async () => {
+    const out = await askModel(PROMPTS.clarify(S.brief), validateClarify, { maxTokens: 1500 });
+    S.questions = out.questions;
+    S.answers = {};
+    S.screen = 'clarify';
+    logEvent('clarify_shown', { mode: 'live', n: S.questions.length });
+  });
+}
+
+/* ── flow: clarify → map ──────────────────────────────────── */
+async function buildMap() {
+  const answers = S.questions.map(q => {
+    const a = S.answers[q.id];
+    return {
+      question: q.question,
+      answered: !!(a && a.answer && a.answer.trim()),
+      answer: a ? a.answer : '',
+      assumeIfSkipped: q.assumeIfSkipped
+    };
+  });
+  const skipped = answers.filter(a => !a.answered).length;
+  logEvent('answers_submitted', { answered: answers.length - skipped, skipped: skipped });
+
+  if (!isLive()) {
+    const c = recordedCase(S.caseId);
+    const m = clone(c.map);
+    normalise(m.root);
+    S.map = m.root; S.title = m.title; S.summary = m.summary;
+    S.assumptions = dedupe(m.assumptions.concat(
+      S.questions.filter(q => !(S.answers[q.id] && S.answers[q.id].answer)).map(q => q.assumeIfSkipped)
+    ));
+    applyUserAnswersToMap();
+    S.screen = 'map'; S.selectedId = S.map.children[0] ? S.map.children[0].id : null;
+    S.changeNote = '';
+    logEvent('map_built', { mode: 'recorded', nodes: countNodes() });
+    return render();
+  }
+  await guarded('Building the map, then challenging it', async () => {
+    const out = await askModel(PROMPTS.buildMap(S.brief, answers), validateMap, { maxTokens: 6000 });
+    S.map = out.root; S.title = out.title; S.summary = out.summary;
+    S.assumptions = dedupe(out.assumptions.concat(
+      S.questions.filter(q => !(S.answers[q.id] && S.answers[q.id].answer)).map(q => q.assumeIfSkipped)
+    ));
+    S.screen = 'map'; S.selectedId = S.map.children[0] ? S.map.children[0].id : null;
+    S.changeNote = '';
+    logEvent('map_built', { mode: 'live', nodes: countNodes() });
+  });
+}
+
+/* answered questions are the user's words: mark the nodes that rest on them */
+function applyUserAnswersToMap() {
+  const answered = S.questions.filter(q => S.answers[q.id] && S.answers[q.id].answer).length;
+  if (!answered || !S.map) return;
+  walk(S.map, n => { if (n.source === 'assumption' && n.status !== 'removed') n.userTouched = true; });
+}
+
+/* two phrasings of the same assumption should not both show */
+function dedupe(list) {
+  const seen = {}, out = [];
+  list.filter(Boolean).forEach(a => {
+    const key = String(a).toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).slice(0, 6).join(' ');
+    if (!seen[key]) { seen[key] = true; out.push(a); }
+  });
+  return out;
+}
+
+function countNodes() { let c = 0; if (S.map) walk(S.map, () => c++); return c; }
+
+/* ── flow: refine ─────────────────────────────────────────── */
+async function refine(nodeId, question, answer) {
+  if (!answer || !answer.trim()) return;
+  logEvent('probe_answered', { node: nodeId, question: question, answer: answer });
+  const before = clone(S.map);
+
+  if (!isLive()) {
+    const c = recordedCase(S.caseId);
+    const rec = (c.refinements || []).filter(r => r.probeId === nodeId && sameish(r.question, question))[0];
+    if (!rec) {
+      S.error = {
+        title: 'No recorded answer for that probe',
+        body: 'Recorded mode replays saved runs, so it can only refine the probes it has a recording for — marked with a ● in the inspector. Your answer was still saved to the session log.',
+        actions: [{ label: 'Show me a probe that is recorded', act: 'jump-recorded' }, { label: 'Close', act: 'dismiss' }]
+      };
+      return render();
+    }
+    snapshot();
+    applyOps(S.map, rec.ops);
+    markDiff(before, S.map);
+    S.changeNote = rec.note;
+    S.refineRound++;
+    logEvent('map_refined', { mode: 'recorded', round: S.refineRound });
+    return render();
+  }
+
+  const locked = [];
+  walk(S.map, n => { if (n.locked) locked.push(n.label); });
+  await guarded('Rethinking the map around your answer', async () => {
+    const out = await askModel(
+      PROMPTS.refine(S.brief, JSON.stringify(stripForPrompt(S.map)), { question: question, answer: answer }, locked),
+      validateMap, { maxTokens: 6000 });
+    snapshot();
+    S.map = out.root; S.title = out.title || S.title; S.summary = out.summary || S.summary;
+    if (Array.isArray(out.assumptions)) S.assumptions = out.assumptions;
+    S.changeNote = out.changeNote || 'The map was rebuilt around your answer.';
+    markDiff(before, S.map);
+    relockFrom(before);
+    S.refineRound++;
+    logEvent('map_refined', { mode: 'live', round: S.refineRound });
+  });
+}
+function sameish(a, b) { return String(a).slice(0, 40).toLowerCase() === String(b).slice(0, 40).toLowerCase(); }
+function stripForPrompt(node) {
+  const c = clone(node);
+  walk(c, n => { delete n.status; delete n.collapsed; delete n.vote; delete n.userTouched; });
+  return c;
+}
+function relockFrom(before) {
+  const locked = {};
+  walk(before, n => { if (n.locked) locked[n.id] = true; });
+  walk(S.map, n => { if (locked[n.id]) n.locked = true; });
+}
+
+async function deepen(nodeId) {
+  const node = findNode(nodeId);
+  if (!node) return;
+  if (!isLive()) {
+    const c = recordedCase(S.caseId);
+    if (!c.deepen || c.deepen.nodeId !== nodeId) {
+      S.error = {
+        title: 'That branch has no recorded expansion',
+        body: 'Recorded mode ships one expansion per example — the branch marked "expandable" in the inspector. Everything else here (editing, locking, undo, export) works on any node.',
+        actions: [{ label: 'Close', act: 'dismiss' }]
+      };
+      return render();
+    }
+    snapshot();
+    const before = clone(S.map);
+    node.children = (node.children || []).concat(clone(c.deepen.children));
+    node.collapsed = false;
+    markDiff(before, S.map);
+    logEvent('branch_deepened', { mode: 'recorded', node: nodeId });
+    return render();
+  }
+  const path = [];
+  walk(S.map, (n, d, p) => { if (n.id === nodeId) { let cur = n; while (cur) { path.unshift(cur.label); cur = findParent(cur.id); } } });
+  await guarded('Expanding "' + node.label + '"', async () => {
+    const out = await askModel(PROMPTS.deepen(S.brief, node.label, path), validateChildren, { maxTokens: 1800 });
+    snapshot();
+    const before = clone(S.map);
+    node.children = (node.children || []).concat(out.children);
+    node.collapsed = false;
+    markDiff(before, S.map);
+    logEvent('branch_deepened', { mode: 'live', node: nodeId });
+  });
+}
+
+/* ── failure handling: every call funnels through here ────── */
+async function guarded(what, fn) {
+  S.busy = { what: what }; S.error = null; render();
+  try {
+    await fn();
+    S.busy = null; render();
+  } catch (e) {
+    S.busy = null;
+    S.error = failureCard(e);
+    logEvent('failure', { kind: e.kind || 'unknown', message: String(e.message).slice(0, 200) });
+    render();
+  }
+}
+function failureCard(e) {
+  const retry = { label: 'Try again', act: 'retry' };
+  const recorded = { label: 'Use a recorded example instead', act: 'to-brief' };
+  switch (e.kind) {
+    case 'auth': return { title: 'That API key was rejected',
+      body: 'Anthropic returned 401. Check the key is a valid API key (it starts with sk-ant-) and has credit, then try again.',
+      actions: [{ label: 'Open settings', act: 'settings' }, recorded] };
+    case 'timeout': return { title: 'The model took too long',
+      body: 'No reply within 90 seconds. A smaller model usually fixes this — or try again, since long waits are often transient.',
+      actions: [retry, { label: 'Switch model', act: 'settings' }, recorded] };
+    case 'network': return { title: 'Could not reach the API',
+      body: 'The request never left the browser. If you opened this file directly, serve it instead (python3 -m http.server), since file:// pages are blocked from calling the API.',
+      actions: [retry, recorded] };
+    case 'unusable': return { title: 'The model replied, but not with a usable map',
+      body: 'Three attempts came back malformed. This is usually a too-small model or a brief that is pulling in several directions at once. Your brief and answers are still here.',
+      actions: [retry, { label: 'Switch model', act: 'settings' }, recorded] };
+    default: return { title: 'Something went wrong on that step',
+      body: String(e.message || e).slice(0, 240) + ' — nothing was lost; your brief, answers and map are all still here.',
+      actions: [retry, recorded] };
+  }
+}
+let lastAction = null;
+function remember(fn) { lastAction = fn; return fn; }
+
+/* ── exports ──────────────────────────────────────────────── */
+function toMarkdown() {
+  const lines = ['# ' + (S.title || S.brief.topic), '', S.summary, ''];
+  if (S.assumptions.length) {
+    lines.push('**Assumptions this map rests on**', '');
+    S.assumptions.forEach(a => lines.push('- ' + a));
+    lines.push('');
+  }
+  walk(S.map, (n, d) => {
+    if (d === 0) return;
+    const bits = [];
+    if (n.source === 'assumption') bits.push('assumption');
+    if (n.source === 'user') bits.push('from your answers');
+    if (n.confidence !== 'medium') bits.push(n.confidence + ' confidence');
+    lines.push('  '.repeat(d - 1) + '- **' + n.label + '**' + (bits.length ? ' _(' + bits.join(', ') + ')_' : ''));
+    if (n.why) lines.push('  '.repeat(d) + '- _why:_ ' + n.why);
+    (n.alternatives || []).forEach(a => lines.push('  '.repeat(d) + '- _alternative:_ ' + a.label + ' — ' + a.tradeoff));
+    (n.probes || []).forEach(p => lines.push('  '.repeat(d) + '- _open question:_ ' + p));
+  });
+  lines.push('', '---', 'Generated by Probe ' + PROMPTS.VERSION + ' (' + (isLive() ? 'live, ' + S.model : 'recorded run') + '). Model knowledge, not live research — verify before acting.');
+  return lines.join('\n');
+}
+function toMermaid() {
+  const lines = ['mindmap'];
+  const safe = s => String(s).replace(/[()[\]{}"]/g, '').slice(0, 70);
+  walk(S.map, (n, d) => {
+    const text = d === 0 ? 'root((' + safe(n.label) + '))' : safe(n.label);
+    lines.push('  '.repeat(d + 1) + text);
+  });
+  return lines.join('\n');
+}
+function toJson() {
+  return JSON.stringify({
+    generator: 'Probe ' + PROMPTS.VERSION, mode: isLive() ? 'live' : 'recorded',
+    model: isLive() ? S.model : 'recorded-' + S.caseId, generatedAt: now(),
+    brief: S.brief, title: S.title, summary: S.summary, assumptions: S.assumptions,
+    answers: S.questions.map(q => ({ question: q.question, answer: (S.answers[q.id] || {}).answer || null, assumedInstead: (S.answers[q.id] || {}).answer ? null : q.assumeIfSkipped })),
+    map: stripForPrompt(S.map)
+  }, null, 2);
+}
+function toSessionLog() {
+  return JSON.stringify({ promptVersion: PROMPTS.VERSION, mode: isLive() ? 'live' : 'recorded', brief: S.brief, events: S.log }, null, 2);
+}
+function currentPrompt() {
+  const answers = S.questions.map(q => ({ question: q.question, answered: !!(S.answers[q.id] || {}).answer, answer: (S.answers[q.id] || {}).answer || '', assumeIfSkipped: q.assumeIfSkipped }));
+  return 'SYSTEM\n──────\n' + PROMPTS.SYSTEM + '\n\nUSER (map step)\n──────\n' + PROMPTS.buildMap(S.brief, answers);
+}
+async function copy(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Copied to clipboard');
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Copied to clipboard'); }
+    catch (e2) { toast('Copy failed — select the text and copy manually'); }
+    ta.remove();
+  }
+}
+/* ─────────────────────────────────────────────────────────────
+   Probe — rendering and interaction
+   ───────────────────────────────────────────────────────────── */
+
+const STEPS = [
+  { key: 'brief', n: '1', label: 'Brief' },
+  { key: 'clarify', n: '2', label: 'Clarify' },
+  { key: 'map', n: '3', label: 'Map' },
+  { key: 'refine', n: '4', label: 'Refine' }
+];
+
+function stepState(key) {
+  const order = ['brief', 'clarify', 'map', 'refine'];
+  const current = S.screen === 'map' && S.refineRound > 0 ? 'refine' : S.screen;
+  const i = order.indexOf(key), j = order.indexOf(current);
+  return i === j ? 'now' : (i < j ? 'done' : 'todo');
+}
+
+function markLogo() {
+  return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+    '<circle cx="12" cy="12" r="3" fill="var(--probe)"/>' +
+    '<circle cx="12" cy="12" r="7" stroke="var(--probe)" stroke-width="1.2" opacity=".55"/>' +
+    '<circle cx="12" cy="12" r="10.6" stroke="var(--probe)" stroke-width="1" opacity=".28"/>' +
+    '<line x1="12" y1="12" x2="21" y2="6" stroke="var(--probe)" stroke-width="1.2"/>' +
+    '<circle cx="21" cy="6" r="1.8" fill="var(--amber)"/></svg>';
+}
+
+function topbar() {
+  const modeChip = LIVE_BLOCKED
+    ? '<span class="chip chip--recorded" title="Shared previews cannot call an API, so this session replays saved runs">recorded run</span>'
+    : (isLive()
+      ? '<span class="chip chip--live" title="Calling the Anthropic API with your key">live · ' + esc(S.model.replace('claude-', '').replace('-20251001', '')) + '</span>'
+      : '<span class="chip chip--recorded" title="No API key set — replaying saved runs">recorded run</span>');
+
+  const tools = [];
+  if (S.screen === 'map') {
+    tools.push(btn('undo', '↺ Undo', { disabled: !S.history.length, title: 'Undo the last change to the map' }));
+    tools.push(btn('redo', '↻ Redo', { disabled: !S.future.length }));
+    tools.push(btn('export', '↗ Export', { primary: false }));
+  }
+  tools.push(btn('settings', '⚙ Settings'));
+  tools.push(btn('theme', 'Theme', { title: 'Switch light / dark / follow system', ghost: true, sm: true }));
+  if (S.screen !== 'brief') tools.push(btn('restart', 'New map', { ghost: true }));
+
+  return '<header class="topbar">' +
+    '<div class="brandmark">' + markLogo() + '<div><b>Probe</b> <span>mind-map agent</span></div></div>' +
+    '<nav class="stepper" aria-label="Progress">' +
+    STEPS.map((s, i) => (i ? '<span class="stepper__sep">›</span>' : '') +
+      '<span class="stepper__item stepper__item--' + stepState(s.key) + '"><b>' + s.n + '</b> ' + s.label + '</span>').join('') +
+    '</nav>' +
+    '<div class="topbar__spacer"></div>' +
+    '<div class="topbar__tools">' + modeChip + tools.join('') + '</div>' +
+    '</header>';
+}
+
+function btn(act, label, o) {
+  o = o || {};
+  return '<button class="btn' + (o.primary ? ' btn--primary' : '') + (o.ghost ? ' btn--ghost' : '') + (o.sm ? ' btn--sm' : '') +
+    '" data-act="' + act + '"' + (o.id ? ' data-id="' + esc(o.id) + '"' : '') + (o.arg ? ' data-arg="' + esc(o.arg) + '"' : '') +
+    (o.disabled ? ' disabled' : '') + (o.title ? ' title="' + esc(o.title) + '"' : '') + '>' + label + '</button>';
+}
+
+function trustline() {
+  return '<div class="trustline">' +
+    '<strong>What you are looking at:</strong> a map written by a language model from general knowledge — ' +
+    'not live research, and not a source of facts, prices or citations. It is useful for structure, blind spots and questions to take to real sources.' +
+    '</div>';
+}
+
+/* ── 1. brief ─────────────────────────────────────────────── */
+function screenBrief() {
+  const examples = RECORDED.map(c =>
+    '<button class="example" data-act="example" data-arg="' + c.id + '"><b>' + esc(c.label) + '</b>' + esc(c.brief.topic.slice(0, 96)) + '…</button>'
+  ).join('');
+
+  return '<div class="stage stage--center"><div class="brief">' +
+    '<div class="brief__head">' +
+      '<div class="eyebrow">Step 1 · Brief</div>' +
+      '<h1>Tell me what you are trying to work out.</h1>' +
+      '<p>I will ask what your brief does not say, map it, then argue with the map — naming the alternatives you did not ask for and the assumptions it rests on.</p>' +
+    '</div>' +
+
+    '<div class="card brief__panel">' +
+      '<div class="field">' +
+        '<label for="topic">Your brief</label>' +
+        '<textarea id="topic" rows="4" data-bind="topic" placeholder="e.g. Plan a UX research study for our onboarding flow — new users drop off before finishing KYC and we do not know why.">' + esc(S.brief.topic) + '</textarea>' +
+        '<span class="hint">A sentence or two beats a keyword. Say what you are deciding, planning or trying to understand.</span>' +
+      '</div>' +
+      '<div class="row">' +
+        '<div class="field"><label for="purpose">I am trying to</label>' +
+          '<select id="purpose" data-bind="purpose">' +
+          ['explore', 'plan', 'decide', 'learn'].map(p => '<option value="' + p + '"' + (S.brief.purpose === p ? ' selected' : '') + '>' + p + '</option>').join('') +
+          '</select></div>' +
+        '<div class="field"><label for="audience">Who this is for</label>' +
+          '<input id="audience" type="text" data-bind="audience" placeholder="e.g. my product team" value="' + esc(S.brief.audience) + '"></div>' +
+        '<div class="field"><label for="depth">Levels deep</label>' +
+          '<select id="depth" data-bind="depth">' + [2, 3, 4].map(d => '<option value="' + d + '"' + (Number(S.brief.depth) === d ? ' selected' : '') + '>' + d + '</option>').join('') + '</select></div>' +
+      '</div>' +
+      '<div class="field"><span class="eyebrow">Or start from a recorded run</span><div class="examples">' + examples + '</div></div>' +
+      '<div class="row" style="align-items:center;gap:10px">' + btn('start', 'Ask me questions first →', { primary: true }) +
+        '<span class="hint">' + (isLive() ? 'Live mode: your key, your brief.' : (LIVE_BLOCKED
+          ? 'This shared preview replays recorded runs — pick an example above.'
+          : 'No key set: pick a recorded example, or add a key in Settings to map your own brief.')) + '</span>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="card expectations">' +
+      '<div class="yes"><h3>Rely on it for</h3><ul>' +
+        '<li>Structuring a messy brief into something you can argue with</li>' +
+        '<li>Alternatives you did not ask for, with their trade-offs</li>' +
+        '<li>Naming the assumptions a plan is quietly resting on</li>' +
+        '<li>Questions worth taking to real users, data or experts</li>' +
+      '</ul></div>' +
+      '<div class="no"><h3>Do not rely on it for</h3><ul>' +
+        '<li>Facts, numbers, prices or citations — it has no web access</li>' +
+        '<li>Anything domain-specific it could not know about your company</li>' +
+        '<li>Legal, medical or financial judgement</li>' +
+        '<li>Deciding for you: it argues, you choose</li>' +
+      '</ul></div>' +
+    '</div>' +
+    '</div></div>';
+}
+
+/* ── 2. clarify ───────────────────────────────────────────── */
+function screenClarify() {
+  const qs = S.questions.map((q, i) => {
+    const a = S.answers[q.id] || {};
+    const skipped = a.skipped;
+    return '<div class="card q' + (skipped ? ' q--skipped' : '') + '">' +
+      '<div class="q__top"><span class="q__n">Q' + (i + 1) + '</span><div style="flex:1">' +
+        '<div class="q__text">' + esc(q.question) + '</div>' +
+        (q.why ? '<div class="q__why">Why I ask: ' + esc(q.why) + '</div>' : '') +
+      '</div></div>' +
+      (skipped
+        ? '<div class="q__foot"><span class="skipnote">Skipped — I will assume: ' + esc(q.assumeIfSkipped) + '</span>' + btn('unskip', 'Answer it after all', { sm: true, ghost: true, arg: q.id }) + '</div>'
+        : '<div class="q__suggestions">' +
+            (q.suggestions || []).map((s, si) => '<button class="sugg" data-act="sugg" data-arg="' + q.id + '" data-i="' + si + '" aria-pressed="' + (a.answer === s) + '">' + esc(s) + '</button>').join('') +
+          '</div>' +
+          '<input type="text" data-bind-answer="' + q.id + '" placeholder="…or answer in your own words" value="' + esc(a.answer && (q.suggestions || []).indexOf(a.answer) < 0 ? a.answer : '') + '">' +
+          '<div class="q__foot">' + btn('skip', 'Skip — use your default', { sm: true, ghost: true, arg: q.id }) +
+            '<span class="hint">If you skip: ' + esc(q.assumeIfSkipped) + '</span></div>')
+      + '</div>';
+  }).join('');
+
+  const answered = S.questions.filter(q => (S.answers[q.id] || {}).answer).length;
+
+  return '<div class="stage stage--center"><div class="clarify">' +
+    '<div class="clarify__head"><div class="eyebrow">Step 2 · Clarify</div>' +
+      '<h2>Before I map this, ' + S.questions.length + ' things your brief does not say.</h2>' +
+      '<p style="margin:0;color:var(--ink-soft);font-size:13.5px">Answer what you know. Skipping is fine — every skipped question becomes a visible assumption on the map, not a silent one.</p></div>' +
+    qs +
+    '<div class="row" style="align-items:center;gap:10px">' +
+      btn('build', 'Build the map →', { primary: true }) +
+      btn('skip-all', 'Skip the rest and use your defaults', { ghost: true }) +
+      '<span class="hint">' + answered + ' of ' + S.questions.length + ' answered</span>' +
+    '</div>' +
+    '<div>' + btn('back-to-brief', '← Change the brief', { ghost: true, sm: true }) + '</div>' +
+    '</div></div>';
+}
+
+/* ── 3. map ───────────────────────────────────────────────── */
+function confBadge(n) {
+  return '<span class="conf conf--' + n.confidence + '" title="Model-stated confidence: ' + n.confidence + '"><i></i>' + n.confidence + '</span>';
+}
+function sourceChip(n) {
+  if (n.source === 'user') return '<span class="chip chip--user" title="Rests on something you told me">your input</span>';
+  if (n.source === 'assumption') return '<span class="chip chip--assumption" title="Rests on an assumption — check it">assumption</span>';
+  return '<span class="chip chip--model" title="From the model\'s general knowledge">model</span>';
+}
+
+function renderNode(n, depth) {
+  const kids = n.children || [];
+  const hasKids = kids.length > 0;
+  const cls = ['node'];
+  if (depth === 0) cls.push('node--root');
+  if (depth === 1) cls.push('node--l1');
+  if (n.id === S.selectedId) cls.push('node--selected');
+  if (n.locked) cls.push('node--locked');
+  if (n.status === 'added') cls.push('node--added');
+  if (n.status === 'changed') cls.push('node--changed');
+  if (n.vote === 1) cls.push('node--voted-up');
+  if (n.vote === -1) cls.push('node--voted-down');
+
+  const label = S.editingId === n.id
+    ? '<span class="node__label" contenteditable="true" data-edit="' + esc(n.id) + '">' + esc(n.label) + '</span>'
+    : '<span class="node__label">' + esc(n.label) + '</span>';
+
+  const meta = depth === 0 ? '' : '<span class="node__meta">' +
+    (n.probes && n.probes.length ? '<span class="node__probecount" title="' + esc(n.probes.length) + ' probing question(s) on this branch">?' + n.probes.length + '</span>' : '') +
+    (n.locked ? '<span class="chip" title="Locked — kept as written when the map is regenerated">locked</span>' : '') +
+    sourceChip(n) + confBadge(n) + '</span>';
+
+  const head = '<div class="' + cls.join(' ') + '" data-node="' + esc(n.id) + '">' +
+    '<button class="node__toggle' + (hasKids ? '' : ' node__toggle--hidden') + '" data-act="toggle" data-id="' + esc(n.id) + '" aria-label="Expand or collapse">' +
+      (n.collapsed ? '+' : '−') + '</button>' +
+    '<div class="node__body" data-act="select" data-id="' + esc(n.id) + '">' + label + meta + '</div>' +
+    '</div>';
+
+  const children = hasKids && !n.collapsed
+    ? '<div class="branch">' + kids.map(c => renderNode(c, depth + 1)).join('') + '</div>'
+    : '';
+  return head + children;
+}
+
+function hasRecordedRefinement(nodeId, probeText) {
+  if (isLive()) return true;
+  const c = recordedCase(S.caseId);
+  if (!c) return false;
+  return (c.refinements || []).some(r => r.probeId === nodeId && sameish(r.question, probeText));
+}
+function hasRecordedDeepen(nodeId) {
+  if (isLive()) return true;
+  const c = recordedCase(S.caseId);
+  return !!(c && c.deepen && c.deepen.nodeId === nodeId);
+}
+
+function inspector() {
+  const n = S.selectedId ? findNode(S.selectedId) : null;
+  if (!n) return '<aside class="inspector"><div class="eyebrow">Inspector</div><p class="inspector__empty">Select any node to see why it is there, what it assumes, and what else could have gone in its place.</p></aside>';
+
+  const alts = (n.alternatives || []).map((a, i) =>
+    '<div class="alt"><b>' + esc(a.label) + '</b><p>' + esc(a.tradeoff) + '</p>' +
+    '<div class="alt__act">' + btn('swap-alt', 'Use this framing instead', { sm: true, id: n.id, arg: String(i) }) + '</div></div>').join('');
+
+  const probes = (n.probes || []).map((p, i) => {
+    const rec = hasRecordedRefinement(n.id, p);
+    return '<div class="probe-q">' + (rec && !isLive() ? '<span title="A recorded answer exists for this probe">● </span>' : '') + esc(p) +
+      '<div class="probe-q__ask"><input type="text" data-probe-input="' + esc(n.id) + '-' + i + '" placeholder="Your answer changes the map">' +
+      btn('answer-probe', 'Answer', { sm: true, primary: true, id: n.id, arg: String(i) }) + '</div></div>';
+  }).join('');
+
+  return '<aside class="inspector">' +
+    '<div><div class="eyebrow">Inspector</div><div class="insp__title">' + esc(n.label) + '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">' + sourceChip(n) + confBadge(n) + '</div></div>' +
+
+    (n.why ? '<div class="insp__section"><h4 class="eyebrow">Why this is here</h4><div class="insp__why">' + esc(n.why) + '</div></div>' : '') +
+
+    (alts ? '<div class="insp__section"><h4 class="eyebrow">Are these the only options?</h4>' + alts + '</div>' : '') +
+
+    (probes ? '<div class="insp__section"><h4 class="eyebrow">What this branch still needs from you</h4>' + probes + '</div>' : '') +
+
+    '<div class="insp__section"><h4 class="eyebrow">Change it</h4><div class="insp__controls">' +
+      btn('edit', '✎ Rename', { sm: true, id: n.id }) +
+      btn('add-child', '+ Add child', { sm: true, id: n.id }) +
+      btn('deepen', '↓ Deepen' + (!isLive() && !hasRecordedDeepen(n.id) ? ' (live only)' : ''), { sm: true, id: n.id, title: 'Ask for 2–4 more specific children under this node' }) +
+      btn('lock', n.locked ? '🔓 Unlock' : '🔒 Lock', { sm: true, id: n.id, title: 'Locked nodes keep their wording when the map is regenerated' }) +
+      btn('delete', '✕ Delete', { sm: true, id: n.id }) +
+    '</div></div>' +
+
+    '<div class="insp__section"><h4 class="eyebrow">Was this branch useful?</h4><div class="votebar">' +
+      btn('vote-up', '👍 Useful', { sm: true, id: n.id }) +
+      btn('vote-down', '👎 Generic', { sm: true, id: n.id }) +
+      '<span class="hint">' + (n.vote === 1 ? 'marked useful' : n.vote === -1 ? 'marked generic' : 'saved to the session log') + '</span>' +
+    '</div></div>' +
+    '</aside>';
+}
+
+function openProbes() {
+  const out = [];
+  if (!S.map) return out;
+  walk(S.map, n => { (n.probes || []).forEach((p, i) => { if (!(n.answeredProbes || []).includes(i)) out.push({ nodeId: n.id, i: i, text: p }); }); });
+  if (!isLive()) {
+    const rec = out.filter(p => hasRecordedRefinement(p.nodeId, p.text));
+    if (rec.length) return rec.concat(out.filter(p => rec.indexOf(p) < 0));
+  }
+  return out;
+}
+
+function dock() {
+  if (S.changeNote) {
+    return '<div class="dock">' +
+      '<div class="dock__head"><span class="chip chip--live">map updated</span>' +
+        '<span style="font-size:13.5px">' + esc(S.changeNote) + '</span></div>' +
+      '<div class="dock__q">' +
+        btn('undo', '↺ Undo this round', { sm: true }) +
+        btn('clear-diff', 'Keep it — clear the highlights', { sm: true, primary: true }) +
+        '<span class="hint">Green edge = added · amber edge = reworded</span>' +
+      '</div></div>';
+  }
+  const probes = openProbes();
+  if (!probes.length) return '';
+  const p = probes[S.dockIndex % probes.length];
+  return '<div class="dock">' +
+    '<div class="dock__head"><span class="ping"></span><span class="eyebrow">Step 4 · The agent is asking</span></div>' +
+    '<div class="dock__q"><span style="font-size:14.5px;font-weight:500;flex:1 1 100%">' + esc(p.text) + '</span></div>' +
+    '<div class="dock__q">' +
+      '<input type="text" data-dock-input placeholder="Answer in a line — the map will change" aria-label="Answer the agent">' +
+      btn('dock-answer', 'Rework the map', { primary: true, id: p.nodeId, arg: String(p.i) }) +
+      btn('dock-next', 'Ask me a different one', { ghost: true }) +
+      btn('dock-jump', 'Show me the branch', { ghost: true, id: p.nodeId }) +
+    '</div></div>';
+}
+
+function screenMap() {
+  const assumptions = S.assumptions.length
+    ? '<div class="assumes"><h4>What this map assumes</h4><ul>' +
+      S.assumptions.map(a => '<li>' + esc(a) + '</li>').join('') +
+      '</ul></div>'
+    : '';
+
+  return '<div class="mapscreen"><div class="workspace">' +
+    '<div class="canvas">' +
+      '<div class="maphead"><div style="flex:1 1 320px">' +
+        '<div class="eyebrow">Step 3 · Map · ' + countNodes() + ' nodes' + (S.refineRound ? ' · round ' + (S.refineRound + 1) : '') + '</div>' +
+        '<h2>' + esc(S.title || S.brief.topic) + '</h2>' +
+        (S.summary ? '<p>' + esc(S.summary) + '</p>' : '') + assumptions +
+      '</div></div>' +
+      '<div class="tree">' + renderNode(S.map, 0) + '</div>' +
+    '</div>' +
+    inspector() +
+    '</div>' + dock() + '</div>';
+}
+
+/* ── overlays ─────────────────────────────────────────────── */
+function busyCard() {
+  return '<div class="stage stage--center"><div class="brief"><div class="card brief__panel loading">' +
+    '<div class="eyebrow">Working</div>' +
+    '<div class="loading__what">' + esc(S.busy.what) + '…</div>' +
+    '<div class="loading__bar"><i></i></div>' +
+    '<div class="hint">' + (isLive() ? esc(S.model) + ' · up to 90 seconds · nothing is sent anywhere but Anthropic' : 'replaying a recorded run') + '</div>' +
+    '</div></div></div>';
+}
+function errorCard() {
+  return '<div class="card notice notice--error" style="margin:16px auto;max-width:760px">' +
+    '<h3>' + esc(S.error.title) + '</h3><p>' + esc(S.error.body) + '</p>' +
+    '<div class="notice__acts">' + S.error.actions.map(a => btn(a.act, esc(a.label), { sm: true, primary: a.act === 'retry' })).join('') + '</div>' +
+    '</div>';
+}
+function modal() {
+  if (!S.modal) return '';
+  if (S.modal.kind === 'settings') {
+    return overlay('<h3>Settings</h3>' +
+      (LIVE_BLOCKED
+        ? '<div class="notice notice--info" style="border:1px solid var(--line);border-radius:8px"><p><strong>Live mode is unavailable in this shared preview.</strong> The viewer blocks outbound API calls, so this session replays recorded runs. To map your own brief, open <code>probe.html</code> from the repo on your own machine and add a key there.</p></div>'
+        : '<div class="field"><label for="key">Anthropic API key</label>' +
+          '<input id="key" type="password" placeholder="sk-ant-…" value="' + esc(S.apiKey) + '">' +
+          '<span class="hint">Kept in this browser only (localStorage) and sent to api.anthropic.com and nowhere else. Leave it empty to stay in recorded mode.</span></div>' +
+        '<div class="field"><label for="model">Model</label><select id="model">' +
+          MODELS.map(m => '<option value="' + m.id + '"' + (S.model === m.id ? ' selected' : '') + '>' + esc(m.label) + '</option>').join('') +
+        '</select></div>') +
+      '<div class="modal__acts">' + (LIVE_BLOCKED ? '' : btn('save-settings', 'Save', { primary: true }) + btn('clear-key', 'Forget my key')) +
+        btn('close-modal', 'Close') + '</div>' +
+      '<div class="hint">Prompt pack ' + PROMPTS.VERSION + ' · this build never sends your brief anywhere except the Anthropic API, and only in live mode.</div>');
+  }
+  if (S.modal.kind === 'export') {
+    const tab = S.modal.tab || 'markdown';
+    const body = tab === 'markdown' ? toMarkdown() : tab === 'mermaid' ? toMermaid() : tab === 'json' ? toJson() : tab === 'log' ? toSessionLog() : currentPrompt();
+    const tabs = [['markdown', 'Markdown'], ['mermaid', 'Mermaid'], ['json', 'JSON'], ['prompt', 'The prompt used'], ['log', 'Session log']];
+    return overlay('<h3>Take it with you</h3>' +
+      '<div class="tabs">' + tabs.map(t => '<button class="tab" data-act="export-tab" data-arg="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + '</button>').join('') + '</div>' +
+      '<pre>' + esc(body) + '</pre>' +
+      '<div class="modal__acts">' + btn('copy-export', 'Copy', { primary: true }) + btn('close-modal', 'Close') + '</div>' +
+      '<div class="hint">' + (tab === 'log' ? 'Every edit, vote, skip and failure in this session — the raw material for evaluating the agent.' : tab === 'prompt' ? 'The exact instructions behind this map. Nothing hidden.' : 'Downloads are blocked inside shared previews, so this copies to your clipboard.') + '</div>');
+  }
+  return '';
+}
+function overlay(inner) {
+  return '<div class="overlay" data-act="close-modal-bg"><div class="card modal" role="dialog" aria-modal="true">' + inner + '</div></div>';
+}
+
+/* ── root render ──────────────────────────────────────────── */
+function render() {
+  const screen = S.busy ? busyCard()
+    : S.screen === 'brief' ? screenBrief()
+    : S.screen === 'clarify' ? screenClarify()
+    : (S.map ? screenMap() : screenBrief());
+
+  app.innerHTML =
+    '<div class="app' + (S.screen === 'map' && S.map && !S.busy ? ' app--map' : '') + '">' + topbar() + (S.screen === 'brief' ? trustline() : '') +
+    (S.error ? errorCard() : '') +
+    '<main class="main">' + screen + '</main>' +
+    '<footer class="footbar">' +
+      '<span>Probe · prompt pack ' + PROMPTS.VERSION + '</span>' +
+      '<span>' + (isLive() ? 'live · ' + esc(S.model) : 'recorded run · no API calls') + '</span>' +
+      '<span>model knowledge, not live research</span>' +
+      '<span>' + countNodes() + ' nodes · ' + S.log.length + ' session events</span>' +
+    '</footer></div>' +
+    modal() + (S.toast ? '<div class="toast">' + esc(S.toast) + '</div>' : '');
+
+  if (render._last !== S.screen) { render._last = S.screen; window.scrollTo(0, 0); }
+
+  const editing = app.querySelector('[contenteditable="true"]');
+  if (editing) {
+    editing.focus();
+    const r = document.createRange(); r.selectNodeContents(editing);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  }
+}
+S.dockIndex = 0;
+/* ─────────────────────────────────────────────────────────────
+   Probe — event wiring
+   ───────────────────────────────────────────────────────────── */
+
+let lastCall = null;
+function invoke(fn) { lastCall = fn; return fn(); }
+
+function val(sel) { const el = app.querySelector(sel); return el ? el.value : ''; }
+
+/* typing updates state without a re-render, so focus is never stolen */
+app.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.bind) {
+    S.brief[t.dataset.bind] = t.value;
+    return;
+  }
+  if (t.dataset.bindAnswer) {
+    const qid = t.dataset.bindAnswer;
+    S.answers[qid] = { answer: t.value, skipped: false };
+    return;
+  }
+});
+
+app.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.dataset.probeInput) {
+    const [id, i] = e.target.dataset.probeInput.split(/-(?=\d+$)/);
+    answerProbe(id, Number(i), e.target.value);
+    e.preventDefault();
+  }
+  if (e.key === 'Enter' && e.target.hasAttribute('data-dock-input')) {
+    const b = app.querySelector('[data-act="dock-answer"]');
+    if (b) b.click();
+    e.preventDefault();
+  }
+  if (e.key === 'Enter' && e.target.isContentEditable) { e.target.blur(); e.preventDefault(); }
+  if (e.key === 'Escape') {
+    if (S.modal) { S.modal = null; render(); }
+    else if (S.editingId) { S.editingId = null; render(); }
+  }
+});
+
+app.addEventListener('blur', e => {
+  if (e.target.dataset && e.target.dataset.edit) {
+    const id = e.target.dataset.edit;
+    const node = findNode(id);
+    const text = e.target.textContent.trim();
+    if (node && text && text !== node.label) {
+      snapshot();
+      logEvent('node_renamed', { node: id, from: node.label, to: text });
+      node.label = text; node.source = 'user'; node.status = 'changed';
+    }
+    S.editingId = null;
+    render();
+  }
+}, true);
+
+function answerProbe(nodeId, index, answer) {
+  const node = findNode(nodeId);
+  if (!node || !answer || !answer.trim()) { toast('Write an answer first'); return; }
+  const question = (node.probes || [])[index];
+  node.answeredProbes = (node.answeredProbes || []).concat([index]);
+  invoke(() => refine(nodeId, question, answer.trim()));
+}
+
+app.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const act = el.dataset.act;
+  const id = el.dataset.id;
+  const arg = el.dataset.arg;
+  const node = id ? findNode(id) : null;
+
+  switch (act) {
+    /* ── brief ── */
+    case 'example': {
+      const c = recordedCase(arg);
+      S.brief = clone(c.brief); S.caseId = c.id;
+      logEvent('example_chosen', { case: c.id });
+      toast('Loaded the recorded brief — now ask for questions');
+      return render();
+    }
+    case 'start': {
+      if (!S.caseId || S.brief.topic !== (recordedCase(S.caseId) || {}).brief?.topic) {
+        const match = RECORDED.filter(c => c.brief.topic === S.brief.topic)[0];
+        S.caseId = match ? match.id : null;
+      }
+      return invoke(startFlow);
+    }
+
+    /* ── clarify ── */
+    case 'sugg': {
+      const q = S.questions.filter(x => x.id === arg)[0];
+      const pick = q.suggestions[Number(el.dataset.i)];
+      const cur = (S.answers[arg] || {}).answer;
+      S.answers[arg] = { answer: cur === pick ? '' : pick, skipped: false };
+      return render();
+    }
+    case 'skip': S.answers[arg] = { answer: '', skipped: true }; logEvent('question_skipped', { q: arg }); return render();
+    case 'unskip': S.answers[arg] = { answer: '', skipped: false }; return render();
+    case 'skip-all':
+      S.questions.forEach(q => { if (!(S.answers[q.id] || {}).answer) S.answers[q.id] = { answer: '', skipped: true }; });
+      logEvent('question_skipped', { all: true });
+      return render();
+    case 'build': return invoke(buildMap);
+    case 'back-to-brief': S.screen = 'brief'; return render();
+
+    /* ── map: navigation ── */
+    case 'select': S.selectedId = id; return render();
+    case 'toggle': node.collapsed = !node.collapsed; return render();
+    case 'dock-jump': S.selectedId = id; render();
+      { const t = app.querySelector('[data-node="' + id + '"]'); if (t) t.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      return;
+    case 'dock-next': S.dockIndex++; return render();
+    case 'clear-diff': clearDiff(); S.changeNote = ''; return render();
+
+    /* ── map: editing ── */
+    case 'edit': S.editingId = id; return render();
+    case 'add-child': {
+      snapshot();
+      const child = { id: newId('u'), label: 'New node', why: 'Added by you.', confidence: 'high', source: 'user', alternatives: [], probes: [], children: [], status: 'added' };
+      node.children = (node.children || []).concat([child]);
+      node.collapsed = false;
+      S.selectedId = child.id; S.editingId = child.id;
+      logEvent('node_added', { parent: id });
+      return render();
+    }
+    case 'delete': {
+      if (node === S.map) { toast('The centre of the map cannot be deleted'); return; }
+      snapshot();
+      const p = findParent(id);
+      p.children = p.children.filter(c => c.id !== id);
+      logEvent('node_deleted', { node: id, label: node.label });
+      S.selectedId = p.id;
+      toast('Deleted — undo is in the top bar');
+      return render();
+    }
+    case 'lock': node.locked = !node.locked; logEvent('node_locked', { node: id, locked: node.locked }); return render();
+    case 'vote-up': case 'vote-down': {
+      const v = act === 'vote-up' ? 1 : -1;
+      node.vote = node.vote === v ? 0 : v;
+      logEvent('feedback', { node: id, label: node.label, vote: node.vote });
+      toast(node.vote === 1 ? 'Marked useful' : node.vote === -1 ? 'Marked generic — saved for the next round' : 'Feedback cleared');
+      return render();
+    }
+    case 'swap-alt': {
+      snapshot();
+      const alt = node.alternatives[Number(arg)];
+      logEvent('alternative_taken', { node: id, from: node.label, to: alt.label });
+      node.label = alt.label; node.why = 'You chose this framing over the original. Trade-off: ' + alt.tradeoff;
+      node.source = 'user'; node.confidence = 'high'; node.status = 'changed';
+      return render();
+    }
+    case 'deepen': return invoke(() => deepen(id));
+
+    /* ── map: refine ── */
+    case 'answer-probe': return answerProbe(id, Number(arg), val('[data-probe-input="' + id + '-' + arg + '"]'));
+    case 'dock-answer': return answerProbe(id, Number(arg), val('[data-dock-input]'));
+
+    /* ── history ── */
+    case 'undo': {
+      if (!S.history.length) return;
+      S.future.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
+      const prev = S.history.pop();
+      S.map = prev.map; S.assumptions = prev.assumptions; S.changeNote = prev.changeNote;
+      logEvent('undo', null);
+      toast('Reverted');
+      return render();
+    }
+    case 'redo': {
+      if (!S.future.length) return;
+      S.history.push({ map: clone(S.map), assumptions: clone(S.assumptions), changeNote: S.changeNote });
+      const next = S.future.pop();
+      S.map = next.map; S.assumptions = next.assumptions; S.changeNote = next.changeNote;
+      return render();
+    }
+
+    /* ── chrome ── */
+    case 'export': S.modal = { kind: 'export', tab: 'markdown' }; return render();
+    case 'export-tab': S.modal.tab = arg; return render();
+    case 'copy-export': {
+      const t = S.modal.tab;
+      return copy(t === 'markdown' ? toMarkdown() : t === 'mermaid' ? toMermaid() : t === 'json' ? toJson() : t === 'log' ? toSessionLog() : currentPrompt());
+    }
+    case 'settings': S.error = null; S.modal = { kind: 'settings' }; return render();
+    case 'save-settings': {
+      S.apiKey = val('#key').trim(); S.model = val('#model');
+      LS.set('key', S.apiKey); LS.set('model', S.model);
+      S.modal = null;
+      toast(S.apiKey ? 'Live mode on — your brief goes to Anthropic only' : 'Recorded mode');
+      return render();
+    }
+    case 'clear-key': S.apiKey = ''; LS.del('key'); S.modal = null; toast('Key forgotten'); return render();
+    case 'close-modal': S.modal = null; return render();
+    case 'close-modal-bg': if (e.target.classList.contains('overlay')) { S.modal = null; render(); } return;
+    case 'theme': {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : cur === 'light' ? '' : 'dark';
+      if (next) document.documentElement.setAttribute('data-theme', next);
+      else document.documentElement.removeAttribute('data-theme');
+      LS.set('theme', next);
+      return;
+    }
+    case 'restart': {
+      if (S.map && !confirm('Start a new map? The current one is not saved anywhere.')) return;
+      S.screen = 'brief'; S.map = null; S.questions = []; S.answers = {}; S.history = []; S.future = [];
+      S.refineRound = 0; S.changeNote = ''; S.selectedId = null; S.assumptions = []; S.caseId = null;
+      logEvent('restart', null);
+      return render();
+    }
+
+    /* ── failure recovery ── */
+    case 'dismiss': S.error = null; return render();
+    case 'retry': S.error = null; render(); return lastCall ? invoke(lastCall) : null;
+    case 'to-brief': S.error = null; S.screen = 'brief'; return render();
+    case 'jump-recorded': {
+      S.error = null;
+      const c = recordedCase(S.caseId);
+      const r = c && c.refinements && c.refinements[0];
+      if (r) { S.selectedId = r.probeId; S.dockIndex = 0; }
+      return render();
+    }
+  }
+});
+
+/* restore the viewer's last explicit theme choice, if any */
+(function boot() {
+  const t = LS.get('theme', '');
+  if (t) document.documentElement.setAttribute('data-theme', t);
+  logEvent('session_start', { mode: isLive() ? 'live' : 'recorded', blocked: LIVE_BLOCKED, promptVersion: PROMPTS.VERSION });
+  render();
+})();
+</script>

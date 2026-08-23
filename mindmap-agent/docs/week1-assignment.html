@@ -1,0 +1,141 @@
+<title>Week 1 — AI Mind-Map Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+:root {
+  --ground:#EDF1F0; --surface:#FFFFFF; --surface-2:#F5F8F7; --line:#D2DCD9; --line-strong:#B4C3BF;
+  --ink:#131E1B; --ink-soft:#4C5B58; --ink-faint:#5E6D69;
+  --probe:#0B655C; --probe-soft:#DCEDEA; --amber:#855A02; --rose:#A03F58; --on-probe:#FFFFFF;
+  --sans:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground:#0D1413; --surface:#141D1B; --surface-2:#1A2523; --line:#26332F; --line-strong:#3A4A46;
+  --ink:#E4EBE8; --ink-soft:#AEBDB8; --ink-faint:#8B9A95;
+  --probe:#4CC3B1; --probe-soft:#16332F; --amber:#D9A441; --rose:#E08199; --on-probe:#06201D;
+} }
+:root[data-theme="dark"] {
+  --ground:#0D1413; --surface:#141D1B; --surface-2:#1A2523; --line:#26332F; --line-strong:#3A4A46;
+  --ink:#E4EBE8; --ink-soft:#AEBDB8; --ink-faint:#8B9A95;
+  --probe:#4CC3B1; --probe-soft:#16332F; --amber:#D9A441; --rose:#E08199; --on-probe:#06201D;
+}
+* { box-sizing: border-box; }
+body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased; }
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 22px 96px; }
+header.doc { padding: 54px 0 26px; border-bottom: 2px solid var(--probe); margin-bottom: 34px; }
+.eyebrow { font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); }
+h1 { font-family:var(--serif); font-weight:500; font-size:clamp(32px,5vw,50px); line-height:1.08; letter-spacing:-.02em; margin:12px 0 16px; text-wrap:balance; }
+.meta { display:flex; flex-wrap:wrap; gap:6px 22px; font-size:14px; color:var(--ink-soft); }
+.meta b { color:var(--ink); font-weight:600; }
+h2 { font-family:var(--serif); font-weight:500; font-size:27px; margin:48px 0 14px; display:flex; gap:12px; align-items:baseline; text-wrap:balance; }
+h2 .num { font-family:var(--mono); font-size:13px; color:var(--probe); border:1px solid var(--probe); border-radius:999px; padding:1px 8px; flex:0 0 auto; }
+h3 { font-size:17px; margin:30px 0 8px; }
+h4 { font-size:15px; margin:22px 0 6px; }
+p { margin:0 0 15px; max-width:74ch; }
+ul, ol { margin:0 0 16px; padding-left:22px; max-width:74ch; }
+li { margin-bottom:6px; }
+a { color:var(--probe); text-underline-offset:3px; }
+strong { font-weight:600; }
+code { font-family:var(--mono); font-size:.86em; background:var(--surface-2); border:1px solid var(--line); border-radius:4px; padding:1px 5px; }
+pre.flow { font-family:var(--mono); background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--probe); border-radius:10px; padding:16px 18px; overflow-x:auto; font-size:13px; line-height:1.7; color:var(--ink-soft); }
+pre.flow code { background:none; border:none; padding:0; font-size:inherit; }
+hr { border:none; border-top:1px solid var(--line); margin:40px 0; }
+.tablewrap { overflow-x:auto; margin:0 0 20px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th, td { text-align:left; padding:9px 13px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2); white-space:nowrap; }
+tbody tr:last-child td { border-bottom:none; }
+td:first-child { font-variant-numeric:tabular-nums; }
+.cta { display:inline-block; margin-top:22px; background:var(--probe); color:var(--on-probe); text-decoration:none;
+  font-weight:600; font-size:14.5px; padding:9px 18px; border-radius:9px; }
+.cta:hover { filter:brightness(1.12); }
+footer.doc { margin-top:56px; padding-top:18px; border-top:1px solid var(--line); font-family:var(--mono); font-size:11px; color:var(--ink-faint); letter-spacing:.05em; display:flex; gap:18px; flex-wrap:wrap; }
+</style>
+<div class="wrap"><header class="doc"><div class="eyebrow">Course project · Week 1 assignment</div><h1>Week 1 — AI Mind-Map Agent</h1><div class="meta"><span><b>Pranaya Manikonda</b></span><span>23 August 2026</span><span>Problem statement 2 — AI Mind-Map Agent</span><span><code>mindmap-agent/</code> on branch <code>claude/ai-agent-design-4t39fl</code></span></div><a class="cta" href="https://claude.ai/code/artifact/5c8f55e2-cd7c-492d-abe0-f648f685119c">Open the agent →</a></header>
+<h2><span class="num">1</span>What was asked, and what I built</h2>
+<p>The brief asks for an agent that creates mind maps from a context or requirement and <em>goes beyond generic structures</em> — researching alternatives, asking probing questions, challenging assumptions, and refining the map from the answers.</p>
+<p>I built <strong>Probe</strong>, a browser agent that runs a four-step loop:</p>
+<pre class="flow"><code>1 Brief  →  2 Clarify  →  3 Map  →  4 Refine
+            ↑                          │
+            └──────── the answers change the map ────┘</code></pre>
+<ol><li><strong>Brief.</strong> You say what you are trying to work out. Purpose, audience and depth are optional.</li><li><strong>Clarify.</strong> Before mapping anything, the agent asks the 3–5 questions whose answers would most change the shape of the map, each with the default it will assume if you skip. Skipping is one click and always allowed.</li><li><strong>Map.</strong> A tree where every node carries <em>why it is there</em>, a <strong>confidence</strong> level, and a <strong>source</strong> — <code>your input</code>, <code>model</code>, or <code>assumption</code>. Every first-level branch also carries <strong>alternatives</strong> (&quot;are these the only options?&quot; answered concretely, each with its trade-off) and <strong>probes</strong> — questions to you that would change that branch.</li><li><strong>Refine.</strong> The agent puts its hardest open question at the bottom of the screen. Your one-line answer rebuilds the map, and the result is shown as a <strong>diff</strong> — added nodes edged green, reworded ones amber, with a written change note and a one-click undo.</li></ol>
+<p>The map is not read-only at any point: rename a node inline, add or delete children, lock a node so a regeneration cannot touch its wording, take an alternative framing in place of the branch it argues against, deepen a branch, or mark a branch useful or generic. Undo/redo covers all of it.</p>
+<h3>Two run modes, stated in the interface</h3>
+<div class="tablewrap"><table><thead><tr><th>Mode</th><th>What it is</th><th>Where</th></tr></thead><tbody>
+<tr><td><strong>Recorded</strong></td><td>Replays saved outputs of the v0.1 prompts for three briefs. No key, no network.</td><td>The default, and the only mode available on the shared link above — artifact pages are blocked from calling external APIs.</td></tr>
+<tr><td><strong>Live</strong></td><td>Sends your own brief to the Anthropic API with your own key.</td><td>When you serve <code>probe.html</code> yourself and add a key in Settings.</td></tr>
+</tbody></table></div>
+<p>This split is a constraint, not a design choice: a published artifact cannot call an LLM API. Rather than hide it, the app names the mode in the top bar, in the footer, and in every message where the limit bites — including refusing to pretend it can map an arbitrary brief in recorded mode.</p>
+<hr>
+<h2><span class="num">2</span>Users and needs</h2>
+<p><strong>Primary user.</strong> Someone doing early, messy thinking work with a real deliverable attached — a UX researcher scoping a study, a founder planning a launch, an engineer planning twelve weeks of learning. They are competent in their domain. They do not need an AI to tell them what a mind map is; they need one that has <em>read their brief</em> and can tell them what they are missing.</p>
+<p><strong>Primary tasks.</strong></p>
+<ol><li>Turn a paragraph of intent into a structure I can argue with.</li><li>Find the branch I would not have thought of, and the assumption I am resting on.</li><li>Leave with something I can paste into a doc, a ticket, or a plan.</li></ol>
+<div class="tablewrap"><table><thead><tr><th>Feature</th><th>The need it serves</th></tr></thead><tbody>
+<tr><td>Clarifying questions before any map</td><td>&quot;It answered a question I did not ask&quot; is the standard failure of generic AI structure</td></tr>
+<tr><td>Skip → visible assumption</td><td>Users will not answer five questions. Skipping must be cheap, but its cost must be visible</td></tr>
+<tr><td><code>source</code> tag per node</td><td>Tells you which parts of the map came from <em>you</em> and which the model invented</td></tr>
+<tr><td>Alternatives with trade-offs</td><td>The requirement &quot;are these the only options?&quot;, answered rather than asked</td></tr>
+<tr><td>Probes in a fixed dock</td><td>Makes challenging the user the agent&#x27;s default behaviour, not a feature you have to find</td></tr>
+<tr><td>Diff + change note + undo</td><td>Iteration is only safe if you can see what changed and reverse it</td></tr>
+<tr><td>Lock a node</td><td>Lets the user protect their own thinking from the next regeneration</td></tr>
+<tr><td>Markdown / Mermaid / JSON export</td><td>The map has to leave the tool to be worth making</td></tr>
+<tr><td>&quot;The prompt used&quot; tab</td><td>Anyone can read exactly what instructions produced their map</td></tr>
+</tbody></table></div>
+<p><strong>Rely on it for:</strong> structure, alternatives, naming assumptions, questions to take to real sources. <strong>Do not rely on it for:</strong> facts, numbers, prices, citations, anything specific to your company it cannot know, or professional judgement. Both lists are printed on the first screen, before the user&#x27;s first run — not buried in a help page.</p>
+<hr>
+<h2><span class="num">3</span>Initial capability check</h2>
+<p>Three things were run end to end.</p>
+<h3>(a) Three briefs, one per target domain</h3>
+<div class="tablewrap"><table><thead><tr><th>Case</th><th>Brief</th><th>Result</th></tr></thead><tbody>
+<tr><td>A</td><td>UX research study for a fintech KYC onboarding drop-off</td><td>5 clarifying questions → 20 nodes across 5 branches, 10 alternatives, 7 probes, 2 stated assumptions plus one for every question skipped; one refinement round rebuilt the diagnostics branch and promoted the exit intercept</td></tr>
+<tr><td>B</td><td>Go-to-market for a campus food delivery app</td><td>4 questions → 21 nodes, 9 alternatives, 7 probes, 3 stated assumptions; the refinement turned &quot;pick a wedge&quot; into a numeric target ladder once the user supplied a kill number</td></tr>
+<tr><td>C</td><td>Learn ML in 12 weeks as a working engineer</td><td>4 questions → 21 nodes, 9 alternatives, 7 probes, 3 stated assumptions; answering one probe about work data re-cut the project branch onto the user&#x27;s own dataset</td></tr>
+</tbody></table></div>
+<p>Scored against the rubric in <code><code>evals/cases.md</code></code> — 12 points, pass at 9:</p>
+<div class="tablewrap"><table><thead><tr><th>Case</th><th>C1 questions</th><th>C2 non-generic</th><th>C3 alternatives</th><th>C4 assumptions</th><th>C5 probes</th><th>C6 iteration</th><th>Total</th></tr></thead><tbody>
+<tr><td>A</td><td>2</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td><strong>11</strong></td></tr>
+<tr><td>B</td><td>2</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td><strong>11</strong></td></tr>
+<tr><td>C</td><td>2</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td><strong>11</strong></td></tr>
+</tbody></table></div>
+<p><strong>3 of 3 pass. Mean 11/12. The lost point is the same one every time:</strong> each map still contains one branch that is a domain template rather than a response to the brief — &quot;Getting the findings used&quot;, &quot;What kills this&quot;, &quot;Staying on it for twelve weeks&quot;. The content underneath is specific; the branch heading is not. That is the first thing v0.2 targets.</p>
+<p><em>How to read this number honestly:</em> the three runs are recorded, scored by their author, with one rater. It says the agent produces maps of the intended shape. It does not say the agent is good — that requires live runs and someone else scoring, which is Week 2.</p>
+<h3>(b) 35 automated end-to-end checks</h3>
+<p><code>test/flow.test.mjs</code> drives the real page in headless Chromium: <strong>35/35 pass.</strong> It covers the full flow on two of the three cases, inline rename, delete and undo, lock, voting, branch expansion, all four exports, the diff highlighting, the mobile layout, and a contrast audit across all four theme states (system light, system dark, and both explicit choices).</p>
+<h3>(c) Failure paths, deliberately triggered</h3>
+<div class="tablewrap"><table><thead><tr><th>Trigger</th><th>Behaviour</th></tr></thead><tbody>
+<tr><td>Brief of one word (&quot;marketing&quot;)</td><td>Refused, with an explanation of what a usable brief contains — no map produced</td></tr>
+<tr><td>Own brief with no key / on the shared link</td><td>Says plainly that only the three recorded briefs can run here, and offers them</td></tr>
+<tr><td>Expanding a branch with no recorded expansion</td><td>Says so, names the branch that does have one, keeps everything else working</td></tr>
+<tr><td>Answering a probe with no recorded refinement</td><td>Says so, and still writes the answer to the session log</td></tr>
+<tr><td>(Live) 401, timeout, unreachable API, unusable JSON</td><td>Four distinct recovery cards, each with actions; brief and answers are never lost</td></tr>
+</tbody></table></div>
+<hr>
+<h2><span class="num">4</span>What works, and what needs improvement</h2>
+<p><strong>Works</strong></p>
+<ul><li>The clarifying step changes the output visibly. Answering &quot;only completers are reachable&quot; or &quot;we stop at 200 orders a week&quot; produces a map that could not have been written from the brief alone.</li><li>Skipping is genuinely cheap, and the assumptions it creates are visible on the map rather than hidden in the model&#x27;s head.</li><li>The refinement diff is the feature that makes iteration feel safe: you can see the four nodes that moved, and undo them in one click.</li><li>Failure states are specific. Nothing in the app produces a blank screen or a bare &quot;something went wrong&quot;.</li></ul>
+<p><strong>Needs improvement</strong></p>
+<ol><li><strong>One template branch per map</strong> (see the rubric scores above) — the biggest quality gap and the first v0.2 change.</li><li><strong>Confidence is compressed.</strong> Almost everything is <code>high</code> or <code>medium</code>; a scale that never says <code>low</code> carries no information.</li><li><strong>Recorded mode is a partial experience.</strong> One expansion and one refinement per case. Honest, but a reviewer without an API key sees a rehearsal, not the agent.</li><li><strong>No memory between sessions.</strong> Close the tab and the map is gone. Exports exist, but a &quot;resume&quot; would cost little.</li><li><strong>The probe dock shows one question at a time</strong> with no sense of how many remain or which matter most.</li><li><strong>Nothing yet learns from the 👍/👎 signals.</strong> They are captured in the session log and go nowhere. Week 3 should feed voted-down nodes back into the refine prompt.</li></ol>
+<hr>
+<h2><span class="num">5</span>The seven concepts — where they stand after Week 1</h2>
+<div class="tablewrap"><table><thead><tr><th>Concept</th><th>In the build today</th><th>Week 2–3</th></tr></thead><tbody>
+<tr><td><strong>User needs</strong></td><td>Three target users, three tasks, every feature mapped to a need (§2); rely / do-not-rely printed on the first screen</td><td>Test the mapping with two people outside this project</td></tr>
+<tr><td><strong>Defining success</strong></td><td>Six-criterion rubric and a 10-brief evaluation set written; 3 recorded cases scored 11/12, 3/3 pass</td><td>Run all 9 briefs live, independent scorer, report the success rate before and after v0.2</td></tr>
+<tr><td><strong>Data and model evolution</strong></td><td>Prompts isolated in one versioned pack; changelog records four build-session iterations with their observed effects</td><td>Ship v0.2, report per-criterion movement on the same evaluation set</td></tr>
+<tr><td><strong>Mental models</strong></td><td>Mode named in three places; capability/limit lists on the first screen; the agent refuses briefs it cannot map well rather than guessing</td><td>Add a first-run walkthrough of what a probe is and why skipping is safe</td></tr>
+<tr><td><strong>Trust and explanations</strong></td><td>Per-node <code>why</code>, confidence, and source tag; assumptions listed under the map; the exact prompt readable in-app</td><td>Make confidence carry information (v0.2 candidate 2); show <em>which answer</em> changed a node</td></tr>
+<tr><td><strong>Feedback and controls</strong></td><td>Edit, add, delete, lock, undo/redo, swap-in alternatives, 👍/👎, exportable session log</td><td>Feed voted-down nodes into the refine prompt so the map responds to the feedback</td></tr>
+<tr><td><strong>Errors and graceful failures</strong></td><td>Guardrail on thin briefs; two silent JSON repairs; four named recovery cards; recorded-mode limits stated instead of faked</td><td>Add resume-after-failure and a partial-map fallback when only some of the JSON parses</td></tr>
+</tbody></table></div>
+<hr>
+<h2><span class="num">6</span>Timeline</h2>
+<div class="tablewrap"><table><thead><tr><th>When</th><th>What</th><th>Status</th></tr></thead><tbody>
+<tr><td>Week 1 (17–23 Aug)</td><td>Choose the problem statement, design the loop, build the agent, prompt pack v0.1, three recorded cases, 35 automated checks, this write-up</td><td><strong>Done — this submission</strong></td></tr>
+<tr><td>Week 2 (24–30 Aug)</td><td>Run the nine live briefs on v0.1 and score them; ship v0.2 from the changelog candidates; re-run and report before/after; wire 👍/👎 into refinement</td><td>Planned</td></tr>
+<tr><td>Week 3 (31 Aug–6 Sep)</td><td>Two outside users on real briefs; fix what they hit; session resume; final course-project write-up with the reported success rate and the iteration evidence</td><td>Planned</td></tr>
+</tbody></table></div>
+<hr>
+<h2><span class="num">7</span>Lessons learnt so far</h2>
+<ol><li><strong>The interesting design work was in the refusals.</strong> Deciding what the agent will <em>not</em> do — map a one-word brief, pretend recorded mode is live, hide a skipped question — did more for its credibility than any feature.</li><li><strong>A skip is a design decision, not a shortcut.</strong> Turning every skipped question into a visible assumption was the change that made the clarify step worth its friction.</li><li><strong>Iteration is only usable if it is reversible and visible.</strong> Before the diff and undo existed, refining felt like gambling with a map you had already invested in.</li><li><strong>The platform constraint shaped the product.</strong> No LLM call is possible from a published artifact, so the honest options were &quot;make the limit visible&quot; or &quot;fake it&quot;. Naming it produced a better artifact — and, unexpectedly, a good demonstration of graceful failure.</li><li><strong>Design bugs hide in the gap between source and output.</strong> The dock squeezing the canvas to a fifth of the window, and small text failing contrast in the light theme, were both invisible in code and obvious in a screenshot. Looking at the running thing found what reading it could not.</li></ol><footer class="doc"><span>Probe · prompt pack v0.1</span><span>3 of 3 recorded cases pass at 11/12</span><span>35 of 35 automated checks pass</span></footer></div>
