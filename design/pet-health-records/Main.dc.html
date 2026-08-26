@@ -1,0 +1,709 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+  <style>
+    body {
+      margin: 0;
+      background: #faf8f4;
+      color: #1b1a17;
+      font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.62;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #1e5c4a; text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: #143d31; }
+    h1, h2, h3 { font-family: Newsreader, Georgia, "Times New Roman", serif; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+    p { margin: 0 0 14px; text-wrap: pretty; }
+    .eyebrow { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #7a7469; }
+    .lede { font-size: 17.5px; line-height: 1.6; color: #37342d; }
+    .sm { font-size: 13.5px; line-height: 1.55; color: #5c5850; }
+    .rule { height: 1px; background: #ddd7cb; border: 0; margin: 0; }
+    ul { margin: 0 0 14px; padding-left: 20px; }
+    li { margin-bottom: 7px; text-wrap: pretty; }
+    strong { font-weight: 600; color: #1b1a17; }
+    .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="width: 100%; max-width: 794px; margin: 0 auto; background: #faf8f4; padding: 0 0 72px;">
+
+  <!-- ===== COVER ===== -->
+  <div style="padding: 64px 64px 40px; background: #1b1a17; color: #f4f1ea;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px; margin-bottom: 52px;">
+      <div class="eyebrow" style="color: #9c9484;">Secondary research &middot; Step 1 of 3</div>
+      <div class="eyebrow" style="color: #9c9484;">26 August 2026</div>
+    </div>
+    <h1 style="font-size: 52px; line-height: 1.07; color: #faf8f4; max-width: 600px; margin-bottom: 22px;">Nobody has solved the pet vaccination record.</h1>
+    <p style="font-size: 19px; line-height: 1.55; color: #c9c2b3; max-width: 560px; margin-bottom: 0;">A market, competitive and problem analysis of digital pet health records &mdash; and where the real design opportunity sits.</p>
+    <div style="display: flex; gap: 56px; margin-top: 56px; padding-top: 26px; border-top: 1px solid #3a382f;">
+      <div>
+        <div class="eyebrow" style="color: #8b8474; margin-bottom: 5px;">Prepared for</div>
+        <div style="font-size: 14.5px; color: #e6e1d5;">Pranaya</div>
+      </div>
+      <div>
+        <div class="eyebrow" style="color: #8b8474; margin-bottom: 5px;">Geography</div>
+        <div style="font-size: 14.5px; color: #e6e1d5;">India-first, global comparison</div>
+      </div>
+      <div>
+        <div class="eyebrow" style="color: #8b8474; margin-bottom: 5px;">Method</div>
+        <div style="font-size: 14.5px; color: #e6e1d5;">Desk research only</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 0 64px;">
+
+  <!-- ===== SCOPE NOTE ===== -->
+  <div style="margin: 40px 0 0; padding: 20px 24px; background: #f6e9e0; border-left: 3px solid #a2542d;">
+    <div class="eyebrow" style="color: #8a4526; margin-bottom: 8px;">Read this first</div>
+    <p class="sm" style="margin: 0; color: #4a3529;">Everything here is <strong>secondary research</strong> &mdash; published market reports, app listings, competitor sites, trade press and regulator guidance. Market-sizing figures for pet care and pet tech vary widely between research firms (often 2&times;), so treat all numbers as <strong>directional, not decision-grade</strong>. Where sources disagree, both figures are shown. No pet owners, vets or boarding operators have been interviewed yet &mdash; that is Step 2, and it is where the assumptions below get tested.</p>
+  </div>
+
+  <!-- ===== TL;DR ===== -->
+  <div style="margin-top: 56px;">
+    <div class="eyebrow" style="margin-bottom: 12px;">01 &nbsp;/&nbsp; The short version</div>
+    <h2 style="font-size: 34px; line-height: 1.15; margin-bottom: 24px;">Seven findings that should shape what you build</h2>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 44px;">
+
+    <div style="display: flex; gap: 20px; padding: 18px 0; border-top: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500; padding-top: 3px; min-width: 26px;">01</div>
+      <div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 5px;">Yes, dozens of these apps exist &mdash; and almost all of them are free.</div>
+        <p class="sm" style="margin: 0;">11pets, Vet Record, PokiPaw, PetVax, Pet Notebook, Remewdy and a long tail of others already do "store your pet's vaccinations and remind you." The category is commoditised at the feature level. Building a better vaccination logger is not a business.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; padding: 18px 0; border-top: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500; padding-top: 3px; min-width: 26px;">02</div>
+      <div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 5px;">None of them produce a record anyone else trusts.</div>
+        <p class="sm" style="margin: 0;">Boarding kennels, airlines, insurers and landlords accept <em>vet-attested</em> documents &mdash; a signed rabies certificate, a stamped booklet. A record you typed into an app yourself has no standing at the exact moment you most need it. That gap is the whole opportunity.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; padding: 18px 0; border-top: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500; padding-top: 3px; min-width: 26px;">03</div>
+      <div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 5px;">The paper booklet already occupies the ideal position.</div>
+        <p class="sm" style="margin: 0;">It is owner-held, portable, vet-attested and universally accepted. It fails on exactly four things: it gets lost, it gets wet, it can't be searched, and it can't be in two places at once. Your competitor is not an app. It is a &#8377;50 booklet that is better than every app on the dimension that matters.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; padding: 18px 0; border-top: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500; padding-top: 3px; min-width: 26px;">04</div>
+      <div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 5px;">Manual data entry is what kills these apps, not missing features.</div>
+        <p class="sm" style="margin: 0;">User reviews across the category converge on the same complaints: too much typing, confusing entry, records lost when accounts break, and no way for a partner or family member to add anything. A records app is opened three or four times a year. It has to survive a nine-month gap between sessions.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; padding: 18px 0; border-top: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500; padding-top: 3px; min-width: 26px;">05</div>
+      <div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 5px;">The person with the pain is not the person with the budget.</div>
+        <p class="sm" style="margin: 0;">Owners feel the pain and won't pay much. Boarding facilities, groomers, daycares, clinics and insurers <em>do</em> pay &mdash; they carry legal record-keeping duties, forgery risk and document-chasing admin. Every durable business in this space sells to them, not to you.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; padding: 18px 0; border-top: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500; padding-top: 3px; min-width: 26px;">06</div>
+      <div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 5px;">Reminders don't drive action. Bookings do.</div>
+        <p class="sm" style="margin: 0;">Industry data suggests owners book the vet <em>after</em> booking a boarding or grooming appointment, not after receiving a clinic reminder. The service booking is the leading indicator. Almost every app in this category reminds off a calendar date &mdash; the weaker trigger.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; padding: 18px 0; border-top: 1px solid #ddd7cb; border-bottom: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500; padding-top: 3px; min-width: 26px;">07</div>
+      <div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 5px;">Regulation is about to do a lot of the convincing for you.</div>
+        <p class="sm" style="margin: 0;">From 22 April 2026 the EU requires microchipping, national database registration and vaccination data synced to TRACES within 24 hours of a vet recording it. India's air-travel regime already demands a rabies certificate current within 12 months plus an AQCS Advance NOC. The "verified digital record" is becoming the default expectation, not a nice-to-have.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MARKET ANALYSIS ===== -->
+  <div style="margin-top: 60px;">
+    <div class="eyebrow" style="margin-bottom: 12px;">02 &nbsp;/&nbsp; Market analysis</div>
+    <h2 style="font-size: 34px; line-height: 1.15; margin-bottom: 18px;">A fast-growing market that doesn't contain your product</h2>
+    <p class="lede" style="margin-bottom: 28px;">Pet care in India is one of the fastest-growing consumer categories in the world. But "pet health records" is not a market you can size &mdash; it is a <strong>feature that four adjacent markets are each trying to own</strong>. Understanding which of those four you are entering is the first strategic decision.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: #ddd7cb; border: 1px solid #ddd7cb; margin-bottom: 14px;">
+    <div style="background: #f2eee6; padding: 20px 18px;">
+      <div class="eyebrow" style="margin-bottom: 10px;">India pet care</div>
+      <div class="num" style="font-size: 30px; font-weight: 500; line-height: 1; margin-bottom: 8px; color: #1e5c4a;">&#8377;8,000 cr</div>
+      <p class="sm" style="margin: 0; font-size: 12.5px;">Market value in 2026, growing roughly 19&ndash;23% a year &mdash; among the fastest-growing pet markets globally.</p>
+    </div>
+    <div style="background: #f2eee6; padding: 20px 18px;">
+      <div class="eyebrow" style="margin-bottom: 10px;">Pets in India</div>
+      <div class="num" style="font-size: 30px; font-weight: 500; line-height: 1; margin-bottom: 8px; color: #1e5c4a;">32&ndash;43 M</div>
+      <p class="sm" style="margin: 0; font-size: 12.5px;">Estimates vary by source. Dogs are roughly 74% of ownership; cats around 5.5 million and rising faster.</p>
+    </div>
+    <div style="background: #f2eee6; padding: 20px 18px;">
+      <div class="eyebrow" style="margin-bottom: 10px;">First-time owners</div>
+      <div class="num" style="font-size: 30px; font-weight: 500; line-height: 1; margin-bottom: 8px; color: #1e5c4a;">~70%</div>
+      <p class="sm" style="margin: 0; font-size: 12.5px;">Share of Indian pet parents who were first-time owners as of 2024 &mdash; skewed urban, Gen Z and millennial.</p>
+    </div>
+    <div style="background: #f2eee6; padding: 20px 18px;">
+      <div class="eyebrow" style="margin-bottom: 10px;">Global pet tech</div>
+      <div class="num" style="font-size: 30px; font-weight: 500; line-height: 1; margin-bottom: 8px; color: #1e5c4a;">$12.5 B</div>
+      <p class="sm" style="margin: 0; font-size: 12.5px;">2025 value; forecast to $17&ndash;24 B by 2030 at roughly 13&ndash;15% CAGR. Wide spread between firms.</p>
+    </div>
+    <div style="background: #f2eee6; padding: 20px 18px;">
+      <div class="eyebrow" style="margin-bottom: 10px;">Pet healthcare tech</div>
+      <div class="num" style="font-size: 30px; font-weight: 500; line-height: 1; margin-bottom: 8px; color: #1e5c4a;">$4.4 B</div>
+      <p class="sm" style="margin: 0; font-size: 12.5px;">The health slice of pet tech in 2025 &mdash; the segment records software actually sits inside.</p>
+    </div>
+    <div style="background: #f2eee6; padding: 20px 18px;">
+      <div class="eyebrow" style="margin-bottom: 10px;">India pet insurance</div>
+      <div class="num" style="font-size: 30px; font-weight: 500; line-height: 1; margin-bottom: 8px; color: #1e5c4a;">~$331 M</div>
+      <p class="sm" style="margin: 0; font-size: 12.5px;">2025 value. Still a niche, but every policy and claim requires proof of current core vaccination.</p>
+    </div>
+  </div>
+  <p class="sm" style="margin-bottom: 36px; color: #7a7469; font-size: 12px;">Sources vary in scope and definition &mdash; "pet care" sometimes means products only, sometimes products plus services. Figures rounded and cross-checked where possible; full source list at the end.</p>
+
+  <h3 style="font-size: 22px; margin-bottom: 14px;">The four markets competing to own the record</h3>
+  <p style="margin-bottom: 20px;">Nobody sells "vaccination records" as a product. The record is a by-product that four different businesses want to hold, because whoever holds it holds the customer relationship.</p>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 36px;">
+    <div style="display: flex; gap: 16px; padding: 16px 18px; background: #fff; border: 1px solid #e4dfd4;">
+      <div style="width: 4px; background: #1e5c4a; flex-shrink: 0;"></div>
+      <div>
+        <div style="font-weight: 600; font-size: 15px; margin-bottom: 3px;">Veterinary practice software</div>
+        <p class="sm" style="margin: 0;">ezyVet (IDEXX), Covetrus AVImark, VETport, Koko. The record is created here. It stays here. Vets have no commercial reason to make it portable &mdash; reminder-driven recall visits are a real revenue line.</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; padding: 16px 18px; background: #fff; border: 1px solid #e4dfd4;">
+      <div style="width: 4px; background: #1e5c4a; flex-shrink: 0;"></div>
+      <div>
+        <div style="font-weight: 600; font-size: 15px; margin-bottom: 3px;">Pet services software</div>
+        <p class="sm" style="margin: 0;">Gingr, VetVerifi, Time To Pet, boarding and daycare platforms. They need to <em>verify</em> records, not create them, and in several jurisdictions must retain them on file for 12 months per animal. They pay for this problem today.</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; padding: 16px 18px; background: #fff; border: 1px solid #e4dfd4;">
+      <div style="width: 4px; background: #1e5c4a; flex-shrink: 0;"></div>
+      <div>
+        <div style="font-weight: 600; font-size: 15px; margin-bottom: 3px;">Pet commerce and care ecosystems</div>
+        <p class="sm" style="margin: 0;">Supertails, Vetic, Wiggles, Heads Up For Tails, Zigly in India. Records are retention glue for food, pharmacy, grooming and consults. They give the record away free because the margin is elsewhere &mdash; which is exactly why a standalone app can't compete on price.</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; padding: 16px 18px; background: #fff; border: 1px solid #e4dfd4;">
+      <div style="width: 4px; background: #1e5c4a; flex-shrink: 0;"></div>
+      <div>
+        <div style="font-weight: 600; font-size: 15px; margin-bottom: 3px;">Insurance and pharma</div>
+        <p class="sm" style="margin: 0;">Insurers need vaccination proof to underwrite and to settle claims; vaccine manufacturers need compliance. Boehringer Ingelheim already publishes its own Pet Health Passport app. Both are plausible funders of a record product they don't want to build.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 22px; margin-bottom: 14px;">Regulation is the strongest tailwind in the deck</h3>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+    <div style="padding: 18px 20px; background: #e6efea; border-top: 3px solid #1e5c4a;">
+      <div class="eyebrow" style="color: #1e5c4a; margin-bottom: 8px;">European Union &middot; from 22 Apr 2026</div>
+      <ul class="sm" style="margin: 0; padding-left: 17px;">
+        <li>Pet passport is <strong>mandatory</strong>, not optional, for movement between member states.</li>
+        <li>All cats and dogs must be microchipped and registered in a national database.</li>
+        <li>Vaccination data must reach the TRACES system within <strong>24 hours</strong> of the vet recording it.</li>
+        <li>Border checks now verify that the chip number matches and that implantation preceded vaccination.</li>
+      </ul>
+    </div>
+    <div style="padding: 18px 20px; background: #e6efea; border-top: 3px solid #1e5c4a;">
+      <div class="eyebrow" style="color: #1e5c4a; margin-bottom: 8px;">India &middot; current</div>
+      <ul class="sm" style="margin: 0; padding-left: 17px;">
+        <li>Rabies vaccination must be current within <strong>12 months</strong> for any pet boarding an Indian flight.</li>
+        <li>Health certificate must be dated within <strong>7 days</strong> of departure, signed and stamped.</li>
+        <li>An AQCS <strong>Advance NOC</strong> is required before the pet can board.</li>
+        <li>An expired rabies certificate is not accepted for domestic air travel or export &mdash; no discretion.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="sm" style="margin-bottom: 8px;">Boarding facilities in India typically require rabies current within 12 months, a core combination vaccine record (DHPPiL for dogs, FVRCP for cats), and often Bordetella for shared spaces. Insurers commonly accept a scanned booklet, but the pet must be demonstrably up to date to be insurable at all.</p>
+  <p style="margin-bottom: 0;"><strong>Read the tailwind carefully.</strong> Regulation is normalising the verified digital record &mdash; but in the EU it is doing so through <em>state-run</em> infrastructure. That raises the ceiling on user expectations without necessarily creating room for a private app. The commercially interesting version of this trend is the private-sector equivalent: the boarding kennel, the airline desk, the new vet, the insurer &mdash; all of whom need proof and none of whom have a database.</p>
+
+  <!-- ===== COMPETITIVE ANALYSIS ===== -->
+  <div style="margin-top: 60px;">
+    <div class="eyebrow" style="margin-bottom: 12px;">03 &nbsp;/&nbsp; Competitive analysis</div>
+    <h2 style="font-size: 34px; line-height: 1.15; margin-bottom: 18px;">Five archetypes, and what each one gets wrong</h2>
+    <p class="lede" style="margin-bottom: 30px;">Listing competitors app-by-app is not useful &mdash; there are too many and most are interchangeable. What matters is the <strong>five structurally different bets</strong> people have made on this problem, because each fails in a characteristic way and each leaves a different opening.</p>
+  </div>
+
+  <!-- Archetype A -->
+  <div style="border: 1px solid #ddd7cb; background: #fff; margin-bottom: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 12px; padding: 16px 22px; background: #f2eee6; border-bottom: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500;">A</div>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Owner-side personal organisers</div>
+      <div class="eyebrow" style="margin-left: auto; color: #a2542d;">Crowded &middot; Commoditised</div>
+    </div>
+    <div style="padding: 18px 22px;">
+      <p class="sm" style="margin-bottom: 12px;"><strong>Who:</strong> 11pets, Vet Record, PokiPaw, PetVax, Pet Health Passport (Boehringer Ingelheim), Remewdy, PetNexa, Pet Notebook and a long tail of solo-developer apps.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">The bet</div>
+          <p class="sm" style="margin: 0;">Owners will maintain their own structured health record if you give them a good enough place to put it. Monetise with a premium tier &mdash; extra pets, exports, analytics.</p>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">Why it fails</div>
+          <p class="sm" style="margin: 0;">The data is self-entered, so no third party trusts it. Entry effort is high and usage frequency is low. The free tier is generous across the whole category, so pricing power is near zero. 11pets &mdash; arguably the category leader &mdash; has raised no funding and runs on a team of under ten.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Archetype B -->
+  <div style="border: 1px solid #ddd7cb; background: #fff; margin-bottom: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 12px; padding: 16px 22px; background: #f2eee6; border-bottom: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500;">B</div>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Clinic-tethered owner apps</div>
+      <div class="eyebrow" style="margin-left: auto; color: #a2542d;">Trusted &middot; Locked</div>
+    </div>
+    <div style="padding: 18px 22px;">
+      <p class="sm" style="margin-bottom: 12px;"><strong>Who:</strong> PetDesk, Vetstoria (3,000+ clinics, 30+ practice-management integrations), owner portals from ezyVet / IDEXX and Covetrus; in India, Vetic's app and clinic-branded portals built on VETport or Koko.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">The bet</div>
+          <p class="sm" style="margin: 0;">Sell to the clinic. The clinic pushes the app to its clients. Records are authoritative because the vet enters them, and booking plus reminders drive measurable visit revenue.</p>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">Why it fails the owner</div>
+          <p class="sm" style="margin: 0;">Your record only covers <em>that</em> clinic. Change vets, move cities, use an emergency hospital at 2am, or adopt a pet with history elsewhere and the record is incomplete or gone. PetDesk in particular is a booking and reminder tool &mdash; it does not hold weight history, documents or a personal care log.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Archetype C -->
+  <div style="border: 1px solid #ddd7cb; background: #fff; margin-bottom: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 12px; padding: 16px 22px; background: #f2eee6; border-bottom: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500;">C</div>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Record-retrieval brokers</div>
+      <div class="eyebrow" style="margin-left: auto; color: #a2542d;">Right idea &middot; Hard economics</div>
+    </div>
+    <div style="padding: 18px 22px;">
+      <p class="sm" style="margin-bottom: 12px;"><strong>Who:</strong> Pawprint &mdash; which fetched official records from your vet on request, and has since been folded into Great Pet Care.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">The bet</div>
+          <p class="sm" style="margin: 0;">Solve the cold-start problem for the owner by going and getting the record from the clinic &mdash; vaccination dates, prescriptions, weight history, visit logs &mdash; so the user never types anything.</p>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">Why it struggles</div>
+          <p class="sm" style="margin: 0;">Retrieval is partly manual, cost scales with users rather than shrinking, and clinics are an unwilling counterparty. Users also reported the free tier being squeezed as monetisation pressure built. The idea was right; the unit economics as a standalone consumer product were not.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Archetype D -->
+  <div style="border: 1px solid #1e5c4a; background: #fff; margin-bottom: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 12px; padding: 16px 22px; background: #e6efea; border-bottom: 1px solid #1e5c4a;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500;">D</div>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Verification rails for service businesses</div>
+      <div class="eyebrow" style="margin-left: auto; color: #1e5c4a;">Newest &middot; Best economics</div>
+    </div>
+    <div style="padding: 18px 22px;">
+      <p class="sm" style="margin-bottom: 12px;"><strong>Who:</strong> VetVerifi, Vedi (which links the vaccine record to the microchip number and issues a digital certificate), MyRover, and vaccine-tracking modules inside boarding platforms such as Gingr.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">The bet</div>
+          <p class="sm" style="margin: 0;">The valuable act is not <em>storing</em> the record, it is <em>verifying</em> it. Sell to kennels, groomers and daycares who must chase documents, guard against forgery, and retain records for compliance.</p>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">The limitation</div>
+          <p class="sm" style="margin: 0;">These are back-office tools. The owner experience is an afterthought &mdash; usually an upload form. Nobody in this segment has built a product an owner would actually want to keep, which is precisely the seam worth attacking.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Archetype E -->
+  <div style="border: 1px solid #ddd7cb; background: #fff; margin-bottom: 30px;">
+    <div style="display: flex; align-items: baseline; gap: 12px; padding: 16px 22px; background: #f2eee6; border-bottom: 1px solid #ddd7cb;">
+      <div class="num" style="font-size: 13px; color: #1e5c4a; font-weight: 500;">E</div>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Commerce and care super-apps</div>
+      <div class="eyebrow" style="margin-left: auto; color: #a2542d;">Well funded &middot; Records are bait</div>
+    </div>
+    <div style="padding: 18px 22px;">
+      <p class="sm" style="margin-bottom: 12px;"><strong>Who (India):</strong> Supertails, Vetic, Wiggles, Conbun, Heads Up For Tails, Zigly, ThePetNest, MaxPetz.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">The bet</div>
+          <p class="sm" style="margin: 0;">Bundle everything &mdash; consults, clinics, grooming, food, pharmacy delivery &mdash; and use digital records, vaccination reminders and pet IDs as the retention layer. Vetic stores vaccination cards and reports and pushes deworming and check-up reminders; Wiggles issues QR-coded pet IDs.</p>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom: 6px;">What this means for you</div>
+          <p class="sm" style="margin: 0;">These are the competitors that can outspend you and give records away forever. But their records are only as complete as their own network, and they are optimising for basket size, not for the moment an airline desk asks for a stamped certificate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 22px 26px; background: #1b1a17; color: #ede9df; margin-bottom: 20px;">
+    <div class="eyebrow" style="color: #9c9484; margin-bottom: 10px;">The pattern across all five</div>
+    <p style="margin: 0; font-size: 16.5px; line-height: 1.6; color: #ede9df;">Every archetype has chosen one of two things: a record that is <strong>portable but unverified</strong> (A, C) or <strong>verified but captive</strong> (B, D, E). Nobody has built a record that is <strong>both owner-held and third-party verifiable</strong>. That combination is what the paper booklet already delivers &mdash; which is why paper is still winning, and where a digital product has to land to actually replace it.</p>
+  </div>
+  <p class="sm" style="margin-bottom: 0; color: #7a7469;">See the <strong>Competitive Landscape</strong> artboard on this canvas for the positioning map, and <strong>Record Journey</strong> for where the record physically breaks down.</p>
+
+  <!-- ===== USER PROBLEMS ===== -->
+  <div style="margin-top: 60px;">
+    <div class="eyebrow" style="margin-bottom: 12px;">04 &nbsp;/&nbsp; User problems</div>
+    <h2 style="font-size: 34px; line-height: 1.15; margin-bottom: 18px;">Five jobs, and only one of them is "keep a record"</h2>
+    <p class="lede" style="margin-bottom: 28px;">Your original framing &mdash; "the booklet gets lost and I can't track cycles or past health issues" &mdash; is actually three separate jobs bundled together. Separating them matters, because they have different triggers, different urgency and different willingness to pay.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 1px; background: #ddd7cb; border: 1px solid #ddd7cb; margin-bottom: 34px;">
+    <div style="background: #fff; padding: 16px 20px; display: flex; gap: 18px;">
+      <div style="min-width: 120px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: #1e5c4a;">Prove it</div>
+        <div class="eyebrow" style="margin-top: 2px;">High urgency</div>
+      </div>
+      <div>
+        <p class="sm" style="margin: 0 0 5px;">"The kennel needs the rabies certificate by Friday." "The airline wants a health certificate dated within seven days." "The insurer wants proof of core vaccination before they'll cover him."</p>
+        <p class="sm" style="margin: 0; color: #7a7469;"><strong>Trigger:</strong> an external gatekeeper. <strong>Deadline-driven, emotionally charged, and the only job people will pay for on the spot.</strong></p>
+      </div>
+    </div>
+    <div style="background: #fff; padding: 16px 20px; display: flex; gap: 18px;">
+      <div style="min-width: 120px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: #1e5c4a;">Remember it</div>
+        <div class="eyebrow" style="margin-top: 2px;">Low urgency</div>
+      </div>
+      <div>
+        <p class="sm" style="margin: 0 0 5px;">"Is the booster due this month or next?" "Did we do the deworming in April?" "Which vaccine did he actually get &mdash; the 7-in-1 or the 9-in-1?"</p>
+        <p class="sm" style="margin: 0; color: #7a7469;"><strong>Trigger:</strong> a calendar date nobody is watching. This is the job every app builds for, and it is the weakest.</p>
+      </div>
+    </div>
+    <div style="background: #fff; padding: 16px 20px; display: flex; gap: 18px;">
+      <div style="min-width: 120px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: #1e5c4a;">Reconstruct it</div>
+        <div class="eyebrow" style="margin-top: 2px;">Painful</div>
+      </div>
+      <div>
+        <p class="sm" style="margin: 0 0 5px;">"We moved from Pune, the old clinic has the file, and the booklet stopped at page four." "He was a rescue &mdash; we have no idea what he had before us."</p>
+        <p class="sm" style="margin: 0; color: #7a7469;"><strong>Trigger:</strong> relocation, a new vet, adoption, a lost booklet. Acute for the ~70% of Indian pet parents who are first-timers, and for rescue and foster owners.</p>
+      </div>
+    </div>
+    <div style="background: #fff; padding: 16px 20px; display: flex; gap: 18px;">
+      <div style="min-width: 120px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: #1e5c4a;">Hand it over</div>
+        <div class="eyebrow" style="margin-top: 2px;">Underserved</div>
+      </div>
+      <div>
+        <p class="sm" style="margin: 0 0 5px;">"I'm travelling &mdash; my mother is looking after him and needs to know the medication schedule." "The sitter asked what he's allergic to."</p>
+        <p class="sm" style="margin: 0; color: #7a7469;"><strong>Trigger:</strong> handover to a family member, sitter, house help or new owner. Users in review threads explicitly say they would pay for multi-person access and can't get it.</p>
+      </div>
+    </div>
+    <div style="background: #fff; padding: 16px 20px; display: flex; gap: 18px;">
+      <div style="min-width: 120px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: #1e5c4a;">Decide with it</div>
+        <div class="eyebrow" style="margin-top: 2px;">Emerging</div>
+      </div>
+      <div>
+        <p class="sm" style="margin: 0 0 5px;">"Is this the fourth ear infection this year?" "He's lost weight since March &mdash; is that a lot?" "Has this rash happened before?"</p>
+        <p class="sm" style="margin: 0; color: #7a7469;"><strong>Trigger:</strong> a symptom. This is where "previous health issues" from your brief actually lives &mdash; and it needs a timeline, not a vaccination list.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 22px; margin-bottom: 14px;">What the evidence says is actually going wrong</h3>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 30px;">
+    <div style="padding: 16px 18px; background: #f6e9e0;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">Entry effort is the number one killer</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px; color: #4a3529;">Reviews across the category cite learning curves, quirky input flows and "user unfriendly, zero convenience". People abandon at setup, before the app has ever been useful.</p>
+    </div>
+    <div style="padding: 16px 18px; background: #f6e9e0;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">Records disappear</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px; color: #4a3529;">Documented reports of entire pet profiles, visit histories and measurements vanishing from an account. For a product whose only promise is "you won't lose this", that is fatal.</p>
+    </div>
+    <div style="padding: 16px 18px; background: #f6e9e0;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">One account, one caregiver</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px; color: #4a3529;">Pets are cared for by households, not individuals. Users say plainly they would subscribe if a partner or parent could fill in records when they aren't home. Most apps still model a single owner.</p>
+    </div>
+    <div style="padding: 16px 18px; background: #f6e9e0;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">Clinic reminders don't land</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px; color: #4a3529;">Industry analysis indicates owners book the vet after booking a boarding or grooming service &mdash; the service appointment is the leading indicator, not the reminder that arrived three weeks earlier.</p>
+    </div>
+    <div style="padding: 16px 18px; background: #f6e9e0;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">Owners don't share the vet's mental model</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px; color: #4a3529;">In a Merck study of cat owners, 16% named vaccination as a key contributor to health, against 69% of vets. 58% of owners rely on the vet for vaccine information, but only 23% of vets actively share material. Owners are under-informed by design.</p>
+    </div>
+    <div style="padding: 16px 18px; background: #f6e9e0;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">The record is illegible even when you have it</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px; color: #4a3529;">A vaccine entry carries type, date, due date, manufacturer, lot number, vet name and licence number &mdash; usually handwritten in a booklet. Owners frequently cannot tell what their pet actually received or when it expires.</p>
+    </div>
+  </div>
+
+  <h3 style="font-size: 22px; margin-bottom: 12px;">Four segments with genuinely different needs</h3>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: #ddd7cb; border: 1px solid #ddd7cb; margin-bottom: 0;">
+    <div style="background: #fff; padding: 15px 18px;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 4px;">First-time urban owner</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px;">Roughly 70% of the Indian market. Doesn't know what the schedule <em>should</em> be, so cannot detect a gap. Needs guidance more than storage. Highest volume, lowest willingness to pay.</p>
+    </div>
+    <div style="background: #fff; padding: 15px 18px;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 4px;">Relocating / travelling owner</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px;">Hits every gatekeeper at once: airline, AQCS NOC, new city, new vet, boarding. Small segment, enormous acute pain, real willingness to pay. The best beachhead.</p>
+    </div>
+    <div style="background: #fff; padding: 15px 18px;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 4px;">Multi-pet household</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px;">Three dogs on three different cycles is genuinely unmanageable on paper. Already the paying tier in most existing apps &mdash; and already served adequately.</p>
+    </div>
+    <div style="background: #fff; padding: 15px 18px;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 4px;">Rescue, foster and shelter</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px;">No history at all, high animal turnover, records must transfer with the animal at adoption. Structurally the worst-served group, and the one that generates records for everybody else.</p>
+    </div>
+  </div>
+
+  <!-- ===== BUSINESS PROBLEMS ===== -->
+  <div style="margin-top: 60px;">
+    <div class="eyebrow" style="margin-bottom: 12px;">05 &nbsp;/&nbsp; Business problems</div>
+    <h2 style="font-size: 34px; line-height: 1.15; margin-bottom: 18px;">Why this keeps getting built and keeps not working</h2>
+    <p class="lede" style="margin-bottom: 28px;">The design problem here is tractable. The business problem is the hard one, and it is the reason a category with dozens of entrants still has no winner. Four structural facts:</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px;">
+    <div style="padding: 18px 22px; border: 1px solid #ddd7cb; background: #fff;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 6px;">1. Pain and budget sit in different pockets</div>
+      <p class="sm" style="margin: 0;">The owner feels the pain and expects the app to be free, because six free ones already exist. The parties who will pay &mdash; boarding facilities carrying 12-month record-retention duties and forgery risk, clinics whose recall reminders are a revenue line, insurers with claims friction, vaccine manufacturers who need compliance &mdash; all feel a version of the same pain with a budget attached. A design that only serves the owner has no payer.</p>
+    </div>
+    <div style="padding: 18px 22px; border: 1px solid #ddd7cb; background: #fff;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 6px;">2. Frequency is brutally low</div>
+      <p class="sm" style="margin: 0;">A vaccination record is genuinely needed maybe three or four times a year. That is not enough to build a habit, sustain notification permissions, or justify acquisition spend. Every consumer-only entrant eventually tries to fix this by adding feeds, tips, social features or commerce &mdash; and dilutes the one thing it was good at. Low frequency is not a flaw to design away; it is a constraint to design <em>for</em>.</p>
+    </div>
+    <div style="padding: 18px 22px; border: 1px solid #ddd7cb; background: #fff;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 6px;">3. The data holder is a hostile counterparty</div>
+      <p class="sm" style="margin: 0;">Vets create the authoritative record and have every commercial reason to keep it. Indian practice makes this worse: clinics are frequently small owner-operated setups of 300&ndash;400 sq ft with little in-house diagnostics and minimal digitisation, so in many cases there is no digital record to integrate with at all. Any plan that depends on clinic API integration will stall in India for years.</p>
+    </div>
+    <div style="padding: 18px 22px; border: 1px solid #ddd7cb; background: #fff;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; margin-bottom: 6px;">4. You are one feature away from being absorbed</div>
+      <p class="sm" style="margin: 0;">Supertails, Vetic and Wiggles can add or improve records overnight and give them away, because they monetise food, pharmacy and consults. A standalone records app has no moat unless it holds something they cannot easily replicate &mdash; verified provenance, a network of accepting gatekeepers, or cross-clinic continuity.</p>
+    </div>
+  </div>
+
+  <div style="padding: 20px 24px; background: #e6efea; border-left: 3px solid #1e5c4a; margin-bottom: 8px;">
+    <div class="eyebrow" style="color: #1e5c4a; margin-bottom: 8px;">The one structural advantage available</div>
+    <p style="margin: 0; font-size: 16px; line-height: 1.58;">Vets won't share records with each other. Boarding facilities won't build databases. Insurers won't chase clinics. <strong>Only the owner has both the right and the motive to assemble a complete record across every provider their pet has ever seen.</strong> An owner-held record is the only version of this that can ever be complete &mdash; which is a real, defensible position, provided it can also be trusted.</p>
+  </div>
+  <p class="sm" style="margin-bottom: 0; color: #7a7469;">Worth noting: PetDesk, the best-known clinic-side player, has raised $14.1M with its last round in 2019, and 11pets leads the consumer side on no funding at all. This is not a category being won by capital. It is being lost by everyone on positioning.</p>
+
+  <!-- ===== DESIGN OPPORTUNITIES ===== -->
+  <div style="margin-top: 60px;">
+    <div class="eyebrow" style="margin-bottom: 12px;">06 &nbsp;/&nbsp; Design opportunities</div>
+    <h2 style="font-size: 34px; line-height: 1.15; margin-bottom: 18px;">Eight openings, ranked by how much they change the outcome</h2>
+    <p class="lede" style="margin-bottom: 30px;">Each of these is a design move with a defensibility argument attached. The first three are the ones that decide whether this product is different from the dozen that already exist.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 1px; background: #ddd7cb; border: 1px solid #ddd7cb; margin-bottom: 32px;">
+
+    <div style="background: #fff; padding: 20px 22px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+        <div class="num" style="font-size: 12px; color: #fff; background: #1e5c4a; padding: 3px 7px; font-weight: 500;">O1</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Capture in ten seconds, not ten fields</div>
+      </div>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Insight:</strong> The vaccination booklet page already contains everything &mdash; vaccine, date, due date, batch, vet signature and stamp. Owners are being asked to retype what they are already holding.</p>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Move:</strong> Camera-first. Photograph the booklet page or the vial sticker; extract the structured fields; keep the photograph as the evidence layer underneath. The user confirms, they don't compose. Every historical entry can be onboarded in one session with a stack of booklet photos.</p>
+      <p class="sm" style="margin: 0; color: #7a7469;"><strong>Why it holds:</strong> It attacks the single most-cited abandonment cause in the category. Handwritten Indian booklets will be hard &mdash; treat extraction accuracy as the core technical risk to prototype early, and always keep the image as fallback truth.</p>
+    </div>
+
+    <div style="background: #fff; padding: 20px 22px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+        <div class="num" style="font-size: 12px; color: #fff; background: #1e5c4a; padding: 3px 7px; font-weight: 500;">O2</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Design the proof, not the database</div>
+      </div>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Insight:</strong> Nobody wants a pet health database. They want to satisfy a person standing in front of them with a clipboard. The output is the product; storage is plumbing.</p>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Move:</strong> Make the hero object a shareable, printable, scannable <em>certificate</em> &mdash; a QR-verifiable link a kennel can open without installing anything, a clean PDF an airline desk accepts, a printed booklet insert that survives a dead phone. Design it to look like a document, because that is what gatekeepers are trained to accept.</p>
+      <p class="sm" style="margin: 0; color: #7a7469;"><strong>Why it holds:</strong> It is the only feature the free organiser apps structurally can't copy well, because it requires the record to mean something outside the app. It is also what makes the product shareable &mdash; every proof sent to a kennel is a distribution event.</p>
+    </div>
+
+    <div style="background: #fff; padding: 20px 22px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+        <div class="num" style="font-size: 12px; color: #fff; background: #1e5c4a; padding: 3px 7px; font-weight: 500;">O3</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Make provenance visible as a ladder</div>
+      </div>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Insight:</strong> Today a record is either "official" or "someone typed it". That binary forces every app into the untrusted bucket. But trust is really a spectrum, and showing where a record sits on that spectrum is honest and useful.</p>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Move:</strong> Three visible tiers &mdash; <strong>self-entered</strong>, <strong>document-backed</strong> (photo of the stamped booklet page attached), <strong>vet-attested</strong> (the clinic confirmed it, via a one-tap link, a signed upload, or a chip-linked certificate as Vedi does). Show the tier on the record and on the shared proof, so the kennel knows exactly what it is looking at.</p>
+      <p class="sm" style="margin: 0; color: #7a7469;"><strong>Why it holds:</strong> It lets you ship value on day one without any vet integration, and gives clinics a low-effort on-ramp later. No consumer app in the category does this.</p>
+    </div>
+
+    <div style="background: #fff; padding: 20px 22px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+        <div class="num" style="font-size: 12px; color: #fff; background: #1e5c4a; padding: 3px 7px; font-weight: 500;">O4</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Trigger off intent, not the calendar</div>
+      </div>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Insight:</strong> The evidence says a boarding or grooming booking predicts a vet visit better than a due-date reminder does. Intent is a stronger signal than time.</p>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Move:</strong> Let the user declare an upcoming event &mdash; a trip, a boarding stay, a flight, a move, a grooming appointment &mdash; and work backwards from the gatekeeper's requirements. "Kennel cough expires four days before Bruno's stay. Book the booster by the 14th." Reminders framed as consequences, not dates.</p>
+      <p class="sm" style="margin: 0; color: #7a7469;"><strong>Why it holds:</strong> It converts a low-frequency utility into a product with a reason to be opened at the exact moment attention exists.</p>
+    </div>
+
+    <div style="background: #fff; padding: 20px 22px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+        <div class="num" style="font-size: 12px; color: #fff; background: #1e5c4a; padding: 3px 7px; font-weight: 500;">O5</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">The household is the account, not the person</div>
+      </div>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Insight:</strong> Pets are looked after by partners, parents, siblings, house help and sitters. Users in review threads say outright they would pay for shared access and can't get it.</p>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Move:</strong> Multiple caregivers by default, with roles &mdash; a permanent co-owner, a temporary sitter with time-boxed read access, a vet with write access to one record. Anyone in the household can add a photo of a booklet page without owning the account.</p>
+      <p class="sm" style="margin: 0; color: #7a7469;"><strong>Why it holds:</strong> It is a stated, unmet, monetisable need, and it doubles the number of people with the app installed per pet.</p>
+    </div>
+
+    <div style="background: #fff; padding: 20px 22px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+        <div class="num" style="font-size: 12px; color: #fff; background: #1e5c4a; padding: 3px 7px; font-weight: 500;">O6</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Design for the unknown past</div>
+      </div>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Insight:</strong> A large share of Indian pets are rescues or adoptions with no history. Every app in the category greets them with an empty state, which reads as a reproach.</p>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Move:</strong> Start from estimated age and species and lay out what the schedule <em>should</em> look like, with unknowns explicitly marked as unknown rather than missing. Give first-time owners &mdash; roughly 70% of the market &mdash; the mental model they don't have, and give the vet a printable "here's what we know and don't" summary at the first visit.</p>
+      <p class="sm" style="margin: 0; color: #7a7469;"><strong>Why it holds:</strong> It turns the emptiest, most demoralising moment in the product into its most useful one, and serves the segment nobody is designing for.</p>
+    </div>
+
+    <div style="background: #fff; padding: 20px 22px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+        <div class="num" style="font-size: 12px; color: #fff; background: #1e5c4a; padding: 3px 7px; font-weight: 500;">O7</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">One timeline across every clinic</div>
+      </div>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Insight:</strong> Your "previous health issues" problem is not a vaccination problem. It is continuity &mdash; the emergency hospital, the old vet in another city, the dermatologist and the regular clinic each hold a fragment and none of them talk.</p>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Move:</strong> A single chronological health timeline that merges vaccinations, visits, medications, weights, symptoms and documents regardless of who provided them, with recurrence made visible &mdash; "fourth ear infection in fourteen months" &mdash; and a one-screen summary designed to be handed to a vet who has never seen this animal.</p>
+      <p class="sm" style="margin: 0; color: #7a7469;"><strong>Why it holds:</strong> Clinic-tethered apps structurally cannot do this. It is the clearest thing an owner-held record can offer that a provider-held one never will.</p>
+    </div>
+
+    <div style="background: #fff; padding: 20px 22px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+        <div class="num" style="font-size: 12px; color: #fff; background: #1e5c4a; padding: 3px 7px; font-weight: 500;">O8</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Enter through the gatekeeper</div>
+      </div>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Insight:</strong> The distribution problem and the monetisation problem have the same answer. Boarding facilities, groomers and daycares already chase these documents, already worry about forgery, and already pay for software.</p>
+      <p class="sm" style="margin: 0 0 8px;"><strong>Move:</strong> Give them a free, dead-simple verification inbox &mdash; a link they send at booking, records arrive structured and dated, expiries flagged automatically. Every owner who uses it arrives pre-qualified, at a moment of genuine need, referred by someone they trust. The business pays later for compliance reporting and integration.</p>
+      <p class="sm" style="margin: 0; color: #7a7469;"><strong>Why it holds:</strong> It solves acquisition cost, the frequency problem and the payer problem in one move &mdash; and it is the specific seam that VetVerifi-style tools left open by ignoring the owner experience.</p>
+    </div>
+
+  </div>
+
+  <div style="padding: 20px 24px; background: #f2eee6; border: 1px solid #ddd7cb; margin-bottom: 0;">
+    <div class="eyebrow" style="margin-bottom: 10px;">What not to build</div>
+    <ul class="sm" style="margin: 0; padding-left: 18px;">
+      <li><strong>Not a super-app.</strong> Supertails and Vetic have already won that shape, with capital and supply chains behind them.</li>
+      <li><strong>Not a social network for pets.</strong> It is the standard reflex when frequency is low, and it dilutes the one thing you would be good at.</li>
+      <li><strong>Not hardware or wearables.</strong> Different market, different economics, and it does not solve the lost-booklet problem.</li>
+      <li><strong>Not a clinic-integration-first strategy in India.</strong> Practice digitisation is too thin for that to be a viable day-one dependency.</li>
+    </ul>
+  </div>
+
+  <!-- ===== RISKS ===== -->
+  <div style="margin-top: 60px;">
+    <div class="eyebrow" style="margin-bottom: 12px;">07 &nbsp;/&nbsp; Where this could go wrong</div>
+    <h2 style="font-size: 34px; line-height: 1.15; margin-bottom: 22px;">Four things that would break the thesis</h2>
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 8px;">
+    <div style="padding: 16px 18px; border: 1px solid #e0cdbd; background: #fdf7f2;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">Extraction accuracy on handwritten booklets</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px;">O1 and O2 both depend on reading a page a rushed vet filled in by hand, sometimes in a regional script, sometimes with a stuck-on vial label. If this is only 70% reliable, the ten-second promise collapses. Prototype this before anything else.</p>
+    </div>
+    <div style="padding: 16px 18px; border: 1px solid #e0cdbd; background: #fdf7f2;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">Gatekeepers may not accept a new artifact</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px;">A kennel that has always wanted a stamped paper certificate may simply refuse a QR link. Acceptance is a behavioural question, not a technical one, and it needs to be tested with real facilities before O2 is committed to.</p>
+    </div>
+    <div style="padding: 16px 18px; border: 1px solid #e0cdbd; background: #fdf7f2;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">Vet attestation may be unwinnable</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px;">The top rung of the provenance ladder needs clinics to spend fifteen seconds confirming a record for a product that competes with their own recall reminders. If they won't, O3 caps at document-backed &mdash; still useful, but weaker.</p>
+    </div>
+    <div style="padding: 16px 18px; border: 1px solid #e0cdbd; background: #fdf7f2;">
+      <div style="font-weight: 600; font-size: 14.5px; margin-bottom: 5px; color: #7a3a1c;">A well-funded incumbent copies the wedge</div>
+      <p class="sm" style="margin: 0; font-size: 12.8px;">Vetic or Supertails could ship verified shareable certificates in a quarter. The defence is the gatekeeper network from O8, not the feature &mdash; which argues for building that side early rather than last.</p>
+    </div>
+  </div>
+
+  <!-- ===== NEXT ===== -->
+  <div style="margin-top: 60px; padding: 32px 34px; background: #1b1a17; color: #ede9df;">
+    <div class="eyebrow" style="color: #9c9484; margin-bottom: 12px;">08 &nbsp;/&nbsp; Step 2</div>
+    <h2 style="font-size: 32px; line-height: 1.15; color: #faf8f4; margin-bottom: 14px;">What this research cannot tell us</h2>
+    <p style="font-size: 16px; line-height: 1.6; color: #c9c2b3; margin-bottom: 26px; max-width: 620px;">Everything above is inference from published material. Three assumptions carry most of the weight and none of them have been tested with a real person: that the "prove it" moment is the sharpest pain, that gatekeepers will accept a digital artifact, and that capture effort is genuinely what kills these apps.</p>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;">
+      <div style="padding-top: 16px; border-top: 2px solid #1e5c4a;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; color: #faf8f4; margin-bottom: 6px;">A &middot; Primary research</div>
+        <p class="sm" style="margin: 0; color: #b3ab9b; font-size: 12.8px;">A discussion guide and screener for 8&ndash;10 pet parents plus 5 gatekeepers &mdash; a boarding operator, a groomer, two vets, an insurer. Validate the five jobs and rank them.</p>
+      </div>
+      <div style="padding-top: 16px; border-top: 2px solid #3a382f;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; color: #faf8f4; margin-bottom: 6px;">B &middot; Opportunity framing</div>
+        <p class="sm" style="margin: 0; color: #b3ab9b; font-size: 12.8px;">A jobs-to-be-done map, service blueprint across owner / vet / kennel, and two or three positioning concepts to choose between before any UI exists.</p>
+      </div>
+      <div style="padding-top: 16px; border-top: 2px solid #3a382f;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; color: #faf8f4; margin-bottom: 6px;">C &middot; Product definition</div>
+        <p class="sm" style="margin: 0; color: #b3ab9b; font-size: 12.8px;">Straight to scope and wireframes for the O1&ndash;O2&ndash;O3 core: camera capture, the proof artifact, the provenance ladder. Fastest route to something testable.</p>
+      </div>
+    </div>
+    <p class="sm" style="margin: 26px 0 0; color: #9c9484;">My recommendation is <strong style="color: #e6e1d5;">A, then B</strong> &mdash; the acceptance question in particular is cheap to answer with five phone calls and expensive to get wrong. But if you want to move faster, C is defensible as long as the extraction prototype comes first.</p>
+  </div>
+
+  <!-- ===== SOURCES ===== -->
+  <div style="margin-top: 52px;">
+    <div class="eyebrow" style="margin-bottom: 12px;">Sources</div>
+    <h3 style="font-size: 20px; margin-bottom: 16px;">Secondary research consulted</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 26px;">
+      <div>
+        <div class="eyebrow" style="margin-bottom: 8px;">Market sizing</div>
+        <ul class="sm" style="font-size: 12.5px; padding-left: 16px; margin-bottom: 18px;">
+          <li><a href="https://www.dogster.com/statistics/pet-industry-statistics-india/">Dogster &mdash; India pet industry statistics 2026</a></li>
+          <li><a href="https://www.petaloons.com/blogs/news/pet-care-india-made-in-india-pet-brands-2026">Petaloons &mdash; India pet care market 2026</a></li>
+          <li><a href="https://www.grandviewresearch.com/horizon/outlook/pet-care-market/india">Grand View Research &mdash; India pet care outlook</a></li>
+          <li><a href="https://www.imarcgroup.com/india-pet-care-products-market">IMARC &mdash; India pet care products market</a></li>
+          <li><a href="https://www.indianretailer.com/article/retail-business/trends/pet-healthcare-india-set-disruption-will-cross-5-bn-2030">Indian Retailer &mdash; pet healthcare to cross $5B by 2030</a></li>
+          <li><a href="https://finance.yahoo.com/news/global-pet-tech-market-poised-094000283.html">Mordor Intelligence &mdash; global pet tech to 2030</a></li>
+          <li><a href="https://www.arizton.com/market-reports/pet-tech-market">Arizton &mdash; pet tech market outlook</a></li>
+          <li><a href="https://www.imarcgroup.com/india-pet-insurance-market">IMARC &mdash; India pet insurance market</a></li>
+        </ul>
+        <div class="eyebrow" style="margin-bottom: 8px;">Competitors</div>
+        <ul class="sm" style="font-size: 12.5px; padding-left: 16px; margin-bottom: 0;">
+          <li><a href="https://apps.apple.com/us/app/id1232470530">11pets &mdash; App Store listing</a></li>
+          <li><a href="https://vetrecord.app/">Vet Record</a> &middot; <a href="https://pokipaw.com/blog/best-free-pet-health-tracker-apps">PokiPaw</a></li>
+          <li><a href="https://apps.apple.com/us/app/-/id6758548102">PetVax &mdash; Pet Health Passport</a></li>
+          <li><a href="https://www.vetstoria.com/blog/vetstoria-pms-integrations-for-veterinary-clinics/">Vetstoria &mdash; PMS integrations</a></li>
+          <li><a href="https://www.ezyvet.com/veterinary-practice-management-software">ezyVet by IDEXX</a></li>
+          <li><a href="https://account.greatpetcare.com/app">Pawprint &rarr; Great Pet Care</a></li>
+          <li><a href="https://vetverifi.com/dog-boarding-software">VetVerifi &mdash; boarding software</a> &middot; <a href="https://www.vedi.io/modules/vaccinations">Vedi</a></li>
+          <li><a href="https://vetic.in/blog/pet-health/the-importance-of-keeping-pet-vaccination-records-updated/">Vetic</a> &middot; <a href="https://wiggles.vercel.app/">Wiggles</a> &middot; <a href="https://www.conbun.com/blog/top-online-pet-care-apps-rare-breeds-india">Conbun &mdash; India app roundup</a></li>
+          <li><a href="https://www.crunchbase.com/organization/locaii">Crunchbase &mdash; PetDesk funding</a> &middot; <a href="https://www.crunchbase.com/organization/11pets">11pets</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-bottom: 8px;">Regulation &amp; requirements</div>
+        <ul class="sm" style="font-size: 12.5px; padding-left: 16px; margin-bottom: 18px;">
+          <li><a href="https://petbase.eu/en/nieuwe-europese-regels-voor-reizen-met-huisdieren-vanaf-22-april-2026/">PetBase &mdash; new EU pet travel rules from 22 April 2026</a></li>
+          <li><a href="https://www.visaverge.com/news/european-pet-passport-requires-iso-compliant-microchip-and-rabies-vaccination-from-april/">VisaVerge &mdash; EU microchip and passport mandate</a></li>
+          <li><a href="https://www.airindia.com/in/en/travel-information/travelling-with-pets.html">Air India &mdash; travelling with pets</a></li>
+          <li><a href="https://www.happyfares.in/blog/pet-travel-from-india-dgca-rules-2026/">DGCA / AWBI pet travel rules from India</a></li>
+          <li><a href="https://www.maxpetz.com/health-hub/blog/preparing-your-pets-vaccination-record-what-documents-to-keep-in-india-wbgj4ch">MaxPetz &mdash; vaccination documents to keep in India</a></li>
+          <li><a href="https://hemopet.org/boarding-kennels-and-grooming-vaccination-laws-and-issues/">Hemopet &mdash; boarding and grooming vaccination law</a></li>
+          <li><a href="https://www.fetchmelatermckinney.com/post/protecting-pets-health-current-vaccine-requirements-optional-boarding">Boarding vaccine requirement practice</a></li>
+          <li><a href="https://joinditto.in/articles/general/pet-insurance/">Ditto &mdash; pet insurance in India</a> &middot; <a href="https://headsupfortails.com/blogs/all/pet-insurance-in-india-guide">HUFT</a></li>
+        </ul>
+        <div class="eyebrow" style="margin-bottom: 8px;">User behaviour &amp; practice</div>
+        <ul class="sm" style="font-size: 12.5px; padding-left: 16px; margin-bottom: 0;">
+          <li><a href="https://www.vetverifi.com/blog/pet-vaccination-reminders-vet-clinic-notifications">VetVerifi &mdash; why clinic reminders don't drive action</a></li>
+          <li><a href="https://www.merck-animal-health.com/news-and-insights/news-releases/study-from-merck-animal-health-reveals-opportunity-to-increase-feline-vaccination-through-knowledge-sharing-between-veterinarians-and-cat-owners/">Merck Animal Health &mdash; feline vaccination study</a></li>
+          <li><a href="https://www.veterinarypracticenews.com/bizbuilder-august-2022/">Veterinary Practice News &mdash; vaccine compliance strategies</a></li>
+          <li><a href="https://www.cityvax.com/blog/how-to-read-and-understand-your-pets-vaccine-records">CityVax &mdash; how to read a vaccine record</a></li>
+          <li><a href="https://apps.apple.com/us/app/pet-health/id6447807502?see-all=reviews&amp;platform=iphone">App Store &mdash; pet health app reviews</a></li>
+          <li><a href="https://www.gingrapp.com/blog/why-manual-vaccine-tracking-is-costing-your-pet-care-biz-time">Gingr &mdash; cost of manual vaccine tracking</a></li>
+          <li><a href="https://khushi-maheshwari.medium.com/the-future-of-pet-care-in-india-why-vet-tech-driven-models-are-ripe-for-73ad5badf988">On the fragmentation of Indian vet practice</a></li>
+          <li><a href="https://koko.vet/blogs/veterinary-clinic-management-software-in-india-complete-guide.html">Koko &mdash; vet clinic software in India</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule" style="margin: 40px 0 18px;">
+  <p class="sm" style="margin: 0; color: #7a7469; font-size: 12px;">Compiled 26 August 2026 from publicly available sources. Market figures are directional. Competitor capabilities and pricing were read from public listings and marketing pages and may have changed; verify anything you intend to act on.</p>
+
+  </div><!-- /padded -->
+</div><!-- /page -->
+</x-dc>
+</body>
+</html>
