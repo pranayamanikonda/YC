@@ -14,10 +14,11 @@
     .eyebrow { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #7a7469; }
     .chip { font-size: 13px; font-weight: 500; color: #1b1a17; }
     .note { font-size: 11.5px; line-height: 1.45; color: #7a7469; }
+    .pill { font-size: 11.5px; padding: 3px 8px; background: #efece4; border: 1px solid #ddd7cb; }
   </style>
 </helmet>
 
-<div style="width: 1120px; height: 820px; background: #faf8f4; padding: 0; position: relative; box-sizing: border-box;">
+<div style="width: 1280px; height: 820px; background: #faf8f4; padding: 0; position: relative; box-sizing: border-box;">
 
   <div style="padding: 34px 44px 0;">
     <div class="eyebrow" style="margin-bottom: 8px;">Competitive landscape &middot; pet health records</div>
@@ -25,84 +26,79 @@
   </div>
 
   <!-- plot -->
-  <div style="position: absolute; left: 150px; top: 132px; width: 860px; height: 560px;">
+  <div style="position: absolute; left: 150px; top: 132px; width: 1060px; height: 560px;">
 
     <!-- quadrant fills -->
-    <div style="position: absolute; left: 0; top: 0; width: 430px; height: 280px; background: #efece4;"></div>
-    <div style="position: absolute; left: 430px; top: 0; width: 430px; height: 280px; background: #e6efea;"></div>
-    <div style="position: absolute; left: 0; top: 280px; width: 430px; height: 280px; background: #f4f1e9;"></div>
-    <div style="position: absolute; left: 430px; top: 280px; width: 430px; height: 280px; background: #f0ede4;"></div>
+    <div style="position: absolute; left: 0; top: 0; width: 530px; height: 280px; background: #efece4;"></div>
+    <div style="position: absolute; left: 530px; top: 0; width: 530px; height: 280px; background: #e6efea;"></div>
+    <div style="position: absolute; left: 0; top: 280px; width: 530px; height: 280px; background: #f4f1e9;"></div>
+    <div style="position: absolute; left: 530px; top: 280px; width: 530px; height: 280px; background: #f0ede4;"></div>
 
     <!-- axes -->
-    <div style="position: absolute; left: 0; top: 280px; width: 860px; height: 1px; background: #c4bdae;"></div>
-    <div style="position: absolute; left: 430px; top: 0; width: 1px; height: 560px; background: #c4bdae;"></div>
-    <div style="position: absolute; left: 0; top: 0; width: 860px; height: 560px; border: 1px solid #ddd7cb; box-sizing: border-box;"></div>
+    <div style="position: absolute; left: 0; top: 280px; width: 1060px; height: 1px; background: #c4bdae;"></div>
+    <div style="position: absolute; left: 530px; top: 0; width: 1px; height: 560px; background: #c4bdae;"></div>
+    <div style="position: absolute; left: 0; top: 0; width: 1060px; height: 560px; border: 1px solid #ddd7cb; box-sizing: border-box;"></div>
 
-    <!-- quadrant labels -->
-    <div class="eyebrow" style="position: absolute; left: 14px; top: 12px; color: #a2542d;">Commodity zone</div>
-    <div class="eyebrow" style="position: absolute; right: 14px; top: 12px; color: #1e5c4a; text-align: right;">The opening</div>
-    <div class="eyebrow" style="position: absolute; left: 14px; bottom: 12px;">Paperwork purgatory</div>
-    <div class="eyebrow" style="position: absolute; right: 14px; bottom: 12px; text-align: right;">Back-office rails</div>
+    <!-- quadrant corner labels -->
+    <div class="eyebrow" style="position: absolute; left: 14px; top: 11px; color: #a2542d;">Commodity zone</div>
+    <div class="eyebrow" style="position: absolute; right: 14px; top: 11px; color: #1e5c4a;">The opening</div>
+    <div class="eyebrow" style="position: absolute; left: 14px; bottom: 11px;">Paperwork purgatory</div>
+    <div class="eyebrow" style="position: absolute; right: 14px; bottom: 11px;">Back-office rails</div>
 
-    <!-- TOP LEFT cluster -->
-    <div style="position: absolute; left: 34px; top: 52px; width: 330px; padding: 16px 18px; background: #fdfcf9; border: 1px solid #ddd7cb;">
+    <!-- TOP LEFT: owner organisers -->
+    <div style="position: absolute; left: 24px; top: 44px; width: 290px; padding: 15px 17px; background: #fdfcf9; border: 1px solid #ddd7cb; box-sizing: border-box;">
       <div class="chip" style="margin-bottom: 8px;">Owner-side personal organisers</div>
       <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
-        <span style="font-size: 11.5px; padding: 3px 8px; background: #efece4; border: 1px solid #ddd7cb;">11pets</span>
-        <span style="font-size: 11.5px; padding: 3px 8px; background: #efece4; border: 1px solid #ddd7cb;">Vet Record</span>
-        <span style="font-size: 11.5px; padding: 3px 8px; background: #efece4; border: 1px solid #ddd7cb;">PokiPaw</span>
-        <span style="font-size: 11.5px; padding: 3px 8px; background: #efece4; border: 1px solid #ddd7cb;">PetVax</span>
-        <span style="font-size: 11.5px; padding: 3px 8px; background: #efece4; border: 1px solid #ddd7cb;">Remewdy</span>
-        <span style="font-size: 11.5px; padding: 3px 8px; background: #efece4; border: 1px solid #ddd7cb;">Pet Health Passport</span>
-        <span style="font-size: 11.5px; padding: 3px 8px; background: #efece4; border: 1px solid #ddd7cb;">Notes app + camera roll</span>
+        <span class="pill">11pets</span>
+        <span class="pill">Vet Record</span>
+        <span class="pill">PokiPaw</span>
+        <span class="pill">PetVax</span>
+        <span class="pill">Remewdy</span>
+        <span class="pill">Pet Health Passport</span>
+        <span class="pill">Notes app + camera roll</span>
       </div>
       <div class="note">Free or near-free, self-entered, no standing with any third party. Six-plus direct substitutes means no pricing power.</div>
     </div>
 
-    <!-- India ecosystem, straddling -->
-    <div style="position: absolute; left: 322px; top: 196px; width: 250px; padding: 13px 15px; background: #fdfcf9; border: 1px dashed #b9b1a1;">
+    <!-- TOP RIGHT (left side): Pawprint -->
+    <div style="position: absolute; left: 545px; top: 66px; width: 150px; padding: 12px 13px; background: #fdfcf9; border: 1px solid #ddd7cb; opacity: 0.75; box-sizing: border-box;">
+      <div class="chip" style="margin-bottom: 5px;">Pawprint</div>
+      <div class="note">Fetched official records from clinics on request. Right idea, manual economics &mdash; since folded into Great Pet Care.</div>
+    </div>
+
+    <!-- TOP RIGHT: the opening, containing the paper incumbent -->
+    <div style="position: absolute; left: 715px; top: 44px; width: 315px; padding: 15px 16px; border: 2px dashed #1e5c4a; background: rgba(230,239,234,0.92); box-sizing: border-box;">
+      <div class="eyebrow" style="color: #1e5c4a; margin-bottom: 7px;">Unoccupied by any product</div>
+      <div style="font-size: 12.5px; line-height: 1.5; color: #1b3f34; margin-bottom: 13px;"><strong>Owner-held and third-party verifiable.</strong> A record the owner assembles across every provider, that a kennel, airline or insurer will still accept.</div>
+      <div style="padding: 14px 15px; background: #1b1a17; color: #f4f1ea;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; margin-bottom: 5px; color: #faf8f4;">Except the paper booklet</div>
+        <div style="font-size: 11.5px; line-height: 1.45; color: #b3ab9b;">Owner-held. Vet-stamped. Accepted everywhere, by everyone, with no onboarding. Fails only on loss, damage, search and simultaneity &mdash; which is the entire brief.</div>
+      </div>
+    </div>
+
+    <!-- STRADDLING: India ecosystems -->
+    <div style="position: absolute; left: 330px; top: 210px; width: 260px; padding: 13px 15px; background: #fdfcf9; border: 1px dashed #b9b1a1; box-sizing: border-box;">
       <div class="chip" style="margin-bottom: 6px;">India care ecosystems</div>
       <div style="font-size: 11.5px; color: #4a4740; margin-bottom: 7px;">Supertails &middot; Vetic &middot; Wiggles &middot; Zigly &middot; HUFT</div>
       <div class="note">Owner-facing and vet-generated &mdash; but only inside their own clinic network. Records are retention glue for food and pharmacy margin.</div>
     </div>
 
-    <!-- TOP RIGHT: paper booklet -->
-    <div style="position: absolute; right: 42px; top: 56px; width: 268px;">
-      <div style="padding: 16px 18px; background: #1b1a17; color: #f4f1ea;">
-        <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; margin-bottom: 6px; color: #faf8f4;">The paper booklet</div>
-        <div style="font-size: 11.5px; line-height: 1.45; color: #b3ab9b;">Owner-held. Vet-stamped. Accepted everywhere, by everyone, with no onboarding. Fails only on loss, damage, search and simultaneity &mdash; which is the entire brief.</div>
-      </div>
-      <div class="eyebrow" style="color: #a2542d; margin-top: 8px;">&larr; The incumbent to beat</div>
-    </div>
-
-    <!-- TOP RIGHT: Pawprint -->
-    <div style="position: absolute; left: 470px; top: 168px; width: 200px; padding: 12px 14px; background: #fdfcf9; border: 1px solid #ddd7cb; opacity: 0.72;">
-      <div class="chip" style="margin-bottom: 5px;">Pawprint</div>
-      <div class="note">Fetched official records from clinics on request. Right idea, manual economics &mdash; folded into Great Pet Care.</div>
-    </div>
-
-    <!-- opening marker -->
-    <div style="position: absolute; right: 66px; top: 214px; width: 218px; padding: 14px 16px; border: 2px dashed #1e5c4a; background: rgba(230,239,234,0.9);">
-      <div class="eyebrow" style="color: #1e5c4a; margin-bottom: 6px;">Unoccupied</div>
-      <div style="font-size: 12.5px; line-height: 1.5; color: #1b3f34;"><strong>Owner-held and third-party verifiable.</strong> A record the owner assembles across every provider, that a kennel, airline or insurer will still accept.</div>
-    </div>
-
     <!-- BOTTOM RIGHT: verification rails -->
-    <div style="position: absolute; left: 462px; bottom: 128px; width: 250px; padding: 13px 15px; background: #fdfcf9; border: 1px solid #ddd7cb;">
+    <div style="position: absolute; left: 555px; top: 340px; width: 240px; padding: 13px 15px; background: #fdfcf9; border: 1px solid #ddd7cb; box-sizing: border-box;">
       <div class="chip" style="margin-bottom: 6px;">Verification rails</div>
       <div style="font-size: 11.5px; color: #4a4740; margin-bottom: 7px;">VetVerifi &middot; Vedi &middot; Gingr &middot; MyRover</div>
-      <div class="note">Sold to kennels and groomers who must chase and retain documents. Owner experience is an upload form.</div>
+      <div class="note">Sold to kennels and groomers who must chase and retain documents. The owner experience is an upload form.</div>
     </div>
 
     <!-- BOTTOM RIGHT: clinic stack -->
-    <div style="position: absolute; right: 34px; bottom: 46px; width: 236px; padding: 13px 15px; background: #fdfcf9; border: 1px solid #ddd7cb;">
+    <div style="position: absolute; left: 815px; top: 340px; width: 230px; padding: 13px 15px; background: #fdfcf9; border: 1px solid #ddd7cb; box-sizing: border-box;">
       <div class="chip" style="margin-bottom: 6px;">Clinic stack</div>
       <div style="font-size: 11.5px; color: #4a4740; margin-bottom: 7px;">ezyVet &middot; Covetrus &middot; PetDesk &middot; Vetstoria &middot; VETport &middot; Koko</div>
       <div class="note">Authoritative and complete &mdash; for one clinic. No commercial reason to make the record portable.</div>
     </div>
 
-    <!-- BOTTOM LEFT -->
-    <div style="position: absolute; left: 34px; bottom: 52px; width: 300px; padding: 13px 15px; background: #fdfcf9; border: 1px solid #ddd7cb;">
+    <!-- BOTTOM LEFT: manual intake -->
+    <div style="position: absolute; left: 24px; top: 400px; width: 320px; padding: 13px 15px; background: #fdfcf9; border: 1px solid #ddd7cb; box-sizing: border-box;">
       <div class="chip" style="margin-bottom: 6px;">Manual intake, today's default</div>
       <div style="font-size: 11.5px; color: #4a4740; margin-bottom: 7px;">WhatsApp photos &middot; Google Forms &middot; paper intake at the counter</div>
       <div class="note">How most Indian kennels and groomers actually collect vaccination proof. Unverifiable, unsearchable, and someone's job.</div>
@@ -112,13 +108,13 @@
 
   <!-- Y axis -->
   <div style="position: absolute; left: 0; top: 132px; height: 560px; width: 140px;">
-    <div class="eyebrow" style="position: absolute; left: 44px; top: 0; width: 200px; transform: rotate(-90deg); transform-origin: left top; color: #4a4740;">Designed for the pet owner</div>
+    <div class="eyebrow" style="position: absolute; left: 44px; top: 0; width: 210px; transform: rotate(-90deg); transform-origin: left top; color: #4a4740;">Designed for the pet owner</div>
     <div class="eyebrow" style="position: absolute; left: 44px; top: 560px; width: 220px; transform: rotate(-90deg); transform-origin: left top; color: #4a4740;">Designed for the business</div>
     <div style="position: absolute; left: 22px; top: 0; width: 1px; height: 560px; background: #ddd7cb;"></div>
   </div>
 
   <!-- X axis -->
-  <div style="position: absolute; left: 150px; top: 700px; width: 860px;">
+  <div style="position: absolute; left: 150px; top: 700px; width: 1060px;">
     <div style="height: 1px; background: #ddd7cb; margin-bottom: 10px;"></div>
     <div style="display: flex; justify-content: space-between;">
       <div class="eyebrow" style="color: #4a4740;">Self-asserted &mdash; nobody has to believe it</div>
@@ -126,7 +122,7 @@
     </div>
   </div>
 
-  <div class="note" style="position: absolute; left: 150px; bottom: 26px; width: 860px;">Positioning is inferred from public product listings and marketing material, not from testing. Placement reflects each product's primary bet, not its full feature list.</div>
+  <div class="note" style="position: absolute; left: 150px; bottom: 26px; width: 1060px;">Positioning is inferred from public product listings and marketing material, not from testing. Placement reflects each product's primary bet, not its full feature list.</div>
 
 </div>
 </x-dc>
