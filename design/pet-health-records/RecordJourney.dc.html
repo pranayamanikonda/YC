@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+  <style>
+    body { margin: 0; background: #faf8f4; color: #1b1a17; font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #1e5c4a; } a:hover { color: #143d31; }
+    .eyebrow { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #7a7469; }
+    .stage-t { font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; line-height: 1.2; }
+    .body-s { font-size: 12.5px; line-height: 1.5; color: #4a4740; }
+    .tag { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; font-weight: 500; color: #fff; background: #1e5c4a; padding: 2px 6px; }
+  </style>
+</helmet>
+
+<div style="width: 1480px; height: 900px; background: #faf8f4; box-sizing: border-box; padding: 38px 44px 0;">
+
+  <div style="margin-bottom: 26px;">
+    <div class="eyebrow" style="margin-bottom: 8px;">Record journey &middot; where the vaccination record actually breaks</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 27px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 6px;">The record is created once, ignored for a year, then urgently needed by a stranger.</div>
+    <div class="body-s" style="max-width: 900px;">Six stages from the vet's pen to the moment someone demands proof. The failure points below are where the paper system breaks &mdash; and each one maps to a design opportunity from the analysis.</div>
+  </div>
+
+  <!-- timeline rail -->
+  <div style="position: relative; height: 26px; margin-bottom: 14px;">
+    <div style="position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: #ddd7cb;"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 11px; height: 11px; border-radius: 50%; background: #1e5c4a; margin-top: 6px;"></div><div class="eyebrow" style="margin-top: 6px;">Day 0</div></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 11px; height: 11px; border-radius: 50%; background: #1e5c4a; margin-top: 6px;"></div><div class="eyebrow" style="margin-top: 6px;">Same day</div></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 11px; height: 11px; border-radius: 50%; background: #b9b1a1; margin-top: 6px;"></div><div class="eyebrow" style="margin-top: 6px;">Months 1&ndash;11</div></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 11px; height: 11px; border-radius: 50%; background: #a2542d; margin-top: 6px;"></div><div class="eyebrow" style="margin-top: 6px; color: #8a4526;">The demand</div></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 11px; height: 11px; border-radius: 50%; background: #a2542d; margin-top: 6px;"></div><div class="eyebrow" style="margin-top: 6px; color: #8a4526;">Minutes to hours</div></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 11px; height: 11px; border-radius: 50%; background: #a2542d; margin-top: 6px;"></div><div class="eyebrow" style="margin-top: 6px; color: #8a4526;">Consequence</div></div>
+    </div>
+  </div>
+
+  <!-- stages -->
+  <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px;">
+    <div style="background: #fff; border: 1px solid #ddd7cb; padding: 16px 15px; min-height: 148px;">
+      <div class="eyebrow" style="margin-bottom: 7px;">01</div>
+      <div class="stage-t" style="margin-bottom: 7px;">The vet writes it down</div>
+      <div class="body-s">Vaccine type, date, due date, batch number, signature and clinic stamp &mdash; handwritten into a passport-size booklet. Sometimes also keyed into clinic software.</div>
+    </div>
+    <div style="background: #fff; border: 1px solid #ddd7cb; padding: 16px 15px; min-height: 148px;">
+      <div class="eyebrow" style="margin-bottom: 7px;">02</div>
+      <div class="stage-t" style="margin-bottom: 7px;">The booklet goes home</div>
+      <div class="body-s">Into a drawer, a document folder, a shelf. It is now the only complete copy of this animal's medical history, and it is a paper object in a household.</div>
+    </div>
+    <div style="background: #fff; border: 1px solid #ddd7cb; padding: 16px 15px; min-height: 148px;">
+      <div class="eyebrow" style="margin-bottom: 7px;">03</div>
+      <div class="stage-t" style="margin-bottom: 7px;">Nothing happens for a year</div>
+      <div class="body-s">Boosters come due on a schedule nobody has internalised. A clinic SMS may arrive. It competes with everything else in the notification tray.</div>
+    </div>
+    <div style="background: #fff; border: 1px solid #ddd7cb; padding: 16px 15px; min-height: 148px;">
+      <div class="eyebrow" style="margin-bottom: 7px; color: #8a4526;">04</div>
+      <div class="stage-t" style="margin-bottom: 7px;">Someone demands proof</div>
+      <div class="body-s">A kennel before a trip. An airline desk. A new landlord. An insurer at claim time. A new vet at 11pm. Adoption paperwork. Always external, always dated.</div>
+    </div>
+    <div style="background: #fff; border: 1px solid #ddd7cb; padding: 16px 15px; min-height: 148px;">
+      <div class="eyebrow" style="margin-bottom: 7px; color: #8a4526;">05</div>
+      <div class="stage-t" style="margin-bottom: 7px;">The search</div>
+      <div class="body-s">Turn out the drawer. Call the old clinic. Ask the ex-partner. Squint at handwriting from 2023 to work out whether it says DHPPiL or DHPPi.</div>
+    </div>
+    <div style="background: #fff; border: 1px solid #ddd7cb; padding: 16px 15px; min-height: 148px;">
+      <div class="eyebrow" style="margin-bottom: 7px; color: #8a4526;">06</div>
+      <div class="stage-t" style="margin-bottom: 7px;">The cost lands</div>
+      <div class="body-s">Re-vaccinate unnecessarily. Get refused at the kennel. Rebook the flight. Have a claim rejected. Or hand an emergency vet an animal with no history.</div>
+    </div>
+  </div>
+
+  <!-- breaks -->
+  <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div style="background: #f6e9e0; border-left: 3px solid #a2542d; padding: 14px 14px; min-height: 176px; display: flex; flex-direction: column;">
+      <div class="eyebrow" style="color: #8a4526; margin-bottom: 7px;">Break 01</div>
+      <div class="body-s" style="color: #4a3529; flex-grow: 1;">The authoritative copy is created in the one format that cannot be backed up, searched, or duplicated &mdash; and the owner is handed sole custody of it for the animal's whole life.</div>
+      <div style="display: flex; gap: 5px; margin-top: 10px;"><span class="tag">O1</span><span class="tag">O3</span></div>
+    </div>
+    <div style="background: #f6e9e0; border-left: 3px solid #a2542d; padding: 14px 14px; min-height: 176px; display: flex; flex-direction: column;">
+      <div class="eyebrow" style="color: #8a4526; margin-bottom: 7px;">Break 02</div>
+      <div class="body-s" style="color: #4a3529; flex-grow: 1;">No digital trace is created that the owner controls. The clinic's copy, where it exists, stays inside the clinic and covers only that clinic's visits.</div>
+      <div style="display: flex; gap: 5px; margin-top: 10px;"><span class="tag">O3</span><span class="tag">O7</span></div>
+    </div>
+    <div style="background: #f6e9e0; border-left: 3px solid #a2542d; padding: 14px 14px; min-height: 176px; display: flex; flex-direction: column;">
+      <div class="eyebrow" style="color: #8a4526; margin-bottom: 7px;">Break 03</div>
+      <div class="body-s" style="color: #4a3529; flex-grow: 1;">The reminder arrives with no consequence attached, weeks before anything is at stake. Evidence suggests it is the service booking, not the reminder, that actually drives a vet visit.</div>
+      <div style="display: flex; gap: 5px; margin-top: 10px;"><span class="tag">O4</span></div>
+    </div>
+    <div style="background: #f6e9e0; border-left: 3px solid #a2542d; padding: 14px 14px; min-height: 176px; display: flex; flex-direction: column;">
+      <div class="eyebrow" style="color: #8a4526; margin-bottom: 7px;">Break 04</div>
+      <div class="body-s" style="color: #4a3529; flex-grow: 1;">The record's only real use is triggered by someone else, on a short deadline, in a format they specify &mdash; and the owner finds out what is required at the worst possible moment.</div>
+      <div style="display: flex; gap: 5px; margin-top: 10px;"><span class="tag">O2</span><span class="tag">O4</span></div>
+    </div>
+    <div style="background: #f6e9e0; border-left: 3px solid #a2542d; padding: 14px 14px; min-height: 176px; display: flex; flex-direction: column;">
+      <div class="eyebrow" style="color: #8a4526; margin-bottom: 7px;">Break 05</div>
+      <div class="body-s" style="color: #4a3529; flex-grow: 1;">Lost, water-damaged, left in the old flat, held by whoever kept the dog after the split, or sitting in a clinic in a city nobody lives in any more. It also cannot be in two hands at once.</div>
+      <div style="display: flex; gap: 5px; margin-top: 10px;"><span class="tag">O2</span><span class="tag">O5</span></div>
+    </div>
+    <div style="background: #f6e9e0; border-left: 3px solid #a2542d; padding: 14px 14px; min-height: 176px; display: flex; flex-direction: column;">
+      <div class="eyebrow" style="color: #8a4526; margin-bottom: 7px;">Break 06</div>
+      <div class="body-s" style="color: #4a3529; flex-grow: 1;">The animal pays for the record-keeping failure &mdash; an unnecessary vaccine, a delayed diagnosis, or a history that restarts at zero every time the household or the vet changes.</div>
+      <div style="display: flex; gap: 5px; margin-top: 10px;"><span class="tag">O6</span><span class="tag">O7</span></div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 20px; padding: 18px 22px; background: #1b1a17; color: #ede9df;">
+    <div class="eyebrow" style="color: #9c9484; min-width: 140px; padding-top: 3px;">What this shows</div>
+    <div style="font-size: 14.5px; line-height: 1.55; max-width: 1080px;">Five of the six breaks happen <strong>after</strong> the record leaves the clinic &mdash; in the owner's custody, where no existing product operates. The clinic stack cannot reach them and the free organiser apps cannot make the record count when it is finally asked for. The design job is not storage. It is <strong>custody, continuity and proof</strong>.</div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

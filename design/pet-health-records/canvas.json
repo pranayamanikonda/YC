@@ -1,0 +1,45 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 794,
+      "h": 13000,
+      "print": "flow",
+      "expand": "fill",
+      "title": "Market & Competitive Analysis"
+    },
+    {
+      "file": "Landscape.dc.html",
+      "x": 914,
+      "y": 0,
+      "w": 1280,
+      "h": 820,
+      "print": "fixed",
+      "title": "Competitive Landscape"
+    },
+    {
+      "file": "RecordJourney.dc.html",
+      "x": 914,
+      "y": 1000,
+      "w": 1480,
+      "h": 900,
+      "print": "fixed",
+      "title": "Record Journey"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "start-here",
+      "x": 0,
+      "y": -230,
+      "w": 460,
+      "text": "Step 1 — secondary research.\n\nThe long artboard is the full analysis; the two on the right are the summary visuals. Step 2 options are at the end of the report."
+    }
+  ],
+  "launch": {
+    "view": "focused",
+    "file": "Main.dc.html"
+  }
+}
