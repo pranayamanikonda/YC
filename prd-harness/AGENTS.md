@@ -50,7 +50,10 @@ a stage skill overrides your default behavior. When they conflict, stop and ask.
   — an open frontier ticket blocks **G1**. Before the human approves **G1** or **G2**, dispatch
   `griller` to interrogate the plan (see `skills/grilling`).
 - **Ingest assets, don't reference uploads.** An attached file is ephemeral until copied into
-  `<project>/assets/` via `assets-intake`. Never treat an upload path as durable.
+  `<project>/assets/` via `assets-intake`. Never treat an upload path as durable. A **video**
+  source is read with `skills/watch` — answer from its frames and transcript, never from its
+  title — then fill the report and `watch stage` it so the report and its hero frames become
+  project assets and a wiki source. The working directory it leaves behind is not durable.
 - **Smallest coherent change.** Prefer reuse and simplicity. Do not scaffold speculative
   structure a stage's phase mask did not call for.
 

@@ -39,7 +39,7 @@ Four constants hold on every run:
 | ----------- | --------------- |
 | `sources/` | `prd/`, `definition/`, `design/design-system/tokens.md` |
 | `harnesses/` (rules & contracts) | `prd-harness/rules/`, `agents/`, `AGENTS.md`, `process.md` |
-| `scripts/` (build/automation) | `prd-harness/skills/` (`prd-intake`, `pipeline`, `assets-intake`, `sync-rules`) |
+| `scripts/` (build/automation) | `prd-harness/skills/` (`prd-intake`, `pipeline`, `assets-intake`, `watch`, `sync-rules`) |
 | `audits/` (proof) | `pipeline/audit.mjs`, the three gates, `docs/validation-report.md` |
 | `generated/` | `design/` outputs, `artifacts/`, `src/` |
 | `documentation/` | `docs/`, `memory.md`, `docs/system-overview.md` |
@@ -227,6 +227,13 @@ See `rules/common/accessibility.md`.
 - **Assets** — attached files are ephemeral until ingested into `<project>/assets/` (content-
   hashed, indexed in the manifest) via `assets-intake`. Storage & durability — what survives,
   and where PRDs live — are documented in [`STORAGE.md`](./STORAGE.md).
+- **Video sources** — a video the work depends on (a competitor launch, a screen-recorded bug,
+  a research session, a talk the PRD cites) is read with `skills/watch`: one frame per shot,
+  editorial pacing, a dense pass over the first ten seconds, and a timestamped transcript from
+  captions or Whisper. The agent answers from the frames, fills the report's `[[FILL]]`
+  markers, and stages it — the report and its hero frames land in `assets/watched/<slug>/` and
+  the report becomes a wiki source, so the video's content compounds like every other input.
+  The ephemeral working directory (video, all frames, audio) is deleted. See `skills/watch`.
 - **Design-system proof** — Stage 5 emits `design/design-system/tokens.json` (DTCG 2025.10),
   validated deterministically by `skills/pipeline/tokens.mjs`: structural validity, the
   primitive → semantic → component tier model (tier leakage / upward refs error), intent-based
@@ -292,4 +299,8 @@ The pipeline synthesizes patterns from repository-harness, superpowers, qm, and 
 front-of-pipeline additions — **wayfinder** (investigation-ticket planning), **grilling**
 (sequential gate interrogation), **handoff** (session compaction), and the single **testing
 seam** — are adapted from [`mattpocock/skills`](https://github.com/mattpocock/skills); its
-`writing-great-skills` conventions inform `rules/common/authoring.md`.
+`writing-great-skills` conventions inform `rules/common/authoring.md`. **`watch`** is a port of
+[`taoufik123-collab/claude-watch`](https://github.com/taoufik123-collab/claude-watch) and
+Bradley Bonanno's [`claude-video`](https://github.com/bradautomates/claude-video) (both MIT),
+rebased onto `assets-intake` + the wiki instead of its Obsidian ingest — see
+[`skills/watch/CREDITS.md`](./skills/watch/CREDITS.md).
