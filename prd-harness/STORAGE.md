@@ -18,6 +18,7 @@ Everything else is temporary.
 | Input | Lands at | Durable? | To keep it |
 | ----- | -------- | -------- | ---------- |
 | Attached file | `/root/.claude/uploads/<session>/…` (container) | No | Ingest into `<project>/assets/` |
+| Watched video | a temp working dir (video · frames · audio) | No | Fill the report, then `watch stage` — it keeps the report + hero frames |
 | Pasted PRD text | The conversation | No | Written to `<project>/prd/PRD.md`, then committed |
 | Scaffolded project | wherever `outDir` points | Only if inside the repo AND committed | Commit + push |
 | Figma design | Figma (your team) | Yes (Figma) | URL recorded in `design/figma-links.md` |
@@ -56,6 +57,18 @@ node prd-harness/skills/assets-intake/ingest.mjs <projectDir> <file...>
 
 Small text/binaries live in `assets/` (durable via git). For **large binaries**, prefer a
 Figma/Drive link recorded in `design/figma-links.md` — git is a poor blob store.
+
+A watched video follows the same rule, which is why `watch stage` keeps only the report and
+its 3–5 hero frames:
+
+```bash
+node prd-harness/skills/watch/watch.mjs stage <projectDir> <workDir> [--type pattern]
+```
+
+The video itself, the full frame set, and the extracted audio stay in the ephemeral working
+directory and are deleted. What survives is `assets/watched/<slug>/` — the report (indexed in
+`manifest.assets[]` like any other asset) plus the frames worth keeping — and the wiki page
+that cites it.
 
 ## Choosing where PRDs live (privacy)
 

@@ -26,6 +26,10 @@ node prd-harness/skills/pipeline/run.mjs audit   "$P"      # consistency + stale
 # ingest an uploaded asset into the project (durable, content-hashed)
 node prd-harness/skills/assets-intake/ingest.mjs "$P" /path/to/logo.svg
 
+# watch a video source, then stage the filled report into the project + wiki
+node prd-harness/skills/watch/watch.mjs run <url-or-path> --intent "why you're watching"
+node prd-harness/skills/watch/watch.mjs stage "$P" <workDir>
+
 # regenerate Cursor rules after editing AGENTS.md or rules/
 node prd-harness/skills/sync-rules/sync.mjs
 
@@ -71,6 +75,7 @@ prd-harness/
     handoff/          session-compaction snapshot (survives context compaction)
     wiki/             LLM-maintained knowledge wiki (Ingest/Query/Lint; lint blocks gates)
     assets-intake/    ingest uploaded files into assets/ (content-hashed, indexed)
+    watch/            watch a video source (scene-change frames · pacing · hook · transcript)
     sync-rules/       regenerate .cursor/rules from the canonical source
   templates/          PRD · product-brief · epics · acceptance-criteria · design-brief ·
                       personas · decisions · ADR · exec-plan · validation-report ·
@@ -91,13 +96,16 @@ tokens** (`tokens.json`, DTCG 2025.10 — structure, tier model / leakage, inten
 coverage, WCAG contrast), and detects **staleness** — edit an upstream artefact and the
 dependent downstream stages are flagged `stale` and blocked from shipping until re-run
 (flag + block, never auto-rewrite). Uploaded **assets** are ingested
-into `assets/` (content-hashed, indexed); durable state lives in `memory.md` (curated), the
+into `assets/` (content-hashed, indexed), and a **video** source is watched with `watch`
+(one frame per shot, editorial pacing, a dense 0–10s hook pass, captions-or-Whisper
+transcript) and staged into `assets/watched/<slug>/` as a wiki source; durable state lives in `memory.md` (curated), the
 ledger (history), and a **compounding LLM-maintained `wiki/`** (Karpathy's pattern —
 Ingest/Query/Lint; the Lint blocks gates on broken links / missing provenance / stale pages) —
 see `STORAGE.md` and `skills/wiki`. Large or foggy PRDs are **charted** first with `wayfinder`
 (a map + investigation tickets; an open frontier ticket blocks G1); the human gates are
 **grilled** by the `griller` agent before approval; and `handoff` writes a secret-scrubbed
-compaction snapshot so a fresh agent resumes cleanly. Covered by `npm test` (139 tests,
-including a full end-to-end run through G1/G2/G3, wayfinder gating, change-propagation, and
-DTCG token validation). Figma drafting of design artefacts is performed live via the Figma
+compaction snapshot so a fresh agent resumes cleanly. Covered by `npm test` (204 tests,
+including a full end-to-end run through G1/G2/G3, wayfinder gating, change-propagation,
+DTCG token validation, and the video pipeline — its frame budget, transcript parsing, report
+schema, and staging into assets + wiki, plus a real ffmpeg run where ffmpeg is installed). Figma drafting of design artefacts is performed live via the Figma
 MCP, driven by the design-stage specs.

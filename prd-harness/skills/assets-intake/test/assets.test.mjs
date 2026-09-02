@@ -102,3 +102,42 @@ test("scaffold initializes an empty assets index and a memory.md", () => {
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("a subdir groups an ingest under assets/ and the manifest records the path", () => {
+  const { root, projectDir } = newProject();
+  try {
+    const src = makeFile(root, "report.md", "# watched\n");
+    const res = ingest({ projectDir, files: [src], subdir: "watched/a-video-2026-08-02", date: DATE });
+    assert.equal(res.ingested[0].name, "watched/a-video-2026-08-02/report.md");
+    assert.ok(existsSync(join(projectDir, "assets/watched/a-video-2026-08-02/report.md")));
+    const manifest = JSON.parse(readFileSync(join(projectDir, ".harness/manifest.json"), "utf8"));
+    assert.equal(manifest.assets[0].name, "watched/a-video-2026-08-02/report.md");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a subdir cannot escape assets/", () => {
+  const { root, projectDir } = newProject();
+  try {
+    const src = makeFile(root, "x.txt", "x");
+    assert.throws(() => ingest({ projectDir, files: [src], subdir: "../../etc", date: DATE }), /invalid subdir/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("the same name in two subdirs is two assets, not a collision", () => {
+  const { root, projectDir } = newProject();
+  try {
+    const a = makeFile(root, "report.md", "first");
+    const b = makeFile(join(root, ""), "report2.md", "second");
+    ingest({ projectDir, files: [a], subdir: "watched/one", date: DATE });
+    const res = ingest({ projectDir, files: [b], subdir: "watched/two", date: DATE });
+    assert.equal(res.ingested[0].name, "watched/two/report2.md");
+    assert.ok(existsSync(join(projectDir, "assets/watched/one/report.md")));
+    assert.ok(existsSync(join(projectDir, "assets/watched/two/report2.md")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
