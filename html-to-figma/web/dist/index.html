@@ -14,9 +14,9 @@
     --r-sm: 8px; --r: 12px; --r-lg: 16px; --shadow: 0 1px 2px rgba(24,24,27,.06), 0 4px 16px rgba(24,24,27,.06);
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --bg:#111113; --surface:#18181b; --surface-2:#222226; --line:#2e2e33; --ink:#f4f4f5; --ink-2:#b4b4bb; --ink-3:#7c7c85; --brand:#8b7fff; --brand-2:#2a2550; --shadow: 0 1px 2px rgba(0,0,0,.4); }
+    :root:not([data-theme="light"]) { --bg:#111113; --surface:#18181b; --surface-2:#222226; --line:#2e2e33; --ink:#f4f4f5; --ink-2:#b4b4bb; --ink-3:#7c7c85; --brand:#8b7fff; --brand-2:#2a2550; --shadow: 0 1px 2px rgba(0,0,0,.4); color-scheme: dark; }
   }
-  :root[data-theme="dark"] { --bg:#111113; --surface:#18181b; --surface-2:#222226; --line:#2e2e33; --ink:#f4f4f5; --ink-2:#b4b4bb; --ink-3:#7c7c85; --brand:#8b7fff; --brand-2:#2a2550; --shadow: 0 1px 2px rgba(0,0,0,.4); }
+  :root[data-theme="dark"] { --bg:#111113; --surface:#18181b; --surface-2:#222226; --line:#2e2e33; --ink:#f4f4f5; --ink-2:#b4b4bb; --ink-3:#7c7c85; --brand:#8b7fff; --brand-2:#2a2550; --shadow: 0 1px 2px rgba(0,0,0,.4); color-scheme: dark; }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body { margin: 0; font: 15px/24px Inter, system-ui, sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; }
@@ -24,7 +24,7 @@
   code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }
   .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
   /* nav */
-  .topnav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .topnav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
   .topnav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
   .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); text-decoration: none; }
   .logo i { width: 24px; height: 24px; border-radius: 8px; background: conic-gradient(from 180deg, #f24e1e, #ff7262, #a259ff, #1abcfe, #0acf83, #f24e1e); display: inline-block; }
@@ -2646,7 +2646,12 @@ Rules — follow all of them:
   };
   $('#copyBtn').onclick = async () => {
     try { await navigator.clipboard.writeText(H2F.serialize(state.doc)); toast('Copied — paste into the plugin’s “From website” tab'); }
-    catch (e) { toast('Clipboard blocked — use Download instead'); }
+    catch (e) {
+      let ta = document.getElementById('jsonOut');
+      if (!ta) { ta = document.createElement('textarea'); ta.id = 'jsonOut'; ta.readOnly = true; ta.style.cssText = 'margin:8px;width:calc(100% - 16px);height:160px'; $('.main .toolbar').after(ta); }
+      ta.value = H2F.serialize(state.doc); ta.focus(); ta.select();
+      toast('Clipboard blocked — the JSON is selected below, press ⌘C / Ctrl+C');
+    }
   };
 
   // ---------- views
