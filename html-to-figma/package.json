@@ -1,0 +1,12 @@
+{
+  "name": "html-to-figma",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTML & screenshots → Figma designs with auto layout, components, variables and a 4/8pt grid. Website + Figma plugin sharing one engine.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/build.mjs && node --test test/*.test.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}

@@ -1,0 +1,2582 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: var(--figma-color-bg, #fff);
+    --bg2: var(--figma-color-bg-secondary, #f5f5f5);
+    --bg3: var(--figma-color-bg-tertiary, #e6e6e6);
+    --fg: var(--figma-color-text, #1e1e1e);
+    --fg2: var(--figma-color-text-secondary, #6b6b6b);
+    --line: var(--figma-color-border, #e6e6e6);
+    --brand: var(--figma-color-bg-brand, #0d99ff);
+    --brand-fg: var(--figma-color-text-onbrand, #fff);
+    --ok: var(--figma-color-text-success, #14ae5c);
+    --warn: var(--figma-color-text-warning, #b86200);
+    --err: var(--figma-color-text-danger, #dc3412);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 12px/16px Inter, system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 2; }
+  header h1 { margin: 0; font-size: 13px; font-weight: 600; }
+  header .ver { color: var(--fg2); font-size: 11px; }
+  main { padding: 0 16px 96px; }
+  section { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  h2 { margin: 0 0 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--fg2); display: flex; gap: 8px; align-items: center; }
+  h2 .n { display: inline-flex; width: 16px; height: 16px; border-radius: 8px; background: var(--fg); color: var(--bg); align-items: center; justify-content: center; font-size: 10px; }
+  .tabs { display: flex; gap: 4px; padding: 4px; background: var(--bg2); border-radius: 8px; margin-bottom: 12px; }
+  .tabs button { flex: 1; padding: 6px 8px; border: 0; border-radius: 4px; background: transparent; color: var(--fg2); font: inherit; font-weight: 500; cursor: pointer; }
+  .tabs button.on { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  textarea, input[type=text], input[type=password], input[type=number], select { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); font: inherit; }
+  textarea { min-height: 120px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; resize: vertical; }
+  .drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--fg2); text-align: center; cursor: pointer; }
+  .drop.over { border-color: var(--brand); background: var(--bg2); }
+  .drop img { max-width: 100%; max-height: 160px; border-radius: 4px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .stack { display: flex; flex-direction: column; gap: 8px; }
+  .muted { color: var(--fg2); }
+  .small { font-size: 11px; }
+  .pane { display: none; }
+  .pane.on { display: flex; flex-direction: column; gap: 8px; }
+  .presets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .preset { display: flex; flex-direction: column; gap: 0; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); text-align: left; font: inherit; cursor: pointer; }
+  .preset b { font-weight: 500; }
+  .preset span { color: var(--fg2); font-size: 11px; }
+  .preset.on { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+  .group-label { grid-column: 1 / -1; color: var(--fg2); font-size: 11px; margin-top: 4px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .seg button { padding: 4px 12px; border: 0; background: var(--bg); color: var(--fg); font: inherit; cursor: pointer; }
+  .seg button.on { background: var(--fg); color: var(--bg); }
+  label.check { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; cursor: pointer; }
+  label.check input { margin: 2px 0 0; }
+  label.check small { display: block; color: var(--fg2); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px; background: var(--bg); border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+  .btn { padding: 8px 16px; border: 0; border-radius: 6px; background: var(--brand); color: var(--brand-fg); font: inherit; font-weight: 600; cursor: pointer; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.ghost { background: var(--bg2); color: var(--fg); font-weight: 500; }
+  .bar { height: 4px; border-radius: 2px; background: var(--bg3); overflow: hidden; display: none; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .2s; }
+  .status { font-size: 11px; color: var(--fg2); min-height: 16px; }
+  .status.err { color: var(--err); }
+  .result { display: none; padding: 12px; border-radius: 8px; background: var(--bg2); gap: 8px; flex-direction: column; }
+  .result.on { display: flex; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat { padding: 8px; border-radius: 6px; background: var(--bg); }
+  .stat b { display: block; font-size: 16px; line-height: 20px; }
+  .stat span { color: var(--fg2); font-size: 10px; }
+  details summary { cursor: pointer; color: var(--fg2); }
+  details ul { margin: 4px 0 0; padding-left: 16px; color: var(--fg2); font-size: 11px; }
+  .pill { display: inline-block; padding: 0 6px; border-radius: 8px; background: var(--bg3); font-size: 10px; }
+  a { color: var(--brand); }
+</style>
+</head>
+<body>
+<header>
+  <h1>HTML → Figma</h1>
+  <span class="ver" id="ver"></span>
+</header>
+<main>
+  <!-- 1. Source -->
+  <section>
+    <h2><span class="n">1</span>Source</h2>
+    <div class="tabs" id="srcTabs">
+      <button data-src="html" class="on">HTML</button>
+      <button data-src="image">Image</button>
+      <button data-src="json">From website</button>
+    </div>
+
+    <div class="pane on" data-pane="html">
+      <div class="drop" id="htmlDrop">
+        <b>Drop an .html file</b><span class="small">or click to upload · or paste markup below</span>
+        <input type="file" id="htmlFile" accept=".html,.htm,text/html" hidden>
+      </div>
+      <textarea id="htmlInput" placeholder="<!doctype html>&#10;<html>…"></textarea>
+      <div class="row">
+        <select id="sample"><option value="">Load a sample…</option></select>
+      </div>
+      <details>
+        <summary class="small">Advanced</summary>
+        <div class="stack" style="margin-top:8px">
+          <input type="text" id="baseUrl" placeholder="Base URL for relative images/CSS (optional)">
+          <label class="check"><input type="checkbox" id="runScripts"><span>Run page scripts<small>Needed for JS-rendered markup. Only enable for HTML you trust.</small></span></label>
+        </div>
+      </details>
+    </div>
+
+    <div class="pane" data-pane="image">
+      <div class="drop" id="imgDrop">
+        <b>Drop a screenshot or mockup</b><span class="small">PNG, JPG, WebP · click to upload · or paste (⌘V)</span>
+        <input type="file" id="imgFile" accept="image/*" hidden>
+      </div>
+      <div class="stack">
+        <label class="check"><input type="radio" name="imgMode" value="ai" checked><span>Rebuild as editable layers (AI)<small>Claude reads the image and writes grid-aligned flexbox HTML, which becomes auto layout + components.</small></span></label>
+        <label class="check"><input type="radio" name="imgMode" value="ref"><span>Place as reference image<small>A locked-size frame at your screen width to trace over.</small></span></label>
+      </div>
+      <div class="stack" id="aiOpts">
+        <input type="password" id="apiKey" placeholder="Anthropic API key (sk-ant-…)" autocomplete="off">
+        <span class="small muted">Stored only in this plugin's local storage, sent only to api.anthropic.com.</span>
+        <input type="text" id="aiNotes" placeholder="Notes for the AI (optional) — e.g. 'font is Manrope'">
+      </div>
+    </div>
+
+    <div class="pane" data-pane="json">
+      <div class="drop" id="jsonDrop">
+        <b>Drop a .h2f.json file</b><span class="small">Exported from the HTML → Figma website</span>
+        <input type="file" id="jsonFile" accept=".json,application/json" hidden>
+      </div>
+      <textarea id="jsonInput" placeholder="…or paste the copied design JSON"></textarea>
+    </div>
+  </section>
+
+  <!-- 2. Screen size -->
+  <section id="screenSection">
+    <h2><span class="n">2</span>Screen size</h2>
+    <div class="presets" id="presets"></div>
+    <div class="row" style="margin-top:8px">
+      <span class="muted">Custom</span>
+      <input type="number" id="cw" min="240" max="3840" step="4" style="width:80px"> ×
+      <input type="number" id="ch" min="240" max="8000" step="4" style="width:80px">
+    </div>
+  </section>
+
+  <!-- 3. Design rules -->
+  <section>
+    <h2><span class="n">3</span>Design rules</h2>
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <span>Spacing grid</span>
+      <div class="seg" id="baseSeg"><button data-base="4">4 pt</button><button data-base="8" class="on">8 pt</button></div>
+    </div>
+    <div class="grid2">
+      <label class="check"><input type="checkbox" id="snapSpacing" checked><span>Snap padding &amp; gaps</span></label>
+      <label class="check"><input type="checkbox" id="snapRadius" checked><span>Snap corner radius</span></label>
+      <label class="check"><input type="checkbox" id="snapSizes" checked><span>Snap fixed sizes</span></label>
+      <label class="check"><input type="checkbox" id="snapType" checked><span>Type scale &amp; 4pt line-height</span></label>
+    </div>
+    <div class="grid2" style="margin-top:4px">
+      <label class="check"><input type="checkbox" id="optAuto" checked><span>Auto layout</span></label>
+      <label class="check"><input type="checkbox" id="optComp" checked><span>Components &amp; variants</span></label>
+      <label class="check"><input type="checkbox" id="optTokens" checked><span>Variables &amp; text styles</span></label>
+    </div>
+  </section>
+
+  <div class="result" id="result">
+    <b id="resTitle">Done</b>
+    <div class="stats" id="stats"></div>
+    <div class="small muted" id="resNote"></div>
+    <details id="warnBox"><summary class="small">Warnings</summary><ul id="warnings"></ul></details>
+  </div>
+</main>
+<footer>
+  <div class="bar" id="bar"><i></i></div>
+  <div class="status" id="status">Choose a source, a screen size and press Convert.</div>
+  <button class="btn" id="go">Convert to Figma</button>
+</footer>
+
+<script>
+/* html-to-figma core — generated by scripts/build.mjs, do not edit */
+/*
+ * H2F core — grid.js
+ * Design-principle rules: snapping spacing / radius / sizes to a 4pt or 8pt grid,
+ * type scale, colour naming. Pure functions, no DOM. Shared by the website and
+ * the Figma plugin UI (both inline this file at build time).
+ */
+(function (root) {
+  const H2F = (root.H2F = root.H2F || {});
+
+  const PILL = 9999;
+
+  /** Common product type scale (px). Values outside are snapped to the nearest step. */
+  const TYPE_SCALE = [10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32, 36, 40, 44, 48, 56, 64, 72, 80, 96, 112, 128];
+
+  const DEFAULT_RULES = {
+    base: 8, // 4 or 8
+    snapSpacing: true, // padding, gap
+    snapRadius: true,
+    snapSizes: true, // fixed widths / heights, absolute offsets
+    snapType: true, // font sizes to TYPE_SCALE, line-heights to 4
+    halfStep: true, // on an 8pt grid allow 4 for values below 16 (standard 8pt practice)
+  };
+
+  /**
+   * Snap a spacing-like value to the grid.
+   * 8pt grid: values < 16 may use the 4pt half-step (0, 4, 8, 12); larger snap to multiples of 8.
+   * 4pt grid: nearest multiple of 4.
+   * Values below 2px are border/rounding noise and become 0; 2px and up keep their intent (→ 4).
+   */
+  function snapSpace(v, rules) {
+    const r = rules || DEFAULT_RULES;
+    if (!isFinite(v)) return 0;
+    const sign = v < 0 ? -1 : 1;
+    let a = Math.abs(v);
+    if (a < 2) return 0; // sub-2px "spacing" is border / rounding noise
+    const base = r.base === 4 ? 4 : 8;
+    let step = base;
+    if (base === 8 && r.halfStep !== false && a < 16) step = 4;
+    let out = Math.round(a / step) * step;
+    if (out === 0) out = step === 8 && r.halfStep !== false ? 4 : step;
+    return sign * out;
+  }
+
+  /** Radius: pills stay pills, everything else snaps like spacing. */
+  function snapRadius(v, w, h, rules) {
+    if (!isFinite(v) || v <= 0) return 0;
+    const minSide = Math.min(w || Infinity, h || Infinity);
+    if (v >= 999 || (isFinite(minSide) && v >= minSide / 2 - 0.5)) return PILL;
+    return snapSpace(v, rules);
+  }
+
+  /** Fixed dimensions: 4pt aligned. */
+  function snapSize(v) {
+    if (!isFinite(v)) return 0;
+    if (v <= 0) return 0;
+    if (v < 2) return Math.max(1, Math.round(v)); // hairlines / dividers keep 1px
+    // sizes are not spacing: they align to the 4pt baseline on both grids (keeps 852px screens at 852)
+    return Math.max(4, Math.round(v / 4) * 4);
+  }
+
+  function snapFontSize(v) {
+    let best = TYPE_SCALE[0];
+    for (const s of TYPE_SCALE) if (Math.abs(s - v) < Math.abs(best - v)) best = s;
+    if (v > TYPE_SCALE[TYPE_SCALE.length - 1]) return Math.round(v / 8) * 8;
+    return best;
+  }
+
+  function snapLineHeight(v) {
+    if (!isFinite(v) || v <= 0) return v;
+    return Math.max(4, Math.round(v / 4) * 4);
+  }
+
+  /** Round to 2 decimals (avoid 15.999999 noise in output). */
+  function r2(v) {
+    return Math.round(v * 100) / 100;
+  }
+
+  // ---------- colour helpers ----------
+  function toHex(c) {
+    const h = (x) => Math.round(Math.max(0, Math.min(1, x)) * 255).toString(16).padStart(2, '0');
+    return ('#' + h(c.r) + h(c.g) + h(c.b)).toUpperCase();
+  }
+
+  function rgbToHsl(c) {
+    const { r, g, b } = c;
+    const max = Math.max(r, g, b),
+      min = Math.min(r, g, b);
+    let h = 0,
+      s = 0;
+    const l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h, s, l };
+  }
+
+  const HUES = [
+    [15, 'red'],
+    [40, 'orange'],
+    [50, 'amber'],
+    [65, 'yellow'],
+    [90, 'lime'],
+    [150, 'green'],
+    [175, 'teal'],
+    [195, 'cyan'],
+    [225, 'blue'],
+    [250, 'indigo'],
+    [275, 'violet'],
+    [295, 'purple'],
+    [335, 'pink'],
+    [350, 'rose'],
+    [361, 'red'],
+  ];
+
+  /** Tailwind-like semantic-ish name: gray/900, blue/500, white, black. */
+  function colorName(c) {
+    const { h, s, l } = rgbToHsl(c);
+    if (l > 0.995) return 'white';
+    if (l < 0.02) return 'black';
+    let family = 'gray';
+    if (s >= 0.12 && s < 0.32 && h >= 180 && h <= 260 && l > 0.08 && l < 0.97) family = 'slate';
+    else if (s >= 0.12 && (l > 0.97 || l < 0.08) && s < 0.5) family = h >= 180 && h <= 260 ? 'slate' : 'gray';
+    else if (s >= 0.12) {
+      for (const [lim, name] of HUES) {
+        if (h < lim) {
+          family = name;
+          break;
+        }
+      }
+    }
+    let step = Math.round((1 - l) * 10) * 100;
+    step = Math.max(50, Math.min(950, step === 0 ? 50 : step));
+    return family + '/' + step;
+  }
+
+  function colorDistance(a, b) {
+    return Math.abs(a.r - b.r) + Math.abs(a.g - b.g) + Math.abs(a.b - b.b);
+  }
+
+  const WEIGHT_NAMES = {
+    100: 'Thin',
+    200: 'ExtraLight',
+    300: 'Light',
+    400: 'Regular',
+    500: 'Medium',
+    600: 'SemiBold',
+    700: 'Bold',
+    800: 'ExtraBold',
+    900: 'Black',
+  };
+
+  function weightName(w) {
+    const k = Math.min(900, Math.max(100, Math.round((w || 400) / 100) * 100));
+    return WEIGHT_NAMES[k];
+  }
+
+  /** Text style role from font size. */
+  function typeRole(size) {
+    if (size >= 40) return 'Display';
+    if (size >= 24) return 'Heading';
+    if (size >= 18) return 'Title';
+    if (size >= 14) return 'Body';
+    return 'Caption';
+  }
+
+  H2F.grid = {
+    PILL,
+    TYPE_SCALE,
+    DEFAULT_RULES,
+    snapSpace,
+    snapRadius,
+    snapSize,
+    snapFontSize,
+    snapLineHeight,
+    r2,
+    toHex,
+    rgbToHsl,
+    colorName,
+    colorDistance,
+    weightName,
+    typeRole,
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/*
+ * H2F core — extract.js
+ * Walks a *rendered* DOM (an iframe sized to the chosen screen) and produces a raw
+ * tree of boxes + computed styles. Runs in a browser (website or Figma plugin UI).
+ * No layout decisions are made here — see layout.js.
+ */
+(function (root) {
+  const H2F = (root.H2F = root.H2F || {});
+
+  const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'HEAD', 'META', 'LINK', 'TITLE', 'BASE']);
+  const REPLACED = new Set(['IMG', 'SVG', 'INPUT', 'TEXTAREA', 'SELECT', 'VIDEO', 'CANVAS', 'IFRAME', 'PICTURE', 'OBJECT', 'EMBED', 'BUTTON', 'HR']);
+  const SVG_SHAPES = new Set(['path', 'circle', 'rect', 'ellipse', 'line', 'polyline', 'polygon', 'text', 'tspan', 'use', 'g']);
+
+  // ---------------------------------------------------------------- colours
+  let _ctx = null;
+  function colorCtx() {
+    if (_ctx) return _ctx;
+    const c = document.createElement('canvas');
+    c.width = c.height = 1;
+    _ctx = c.getContext('2d', { willReadFrequently: true });
+    return _ctx;
+  }
+
+  function parseColor(str) {
+    if (!str || str === 'transparent' || str === 'none') return null;
+    let m = str.match(/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/i);
+    if (m) {
+      let a = m[4] === undefined ? 1 : m[4].endsWith('%') ? parseFloat(m[4]) / 100 : parseFloat(m[4]);
+      if (a <= 0.001) return null;
+      return { r: +m[1] / 255, g: +m[2] / 255, b: +m[3] / 255, a };
+    }
+    // oklch(), color(display-p3 …), lab() … → let the canvas resolve it to sRGB.
+    try {
+      const ctx = colorCtx();
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = '#000';
+      ctx.fillStyle = str;
+      ctx.fillRect(0, 0, 1, 1);
+      const d = ctx.getImageData(0, 0, 1, 1).data;
+      if (d[3] === 0) return null;
+      return { r: d[0] / 255, g: d[1] / 255, b: d[2] / 255, a: d[3] / 255 };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /** Split on commas that are not inside parentheses. */
+  function splitTop(str) {
+    const out = [];
+    let depth = 0,
+      cur = '';
+    for (const ch of str) {
+      if (ch === '(') depth++;
+      if (ch === ')') depth--;
+      if (ch === ',' && depth === 0) {
+        out.push(cur.trim());
+        cur = '';
+      } else cur += ch;
+    }
+    if (cur.trim()) out.push(cur.trim());
+    return out;
+  }
+
+  function parseShadows(str) {
+    if (!str || str === 'none') return [];
+    const out = [];
+    for (const part of splitTop(str)) {
+      const colorMatch = part.match(/(rgba?\([^)]*\)|#[0-9a-f]{3,8}|oklch\([^)]*\)|color\([^)]*\))/i);
+      const color = colorMatch ? parseColor(colorMatch[0]) : { r: 0, g: 0, b: 0, a: 1 };
+      const rest = colorMatch ? part.replace(colorMatch[0], '') : part;
+      const nums = (rest.match(/-?[\d.]+px|-?[\d.]+(?=\s|$)/g) || []).map(parseFloat);
+      if (!color) continue;
+      out.push({
+        inset: /\binset\b/.test(part),
+        x: nums[0] || 0,
+        y: nums[1] || 0,
+        blur: nums[2] || 0,
+        spread: nums[3] || 0,
+        color,
+      });
+    }
+    return out;
+  }
+
+  function parseGradient(str) {
+    const m = str.match(/^(repeating-)?(linear|radial)-gradient\((.*)\)$/s);
+    if (!m) return null;
+    const parts = splitTop(m[3]);
+    let angle = 180; // CSS default: to bottom
+    let i = 0;
+    if (m[2] === 'linear') {
+      const first = parts[0];
+      const deg = first.match(/^(-?[\d.]+)(deg|turn|rad)$/);
+      if (deg) {
+        angle = parseFloat(deg[1]) * (deg[2] === 'turn' ? 360 : deg[2] === 'rad' ? 180 / Math.PI : 1);
+        i = 1;
+      } else if (/^to /.test(first)) {
+        const dirs = { 'to top': 0, 'to right': 90, 'to bottom': 180, 'to left': 270, 'to top right': 45, 'to right top': 45, 'to bottom right': 135, 'to right bottom': 135, 'to bottom left': 225, 'to left bottom': 225, 'to top left': 315, 'to left top': 315 };
+        angle = dirs[first] ?? 180;
+        i = 1;
+      }
+    } else if (!/^(rgb|#|hsl|oklch|color|[a-z]+$)/i.test(parts[0]) || /circle|ellipse|at /.test(parts[0])) {
+      i = 1; // radial shape/position descriptor
+    }
+    const stops = [];
+    for (; i < parts.length; i++) {
+      const p = parts[i];
+      const cm = p.match(/(rgba?\([^)]*\)|#[0-9a-f]{3,8}|oklch\([^)]*\)|color\([^)]*\)|hsla?\([^)]*\)|\b[a-z]+\b)/i);
+      if (!cm) continue;
+      const color = parseColor(cm[0]) || { r: 0, g: 0, b: 0, a: 0 };
+      const pos = p.replace(cm[0], '').match(/(-?[\d.]+)%/);
+      stops.push({ color, pos: pos ? parseFloat(pos[1]) / 100 : null });
+    }
+    if (stops.length < 2) return null;
+    stops.forEach((s, idx) => {
+      if (s.pos === null) s.pos = idx / (stops.length - 1);
+    });
+    return { type: m[2], angle, stops };
+  }
+
+  // ---------------------------------------------------------------- naming
+  // utility classes (Tailwind & co.) are skipped when naming layers; plain words like "row" or "content" are kept
+  const UTILITY_PREFIX = /^(?:[a-z0-9]+:|!|-)|^(?:p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|w|h|size|min-w|min-h|max-w|max-h|text|font|bg|border|rounded|shadow|gap|space|items|justify|self|place|leading|tracking|z|inset|overflow|opacity|transition|duration|ease|delay|animate|col-span|row-span|grid-cols|grid-rows|order|grow|shrink|basis|object|aspect|ring|divide|cursor|select|whitespace|break|align|outline|fill|stroke|translate|rotate|scale|skew|origin|backdrop|blur|filter|decoration|mix|pointer|scroll|snap|touch|will|from|via|to|flex|grid|inline|top|left|right|bottom|line-clamp|sr|d|u|tw|js|is|has)-/;
+  const UTILITY_WORD = /^(?:flex|grid|block|inline|inline-block|inline-flex|hidden|contents|absolute|relative|fixed|sticky|static|truncate|uppercase|lowercase|capitalize|underline|italic|antialiased|container|isolate|visible|invisible|clearfix|grow|shrink|transform|filter|shadow|rounded|border|active|selected|open|disabled|show|fade|in|clear|float|sr-only)$/;
+  const isUtility = (c) => UTILITY_PREFIX.test(c) || UTILITY_WORD.test(c) || /[\[\]/:]/.test(c);
+
+  const TAG_NAMES = {
+    HEADER: 'Header', NAV: 'Nav', MAIN: 'Main', FOOTER: 'Footer', SECTION: 'Section', ARTICLE: 'Article', ASIDE: 'Sidebar',
+    BUTTON: 'Button', A: 'Link', UL: 'List', OL: 'List', LI: 'List item', FORM: 'Form', INPUT: 'Input', TEXTAREA: 'Text area',
+    SELECT: 'Select', IMG: 'Image', SVG: 'Icon', H1: 'Heading 1', H2: 'Heading 2', H3: 'Heading 3', H4: 'Heading 4',
+    H5: 'Heading 5', H6: 'Heading 6', P: 'Paragraph', LABEL: 'Label', TABLE: 'Table', TR: 'Row', TD: 'Cell', TH: 'Header cell',
+    FIGURE: 'Figure', FIGCAPTION: 'Caption', BLOCKQUOTE: 'Quote', HR: 'Divider', DIALOG: 'Dialog', VIDEO: 'Video',
+    BODY: 'Page', SPAN: 'Span', DIV: 'Frame',
+  };
+
+  function humanize(s) {
+    s = s.replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim();
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function layerName(el) {
+    const tag = el.tagName.toUpperCase();
+    const aria = el.getAttribute && el.getAttribute('aria-label');
+    if (aria) return humanize(aria).slice(0, 40);
+    if (tag === 'IMG' && el.alt) return el.alt.slice(0, 40);
+    const dn = el.getAttribute && (el.getAttribute('data-name') || el.getAttribute('data-figma-name'));
+    if (dn) return dn;
+    const cls = typeof el.className === 'string' ? el.className.split(/\s+/).filter((c) => c && !isUtility(c)) : [];
+    const generic = tag === 'DIV' || tag === 'SPAN' || tag === 'SECTION';
+    if (cls.length && generic) return humanize(cls[0]);
+    if (el.id && generic) return humanize(el.id);
+    return TAG_NAMES[tag] || humanize(tag.toLowerCase());
+  }
+
+  // ---------------------------------------------------------------- style readers
+  const px = (v) => parseFloat(v) || 0;
+
+  function fontFamilies(cs) {
+    return cs.fontFamily.split(',').map((f) => f.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+  }
+
+  function textStyle(cs) {
+    const size = px(cs.fontSize);
+    const lh = cs.lineHeight === 'normal' ? null : px(cs.lineHeight);
+    const ls = cs.letterSpacing === 'normal' ? 0 : px(cs.letterSpacing);
+    const deco = (cs.textDecorationLine || cs.textDecoration || '').includes('underline')
+      ? 'UNDERLINE'
+      : (cs.textDecorationLine || cs.textDecoration || '').includes('line-through')
+      ? 'STRIKETHROUGH'
+      : 'NONE';
+    const tt = cs.textTransform;
+    return {
+      family: fontFamilies(cs),
+      weight: parseInt(cs.fontWeight, 10) || 400,
+      italic: cs.fontStyle === 'italic' || cs.fontStyle.startsWith('oblique'),
+      size,
+      lineHeight: lh,
+      letterSpacing: ls,
+      color: parseColor(cs.color) || { r: 0, g: 0, b: 0, a: 1 },
+      decoration: deco,
+      transform: tt === 'uppercase' ? 'UPPER' : tt === 'lowercase' ? 'LOWER' : tt === 'capitalize' ? 'TITLE' : 'ORIGINAL',
+    };
+  }
+
+  function boxStyle(cs) {
+    const bw = [px(cs.borderTopWidth), px(cs.borderRightWidth), px(cs.borderBottomWidth), px(cs.borderLeftWidth)];
+    const bstyles = [cs.borderTopStyle, cs.borderRightStyle, cs.borderBottomStyle, cs.borderLeftStyle];
+    for (let i = 0; i < 4; i++) if (bstyles[i] === 'none' || bstyles[i] === 'hidden') bw[i] = 0;
+    const bc = [cs.borderTopColor, cs.borderRightColor, cs.borderBottomColor, cs.borderLeftColor].map(parseColor);
+    for (let i = 0; i < 4; i++) if (!bc[i]) bw[i] = 0;
+    const gradients = [];
+    let bgUrl = null;
+    if (cs.backgroundImage && cs.backgroundImage !== 'none') {
+      for (const layer of splitTop(cs.backgroundImage)) {
+        const u = layer.match(/^url\(["']?(.*?)["']?\)$/);
+        if (u) bgUrl = bgUrl || u[1];
+        else {
+          const g = parseGradient(layer);
+          if (g) gradients.push(g);
+        }
+      }
+    }
+    return {
+      display: cs.display,
+      position: cs.position,
+      flexDir: cs.flexDirection,
+      flexWrap: cs.flexWrap,
+      justify: cs.justifyContent,
+      alignItems: cs.alignItems,
+      alignSelf: cs.alignSelf,
+      grow: parseFloat(cs.flexGrow) || 0,
+      rowGap: cs.rowGap === 'normal' ? 0 : px(cs.rowGap),
+      colGap: cs.columnGap === 'normal' ? 0 : px(cs.columnGap),
+      pad: [px(cs.paddingTop), px(cs.paddingRight), px(cs.paddingBottom), px(cs.paddingLeft)],
+      bw,
+      bc,
+      bstyle: bstyles.find((s) => s !== 'none' && s !== 'hidden') || 'solid',
+      radius: [px(cs.borderTopLeftRadius), px(cs.borderTopRightRadius), px(cs.borderBottomRightRadius), px(cs.borderBottomLeftRadius)],
+      bg: parseColor(cs.backgroundColor),
+      gradients,
+      bgUrl,
+      bgSize: cs.backgroundSize,
+      shadows: parseShadows(cs.boxShadow),
+      opacity: parseFloat(cs.opacity),
+      overflowHidden: cs.overflowX !== 'visible' || cs.overflowY !== 'visible',
+      textAlign: cs.textAlign,
+      zIndex: cs.zIndex === 'auto' ? 0 : parseInt(cs.zIndex, 10) || 0,
+      blur: blurOf(cs.filter),
+      backdropBlur: blurOf(cs.backdropFilter || cs.webkitBackdropFilter),
+    };
+  }
+
+  function blurOf(f) {
+    const m = (f || '').match(/blur\(([\d.]+)px\)/);
+    return m ? parseFloat(m[1]) : 0;
+  }
+
+  function hasVisualBox(s) {
+    return !!(s.bg || s.gradients.length || s.bgUrl || s.bw.some((w) => w > 0) || s.shadows.length);
+  }
+
+  // ---------------------------------------------------------------- extractor
+  function Extractor(doc, opts) {
+    this.doc = doc;
+    this.win = doc.defaultView;
+    this.opts = opts || {};
+    this.assets = {};
+    this.assetJobs = [];
+    this.warnings = [];
+    this.nextId = 1;
+    this.urlToAsset = new Map();
+  }
+
+  Extractor.prototype.rect = function (r) {
+    return { x: r.left + this.win.scrollX, y: r.top + this.win.scrollY, w: r.width, h: r.height };
+  };
+
+  Extractor.prototype.cs = function (el, pseudo) {
+    return this.win.getComputedStyle(el, pseudo || null);
+  };
+
+  Extractor.prototype.isInlineText = function (el) {
+    if (el.nodeType === 3) return true;
+    if (el.nodeType !== 1) return true; // comments
+    const tag = el.tagName.toUpperCase();
+    if (tag === 'BR' || tag === 'WBR') return true;
+    if (REPLACED.has(tag) || el instanceof this.win.SVGElement) return false;
+    const cs = this.cs(el);
+    if (cs.display === 'none') return true; // ignored anyway
+    if (cs.display !== 'inline' && cs.display !== 'contents') return false;
+    if (cs.position === 'absolute' || cs.position === 'fixed') return false;
+    for (const c of el.childNodes) if (!this.isInlineText(c)) return false;
+    return true;
+  };
+
+  /** Collect styled text runs from an inline-only subtree. */
+  Extractor.prototype.segments = function (el, out) {
+    out = out || [];
+    for (const node of el.childNodes) {
+      if (node.nodeType === 3) {
+        const parent = node.parentElement;
+        const cs = this.cs(parent);
+        let t = node.textContent;
+        const ws = cs.whiteSpace;
+        if (!/^pre/.test(ws) && ws !== 'break-spaces') t = t.replace(/\s+/g, ' ');
+        if (t) out.push({ text: t, ...textStyle(cs), href: parent.closest && parent.closest('a') ? true : undefined });
+      } else if (node.nodeType === 1) {
+        const tag = node.tagName.toUpperCase();
+        if (tag === 'BR') {
+          out.push({ text: '\n', ...textStyle(this.cs(node.parentElement)) });
+          continue;
+        }
+        if (this.cs(node).display === 'none') continue;
+        this.segments(node, out);
+      }
+    }
+    return out;
+  };
+
+  /** Number of visual lines: cluster client rects whose vertical centres overlap. */
+  function countLines(rects) {
+    const rows = [];
+    for (const r of rects) {
+      if (r.width <= 0 || r.height <= 0) continue;
+      const cy = r.top + r.height / 2;
+      if (!rows.some((row) => cy > row.top && cy < row.bottom)) rows.push({ top: r.top, bottom: r.bottom });
+    }
+    return Math.max(1, rows.length);
+  }
+
+  function cleanSegments(segs) {
+    // collapse whitespace across run boundaries and trim the ends
+    const out = [];
+    for (const s of segs) {
+      if (!s.text) continue;
+      const prev = out[out.length - 1];
+      if (prev && /[ \n]$/.test(prev.text) && s.text.startsWith(' ')) s.text = s.text.slice(1);
+      if (prev && s.text === '\n') prev.text = prev.text.replace(/ +$/, '');
+      if (prev && prev.text.endsWith('\n')) s.text = s.text.replace(/^ +/, '');
+      if (!s.text) continue;
+      // merge identical styles
+      if (prev && sameStyle(prev, s)) prev.text += s.text;
+      else out.push({ ...s });
+    }
+    if (out.length) {
+      out[0].text = out[0].text.replace(/^[ ]+/, '');
+      out[out.length - 1].text = out[out.length - 1].text.replace(/[ \n]+$/, '');
+    }
+    return out.filter((s) => s.text.length);
+  }
+
+  function sameStyle(a, b) {
+    return (
+      a.family[0] === b.family[0] && a.weight === b.weight && a.italic === b.italic && a.size === b.size &&
+      a.lineHeight === b.lineHeight && a.letterSpacing === b.letterSpacing && a.decoration === b.decoration &&
+      a.transform === b.transform && a.color.r === b.color.r && a.color.g === b.color.g && a.color.b === b.color.b && a.color.a === b.color.a
+    );
+  }
+
+  Extractor.prototype.textBounds = function (el) {
+    const range = this.doc.createRange();
+    range.selectNodeContents(el);
+    const r = range.getBoundingClientRect();
+    return { box: this.rect(r), lines: countLines(range.getClientRects()) };
+  };
+
+  Extractor.prototype.makeText = function (el, segs, box, cs, lines) {
+    return {
+      id: 'n' + this.nextId++,
+      kind: 'text',
+      tag: el.tagName ? el.tagName.toUpperCase() : '#text',
+      name: segs.map((s) => s.text).join('').replace(/\s+/g, ' ').slice(0, 48),
+      box,
+      s: { position: 'static', alignSelf: cs.alignSelf, grow: parseFloat(cs.flexGrow) || 0, textAlign: cs.textAlign, display: cs.display },
+      text: { segments: segs, align: cs.textAlign, lines },
+      children: [],
+    };
+  };
+
+  Extractor.prototype.requestAsset = function (url, kindHint) {
+    if (!url) return null;
+    if (this.urlToAsset.has(url)) return this.urlToAsset.get(url);
+    const id = 'a' + (this.urlToAsset.size + 1);
+    this.urlToAsset.set(url, id);
+    this.assetJobs.push(
+      this.loadAsset(url)
+        .then((a) => {
+          if (a) this.assets[id] = a;
+          else this.warnings.push('Could not load image (CORS?): ' + url.slice(0, 80));
+        })
+        .catch(() => this.warnings.push('Could not load image: ' + url.slice(0, 80)))
+    );
+    return id;
+  };
+
+  Extractor.prototype.loadAsset = async function (url) {
+    const res = await fetch(url, { mode: 'cors' }).catch(() => null);
+    let blob = res && res.ok ? await res.blob() : null;
+    if (!blob) return null;
+    const type = blob.type || '';
+    if (/svg/.test(type) || /\.svg(\?|$)/i.test(url)) {
+      return { kind: 'svg', svg: await blob.text() };
+    }
+    if (/^image\/(png|jpeg|gif)$/.test(type)) {
+      const buf = new Uint8Array(await blob.arrayBuffer());
+      return { kind: 'image', mime: type, bytes: buf };
+    }
+    // webp / avif / unknown → re-encode as PNG
+    try {
+      const bmp = await createImageBitmap(blob);
+      const c = document.createElement('canvas');
+      c.width = bmp.width;
+      c.height = bmp.height;
+      c.getContext('2d').drawImage(bmp, 0, 0);
+      const png = await new Promise((r) => c.toBlob(r, 'image/png'));
+      return { kind: 'image', mime: 'image/png', bytes: new Uint8Array(await png.arrayBuffer()) };
+    } catch (e) {
+      return null;
+    }
+  };
+
+  Extractor.prototype.svgMarkup = function (svg, box) {
+    const clone = svg.cloneNode(true);
+    const srcEls = [svg, ...svg.querySelectorAll('*')];
+    const dstEls = [clone, ...clone.querySelectorAll('*')];
+    srcEls.forEach((src, i) => {
+      const dst = dstEls[i];
+      if (!dst || !dst.setAttribute) return;
+      const tag = (src.tagName || '').toLowerCase();
+      const cs = this.cs(src);
+      if (SVG_SHAPES.has(tag) || src === svg) {
+        const fill = cs.fill;
+        const stroke = cs.stroke;
+        if (fill) dst.setAttribute('fill', fill.startsWith('url(') ? dst.getAttribute('fill') || fill : fill);
+        if (stroke && stroke !== 'none') dst.setAttribute('stroke', stroke);
+        if (cs.strokeWidth && stroke !== 'none') dst.setAttribute('stroke-width', cs.strokeWidth);
+        if (cs.strokeLinecap && cs.strokeLinecap !== 'butt') dst.setAttribute('stroke-linecap', cs.strokeLinecap);
+        if (cs.strokeLinejoin && cs.strokeLinejoin !== 'miter') dst.setAttribute('stroke-linejoin', cs.strokeLinejoin);
+        if (cs.fillOpacity && cs.fillOpacity !== '1') dst.setAttribute('fill-opacity', cs.fillOpacity);
+        if (cs.opacity && cs.opacity !== '1' && src !== svg) dst.setAttribute('opacity', cs.opacity);
+      }
+      dst.removeAttribute('class');
+      dst.removeAttribute('style');
+    });
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', String(Math.round(box.w)));
+    clone.setAttribute('height', String(Math.round(box.h)));
+    if (!clone.getAttribute('viewBox')) clone.setAttribute('viewBox', `0 0 ${Math.round(box.w)} ${Math.round(box.h)}`);
+    return new XMLSerializer().serializeToString(clone).replace(/currentColor/g, this.cs(svg).color);
+  };
+
+  /**
+   * Is the element's width decided by its content (shrink-to-fit)?
+   * Only asked where CSS makes it ambiguous: flex-row items, inline-blocks, floats,
+   * absolutely positioned boxes and items of non-stretching flex columns.
+   * Measured by temporarily forcing width:max-content. Returns true / false / undefined (not a candidate).
+   */
+  Extractor.prototype.measureShrink = function (el, cs) {
+    const parent = el.parentElement;
+    if (!parent || el === this.doc.body) return undefined;
+    const pcs = this.cs(parent);
+    const pFlex = /flex/.test(pcs.display);
+    const rowItem = pFlex && !pcs.flexDirection.startsWith('column');
+    const colItem = pFlex && pcs.flexDirection.startsWith('column') && !/stretch|normal/.test(cs.alignSelf === 'auto' ? pcs.alignItems : cs.alignSelf);
+    const candidate = (rowItem && !(parseFloat(cs.flexGrow) > 0)) || colItem || /^inline-/.test(cs.display) || cs.float !== 'none' || cs.position === 'absolute' || cs.position === 'fixed';
+    if (!candidate) return undefined;
+    const before = el.getBoundingClientRect().width;
+    const prevW = el.style.getPropertyValue('width'),
+      prevP = el.style.getPropertyPriority('width');
+    const prevMax = el.style.getPropertyValue('max-width'),
+      prevMaxP = el.style.getPropertyPriority('max-width');
+    const prevMin = el.style.getPropertyValue('min-width'),
+      prevMinP = el.style.getPropertyPriority('min-width');
+    el.style.setProperty('width', 'max-content', 'important');
+    el.style.setProperty('max-width', 'none', 'important');
+    el.style.setProperty('min-width', '0', 'important');
+    const after = el.getBoundingClientRect().width;
+    el.style.setProperty('width', prevW, prevP);
+    el.style.setProperty('max-width', prevMax, prevMaxP);
+    el.style.setProperty('min-width', prevMin, prevMinP);
+    if (!el.getAttribute('style')) el.removeAttribute('style');
+    return Math.abs(after - before) < 1;
+  };
+
+  /** Main recursive walk. Returns a raw node or null (or an array for display:contents). */
+  Extractor.prototype.walk = function (el, depth) {
+    if (el.nodeType !== 1) return null;
+    const tag = el.tagName.toUpperCase();
+    if (SKIP_TAGS.has(tag)) return null;
+    const cs = this.cs(el);
+    if (cs.display === 'none') return null;
+    if (cs.display === 'contents') {
+      const kids = [];
+      for (const c of el.children) {
+        const k = this.walk(c, depth);
+        if (Array.isArray(k)) kids.push(...k);
+        else if (k) kids.push(k);
+      }
+      return kids;
+    }
+    if (cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return null;
+    if (el.getAttribute('aria-hidden') === 'true' && el.classList.contains('sr-only')) return null;
+    const box = this.rect(el.getBoundingClientRect());
+    const s = boxStyle(cs);
+    // screen-reader-only / clipped content
+    if (box.w <= 1 && box.h <= 1 && s.overflowHidden) return null;
+    const base = { id: 'n' + this.nextId++, tag, name: layerName(el), box, s, children: [] };
+    s.shrinkW = this.measureShrink(el, cs);
+
+    // ---- SVG
+    if (el instanceof this.win.SVGElement && tag === 'SVG') {
+      if (box.w === 0 || box.h === 0) return null;
+      return { ...base, kind: 'svg', svg: this.svgMarkup(el, box) };
+    }
+    if (el instanceof this.win.SVGElement) return null;
+
+    // ---- images
+    if (tag === 'IMG' || tag === 'PICTURE') {
+      const img = tag === 'IMG' ? el : el.querySelector('img');
+      if (!img || box.w === 0 || box.h === 0) return null;
+      const src = img.currentSrc || img.src;
+      return { ...base, kind: 'image', image: { asset: this.requestAsset(src), fit: this.cs(img).objectFit || 'fill' } };
+    }
+    if (tag === 'VIDEO' || tag === 'CANVAS' || tag === 'IFRAME' || tag === 'OBJECT' || tag === 'EMBED') {
+      let asset = null;
+      if (tag === 'VIDEO' && el.poster) asset = this.requestAsset(el.poster);
+      if (tag === 'CANVAS') {
+        try {
+          asset = this.requestAsset(el.toDataURL('image/png'));
+        } catch (e) {}
+      }
+      return { ...base, kind: 'image', image: { asset, fit: 'cover', placeholder: tag.toLowerCase() } };
+    }
+    if (tag === 'HR') {
+      return { ...base, kind: 'frame', semantic: 'divider' };
+    }
+
+    // ---- form controls → frame + text
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+      const type = (el.getAttribute('type') || 'text').toLowerCase();
+      if (type === 'hidden') return null;
+      base.semantic = type === 'checkbox' || type === 'radio' ? type : type === 'submit' || type === 'button' ? 'button' : 'input';
+      base.kind = 'frame';
+      // a control centres its value vertically inside an explicit height → flex row, counter-centred
+      base.s = Object.assign({}, s, { display: 'flex', flexDir: 'row', flexWrap: 'nowrap', alignItems: tag === 'TEXTAREA' ? 'flex-start' : 'center', justify: base.semantic === 'button' || /center/.test(cs.textAlign) ? 'center' : 'flex-start' });
+      if (type === 'checkbox' || type === 'radio') return base;
+      let text = '',
+        tcs = cs;
+      if (tag === 'SELECT') text = el.options[el.selectedIndex] ? el.options[el.selectedIndex].text : '';
+      else if (el.value) text = el.value;
+      else if (el.placeholder) {
+        text = el.placeholder;
+        tcs = this.cs(el, '::placeholder');
+      }
+      if (text) {
+        const st = textStyle(tcs);
+        if (tcs !== cs) {
+          // placeholder pseudo inherits font from the input
+          const ist = textStyle(cs);
+          Object.assign(st, { family: ist.family, size: ist.size, weight: tcs.fontWeight ? st.weight : ist.weight, lineHeight: ist.lineHeight });
+        }
+        const inner = {
+          x: box.x + s.bw[3] + s.pad[3],
+          y: box.y + s.bw[0] + s.pad[0],
+          w: Math.max(1, box.w - s.bw[1] - s.bw[3] - s.pad[1] - s.pad[3]),
+          h: Math.max(1, box.h - s.bw[0] - s.bw[2] - s.pad[0] - s.pad[2]),
+        };
+        const lh = st.lineHeight || st.size * 1.2;
+        const tb = { x: inner.x, y: inner.y + (tag === 'TEXTAREA' ? 0 : Math.max(0, (inner.h - lh) / 2)), w: inner.w, h: Math.min(inner.h, lh) };
+        const t = this.makeText(el, [{ text, ...st }], tb, cs, 1);
+        t.s.fillWidth = true;
+        base.children.push(t);
+      }
+      return base;
+    }
+
+    // ---- inline-only content → text (or frame wrapping text)
+    const childNodes = [...el.childNodes].filter((n) => !(n.nodeType === 3 && !n.textContent.trim()) && n.nodeType !== 8);
+    const allInline = childNodes.length > 0 && childNodes.every((n) => this.isInlineText(n));
+    if (allInline && tag !== 'BODY') {
+      const segs = cleanSegments(this.segments(el));
+      if (!segs.length) {
+        return hasVisualBox(s) ? { ...base, kind: 'frame' } : null;
+      }
+      const tb = this.textBounds(el);
+      const visual = hasVisualBox(s) || s.pad.some((p) => p > 0) || tag === 'BUTTON';
+      if (!visual && tag !== 'BUTTON') {
+        // a bare text element: use the element box (keeps block width → FILL) and line count
+        const t = this.makeText(el, segs, box, cs, tb.lines);
+        t.name = segs.map((x) => x.text).join('').replace(/\s+/g, ' ').slice(0, 48);
+        t.s.position = s.position;
+        t.tagName = tag;
+        t.textBox = tb.box;
+        return t;
+      }
+      const t = this.makeText(el, segs, tb.box, cs, tb.lines);
+      t.s.grow = 0; // flex-grow / align-self belong to the box, not to its label
+      t.s.alignSelf = 'auto';
+      base.kind = 'frame';
+      base.children.push(t);
+      if (!/flex/.test(s.display)) {
+        // text inside a padded box: horizontal row, vertically centred (how buttons, badges and chips render)
+        base.s = Object.assign({}, s, { display: 'flex', flexDir: 'row', flexWrap: 'nowrap', alignItems: tb.lines > 1 ? 'flex-start' : 'center', justify: /center/.test(cs.textAlign) ? 'center' : /right|end/.test(cs.textAlign) ? 'flex-end' : 'flex-start' });
+        if (tb.lines > 1) t.s.fillWidth = true;
+      }
+      base.semantic = tag === 'BUTTON' || (tag === 'A' && (s.bg || s.bw.some((w) => w > 0))) ? 'button' : undefined;
+      return base;
+    }
+
+    // ---- generic container
+    base.kind = 'frame';
+    if (tag === 'BUTTON') base.semantic = 'button';
+    for (const node of el.childNodes) {
+      if (node.nodeType === 3) {
+        let t = node.textContent;
+        if (!t.trim()) continue;
+        const range = this.doc.createRange();
+        range.selectNodeContents(node);
+        const r = range.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue;
+        const lines = countLines(range.getClientRects());
+        t = /^pre/.test(cs.whiteSpace) ? t : t.replace(/\s+/g, ' ').trim();
+        base.children.push(this.makeText(el, [{ text: t, ...textStyle(cs) }], this.rect(r), cs, lines));
+        continue;
+      }
+      if (node.nodeType !== 1) continue;
+      // inline formatting element sitting next to blocks (e.g. <strong> inside a flex container)
+      const k = this.walk(node, depth + 1);
+      if (Array.isArray(k)) base.children.push(...k);
+      else if (k) base.children.push(k);
+    }
+    // order by z-index (stable) so later siblings paint above
+    if (base.children.some((c) => c.s && c.s.zIndex)) {
+      base.children = base.children
+        .map((c, i) => [c, i])
+        .sort((a, b) => (a[0].s.zIndex || 0) - (b[0].s.zIndex || 0) || a[1] - b[1])
+        .map((x) => x[0]);
+    }
+    if (s.bgUrl) s.bgAsset = this.requestAsset(s.bgUrl);
+    if (!base.children.length && !hasVisualBox(s) && (box.w === 0 || box.h === 0)) return null;
+    return base;
+  };
+
+  /**
+   * Extract a raw tree from a rendered document.
+   * @returns {Promise<{root, assets, warnings, width, height}>}
+   */
+  /**
+   * ::before / ::after cannot be measured, so in the (throw-away) render document we turn
+   * every visible pseudo-element into a real <span> with the same computed style.
+   */
+  function materializePseudos(doc) {
+    const win = doc.defaultView;
+    const SKIP = new Set(['content', 'width', 'height', 'inline-size', 'block-size', 'min-inline-size', 'min-block-size', 'max-inline-size', 'max-block-size']);
+    const jobs = [];
+    for (const el of doc.body.querySelectorAll('*')) {
+      if (SKIP_TAGS.has(el.tagName.toUpperCase()) || REPLACED.has(el.tagName.toUpperCase()) || el instanceof win.SVGElement) continue;
+      for (const which of ['::before', '::after']) {
+        const pcs = win.getComputedStyle(el, which);
+        const content = pcs.content;
+        if (!content || content === 'none' || content === 'normal' || pcs.display === 'none') continue;
+        const m = content.match(/^(["'])(.*)\1$/s);
+        if (!m) continue; // counters(), attr(), url() … are not materialised
+        const text = m[2].replace(/\\([0-9a-f]{1,6})\s?/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/\\(.)/g, '$1');
+        const visual = parseColor(pcs.backgroundColor) || pcs.backgroundImage !== 'none' || parseFloat(pcs.borderTopWidth) > 0 || parseFloat(pcs.borderBottomWidth) > 0 || parseFloat(pcs.borderLeftWidth) > 0 || pcs.boxShadow !== 'none';
+        if (!text.trim() && !visual) continue;
+        // icon fonts (private-use code points) would render as tofu in Figma
+        if (/[\uE000-\uF8FF]/.test(text)) continue;
+        const inline = pcs.display === 'inline';
+        const decl = [];
+        for (let i = 0; i < pcs.length; i++) {
+          const prop = pcs[i];
+          if (SKIP.has(prop) && (inline || prop === 'content')) continue;
+          decl.push(`${prop}:${pcs.getPropertyValue(prop)}`);
+        }
+        jobs.push({ el, which, text, css: decl.join(';') });
+      }
+    }
+    for (const j of jobs) {
+      const span = doc.createElement('span');
+      span.setAttribute('data-h2f-pseudo', j.which.slice(2));
+      span.setAttribute('data-name', j.text.trim() ? j.text.trim().slice(0, 24) : j.which === '::before' ? 'Before' : 'After');
+      span.style.cssText = j.css;
+      span.textContent = j.text;
+      if (j.which === '::before') j.el.insertBefore(span, j.el.firstChild);
+      else j.el.appendChild(span);
+      j.el.classList.add('h2f-nopseudo');
+    }
+    if (jobs.length) {
+      const st = doc.createElement('style');
+      st.textContent = '.h2f-nopseudo::before,.h2f-nopseudo::after{content:none!important;display:none!important}';
+      doc.head.appendChild(st);
+    }
+    return jobs.length;
+  }
+
+  async function extract(doc, opts) {
+    const ex = new Extractor(doc, opts);
+    const win = doc.defaultView;
+    if (!opts || opts.pseudo !== false) materializePseudos(doc);
+    win.scrollTo(0, 0);
+    const body = doc.body;
+    const html = doc.documentElement;
+    const width = opts && opts.width ? opts.width : html.clientWidth;
+    const pageH = Math.max(body.scrollHeight, html.scrollHeight, body.getBoundingClientRect().height);
+    const root = ex.walk(body, 0);
+    const htmlBg = parseColor(win.getComputedStyle(html).backgroundColor);
+    if (root) {
+      root.box = { x: 0, y: 0, w: width, h: pageH };
+      root.name = (opts && opts.name) || doc.title || 'Screen';
+      root.isRoot = true;
+      // body margin is real spacing in the page frame; body padding too.
+      if (!root.s.bg) root.s.bg = htmlBg || { r: 1, g: 1, b: 1, a: 1 };
+      root.s.bw = [0, 0, 0, 0];
+      root.s.radius = [0, 0, 0, 0];
+      root.s.shadows = [];
+    }
+    await Promise.all(ex.assetJobs);
+    return { root, assets: ex.assets, warnings: ex.warnings, width, height: pageH };
+  }
+
+  /** Render an HTML string inside an off-screen iframe at the given size and extract it. */
+  async function extractHTML(html, opts) {
+    const { width, height, runScripts, baseUrl } = opts;
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('sandbox', runScripts ? 'allow-same-origin allow-scripts' : 'allow-same-origin');
+    iframe.style.cssText = `position:fixed;left:-${width + 1000}px;top:0;width:${width}px;height:${height}px;border:0;visibility:hidden;pointer-events:none;`;
+    let src = html;
+    if (baseUrl && !/<base\s/i.test(src)) src = src.replace(/<head[^>]*>/i, (m) => `${m}<base href="${baseUrl}">`);
+    if (!/<head/i.test(src)) src = `<!doctype html><html><head><meta charset="utf-8"></head><body>${src}</body></html>`;
+    document.body.appendChild(iframe);
+    try {
+      await new Promise((resolve) => {
+        iframe.onload = resolve;
+        iframe.srcdoc = src;
+        setTimeout(resolve, 8000);
+      });
+      const doc = iframe.contentDocument;
+      if (!doc) throw new Error('Cannot access rendered document');
+      try {
+        await doc.fonts.ready;
+      } catch (e) {}
+      // wait for images
+      await Promise.all(
+        [...doc.images].map((img) => (img.complete ? null : new Promise((r) => { img.onload = img.onerror = r; setTimeout(r, 5000); })))
+      );
+      await new Promise((r) => setTimeout(r, opts.settleMs || 120));
+      return await extract(doc, opts);
+    } finally {
+      if (!opts.keepFrame) iframe.remove();
+    }
+  }
+
+  H2F.extract = extract;
+  H2F.extractHTML = extractHTML;
+  H2F._extractInternals = { parseColor, parseShadows, parseGradient, splitTop, layerName, humanize };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/*
+ * H2F core — layout.js
+ * Raw tree (boxes + computed styles) → design tree (Figma-shaped):
+ *   - infers auto layout direction, gap, padding, alignment, wrap
+ *   - decides HUG / FILL / FIXED sizing per axis
+ *   - groups irregularly-spaced siblings so every stack has ONE consistent gap
+ *   - snaps spacing / radius / sizes / type to the 4pt or 8pt grid
+ * Pure: no DOM, runs in Node for tests.
+ */
+(function (root) {
+  const H2F = (root.H2F = root.H2F || {});
+  const G = () => H2F.grid;
+
+  const TOL = 1.5; // px tolerance for "touching" comparisons
+  const HUG_SLACK = 32; // free space allowed at the end of a stack before we call it fixed-size
+
+  function emptyStyle() {
+    return {
+      display: 'block', position: 'static', flexDir: 'row', flexWrap: 'nowrap', justify: 'normal', alignItems: 'normal',
+      alignSelf: 'auto', grow: 0, rowGap: 0, colGap: 0, pad: [0, 0, 0, 0], bw: [0, 0, 0, 0], bc: [null, null, null, null],
+      radius: [0, 0, 0, 0], bg: null, gradients: [], shadows: [], opacity: 1, overflowHidden: false, textAlign: 'start', zIndex: 0,
+    };
+  }
+
+  const isAbs = (n) => n.s && (n.s.position === 'absolute' || n.s.position === 'fixed');
+  const right = (b) => b.x + b.w;
+  const bottom = (b) => b.y + b.h;
+
+  function union(nodes) {
+    const x = Math.min(...nodes.map((n) => n.box.x));
+    const y = Math.min(...nodes.map((n) => n.box.y));
+    const r = Math.max(...nodes.map((n) => right(n.box)));
+    const b = Math.max(...nodes.map((n) => bottom(n.box)));
+    return { x, y, w: r - x, h: b - y };
+  }
+
+  function median(arr) {
+    if (!arr.length) return 0;
+    const a = [...arr].sort((x, y) => x - y);
+    return a[Math.floor(a.length / 2)];
+  }
+
+  /** Most common value after snapping (ties → smaller). */
+  function modeSnapped(arr, rules) {
+    if (!arr.length) return 0;
+    const counts = new Map();
+    for (const v of arr) {
+      const k = rules.snapSpacing ? G().snapSpace(Math.max(0, v), rules) : Math.round(Math.max(0, v));
+      counts.set(k, (counts.get(k) || 0) + 1);
+    }
+    let best = null,
+      bc = -1;
+    for (const [k, c] of counts) if (c > bc || (c === bc && k < best)) (best = k), (bc = c);
+    return best;
+  }
+
+  // ------------------------------------------------------------ geometry tests
+  function stackedV(list) {
+    const a = [...list].sort((p, q) => p.box.y - q.box.y);
+    for (let i = 1; i < a.length; i++) if (a[i].box.y < bottom(a[i - 1].box) - TOL) return null;
+    return a;
+  }
+
+  function rowH(list) {
+    const a = [...list].sort((p, q) => p.box.x - q.box.x);
+    for (let i = 1; i < a.length; i++) if (a[i].box.x < right(a[i - 1].box) - TOL) return null;
+    const top = Math.max(...a.map((n) => n.box.y));
+    const bot = Math.min(...a.map((n) => bottom(n.box)));
+    if (top > bot + TOL) return null; // not on one line
+    return a;
+  }
+
+  /** Rows of items (flex-wrap / grid). Returns array of rows or null. */
+  function wrapRows(list) {
+    const a = [...list].sort((p, q) => p.box.y - q.box.y || p.box.x - q.box.x);
+    const rows = [];
+    for (const n of a) {
+      const row = rows.find((r) => n.box.y < r.bottom - TOL && bottom(n.box) > r.top + TOL);
+      if (row) {
+        row.items.push(n);
+        row.top = Math.min(row.top, n.box.y);
+        row.bottom = Math.max(row.bottom, bottom(n.box));
+      } else rows.push({ items: [n], top: n.box.y, bottom: bottom(n.box) });
+    }
+    rows.sort((p, q) => p.top - q.top);
+    for (let i = 1; i < rows.length; i++) if (rows[i].top < rows[i - 1].bottom - TOL) return null;
+    for (const r of rows) {
+      r.items.sort((p, q) => p.box.x - q.box.x);
+      for (let i = 1; i < r.items.length; i++) if (r.items[i].box.x < right(r.items[i - 1].box) - TOL) return null;
+    }
+    return rows;
+  }
+
+  // ------------------------------------------------------------ irregular gap grouping
+  /**
+   * Siblings in a stack must share one gap in Figma. When CSS margins produce
+   * irregular gaps (e.g. 8, 24, 24), group the tightly-spaced runs into nested
+   * auto-layout groups so the outer stack gets a single consistent gap.
+   */
+  function groupIrregular(ordered, axis, rules, report) {
+    const gapOf = (a, b) => (axis === 'V' ? b.box.y - bottom(a.box) : b.box.x - right(a.box));
+    let items = ordered;
+    for (let iter = 0; iter < 3 && items.length > 2; iter++) {
+      const gaps = [];
+      for (let i = 1; i < items.length; i++) gaps.push(Math.max(0, gapOf(items[i - 1], items[i])));
+      const snapped = gaps.map((g) => G().snapSpace(g, rules));
+      const uniq = [...new Set(snapped)];
+      if (uniq.length <= 1) break;
+      const min = Math.min(...snapped);
+      // only group when the small gap is clearly tighter than the rest
+      const others = snapped.filter((g) => g !== min);
+      if (!others.length || Math.min(...others) - min < 8) break;
+      const out = [];
+      let run = [items[0]];
+      for (let i = 1; i < items.length; i++) {
+        if (snapped[i - 1] === min) run.push(items[i]);
+        else {
+          out.push(run);
+          run = [items[i]];
+        }
+      }
+      out.push(run);
+      if (out.length === items.length || out.length === 1) break;
+      items = out.map((r) => {
+        if (r.length === 1) return r[0];
+        report.grouped++;
+        return {
+          id: r[0].id + '_g',
+          kind: 'frame',
+          tag: 'GROUP',
+          name: groupName(r),
+          synthetic: true,
+          box: union(r),
+          s: Object.assign(emptyStyle(), { display: 'block', flexDir: axis === 'V' ? 'column' : 'row' }),
+          children: r,
+        };
+      });
+    }
+    return items;
+  }
+
+  function groupName(items) {
+    const first = items[0];
+    if (first.kind === 'text' && /^H[1-6]$/.test(first.tagName || first.tag)) return 'Heading group';
+    if (items.every((i) => i.kind === 'text')) return 'Text group';
+    return 'Group';
+  }
+
+  // ------------------------------------------------------------ paints
+  function solid(c) {
+    return { type: 'SOLID', color: { r: c.r, g: c.g, b: c.b }, opacity: c.a === undefined ? 1 : c.a };
+  }
+
+  function fillsFor(s) {
+    const fills = [];
+    if (s.bg) fills.push(solid(s.bg));
+    for (const g of [...(s.gradients || [])].reverse()) {
+      fills.push({
+        type: g.type === 'radial' ? 'GRADIENT_RADIAL' : 'GRADIENT_LINEAR',
+        angle: g.angle,
+        stops: g.stops.map((st) => ({ position: Math.max(0, Math.min(1, st.pos)), color: { r: st.color.r, g: st.color.g, b: st.color.b, a: st.color.a } })),
+      });
+    }
+    if (s.bgAsset) {
+      fills.push({ type: 'IMAGE', asset: s.bgAsset, scaleMode: s.bgSize === 'contain' ? 'FIT' : 'FILL' });
+    }
+    return fills;
+  }
+
+  function strokesFor(s) {
+    if (!s.bw || !s.bw.some((w) => w > 0)) return null;
+    const idx = s.bw.findIndex((w) => w > 0);
+    const color = s.bc[idx];
+    if (!color) return null;
+    const uniform = s.bw.every((w) => Math.abs(w - s.bw[idx]) < 0.01);
+    return {
+      paints: [solid(color)],
+      weight: s.bw[idx],
+      weights: uniform ? null : s.bw.slice(),
+      align: 'INSIDE',
+      dashed: s.bstyle === 'dashed' ? [Math.max(2, s.bw[idx] * 3), Math.max(2, s.bw[idx] * 2)] : s.bstyle === 'dotted' ? [s.bw[idx], s.bw[idx]] : null,
+    };
+  }
+
+  function effectsFor(s) {
+    const fx = [];
+    for (const sh of s.shadows || []) {
+      fx.push({
+        type: sh.inset ? 'INNER_SHADOW' : 'DROP_SHADOW',
+        color: { r: sh.color.r, g: sh.color.g, b: sh.color.b, a: sh.color.a },
+        offset: { x: Math.round(sh.x), y: Math.round(sh.y) },
+        radius: Math.round(sh.blur),
+        spread: Math.round(sh.spread),
+        visible: true,
+        blendMode: 'NORMAL',
+      });
+    }
+    if (s.blur) fx.push({ type: 'LAYER_BLUR', radius: Math.round(s.blur), visible: true });
+    if (s.backdropBlur) fx.push({ type: 'BACKGROUND_BLUR', radius: Math.round(s.backdropBlur), visible: true });
+    return fx;
+  }
+
+  // ------------------------------------------------------------ main converter
+  function Layout(rules, opts) {
+    this.rules = Object.assign({}, G().DEFAULT_RULES, rules || {});
+    this.opts = Object.assign({ autoLayout: true }, opts || {});
+    this.report = { snapped: { spacing: 0, radius: 0, size: 0, type: 0 }, grouped: 0, absolute: 0, autoLayoutFrames: 0, frames: 0, texts: 0, images: 0, examples: [] };
+  }
+
+  Layout.prototype.note = function (kind, from, to) {
+    if (Math.abs(from - to) < 0.5) return;
+    this.report.snapped[kind]++;
+    if (this.report.examples.length < 12) this.report.examples.push(`${kind} ${G().r2(from)} → ${to}`);
+  };
+
+  Layout.prototype.space = function (v) {
+    if (!this.rules.snapSpacing) return Math.max(0, Math.round(v));
+    const out = G().snapSpace(Math.max(0, v), this.rules);
+    this.note('spacing', v, out);
+    return out;
+  };
+
+  Layout.prototype.size = function (v) {
+    if (!this.rules.snapSizes) return Math.max(1, Math.round(v));
+    const out = G().snapSize(v, this.rules);
+    this.note('size', v, out);
+    return out;
+  };
+
+  Layout.prototype.pos = function (v) {
+    if (!this.rules.snapSizes) return Math.round(v);
+    return Math.round(v / 4) * 4;
+  };
+
+  Layout.prototype.radius = function (rad, w, h) {
+    return rad.map((v) => {
+      if (!v) return 0;
+      if (!this.rules.snapRadius) return Math.round(v);
+      const out = G().snapRadius(v, w, h, this.rules);
+      if (out !== G().PILL) this.note('radius', v, out);
+      return out;
+    });
+  };
+
+  /**
+   * Decide auto layout for a frame from its in-flow children.
+   * Returns { mode, wrap, ordered, rows, primary, counter, isFlex }.
+   */
+  Layout.prototype.direction = function (node, flow) {
+    const s = node.s;
+    const isFlex = /flex/.test(s.display);
+    const isGrid = /grid/.test(s.display);
+    if (!flow.length) return { mode: 'NONE' };
+    if (flow.length === 1) {
+      const mode = isFlex && !s.flexDir.startsWith('column') ? 'HORIZONTAL' : 'VERTICAL';
+      return { mode, ordered: flow, isFlex };
+    }
+    if (isFlex) {
+      const col = s.flexDir.startsWith('column');
+      if (s.flexWrap !== 'nowrap' && !col) {
+        const rows = wrapRows(flow);
+        if (rows && rows.length > 1) return { mode: 'HORIZONTAL', wrap: true, rows, ordered: rows.flatMap((r) => r.items), isFlex };
+      }
+      const ordered = col ? stackedV(flow) : rowH(flow);
+      if (ordered) return { mode: col ? 'VERTICAL' : 'HORIZONTAL', ordered, isFlex };
+    }
+    const v = stackedV(flow);
+    if (v && !(isGrid && rowH(flow))) return { mode: 'VERTICAL', ordered: v, isFlex: false };
+    const h = rowH(flow);
+    if (h) return { mode: 'HORIZONTAL', ordered: h, isFlex: isFlex };
+    const rows = wrapRows(flow);
+    if (rows && rows.length > 1 && rows.every((r) => r.items.length >= 1)) {
+      return { mode: 'HORIZONTAL', wrap: true, rows, ordered: rows.flatMap((r) => r.items), isFlex };
+    }
+    return { mode: 'NONE' };
+  };
+
+  Layout.prototype.convertNode = function (node, parentBox, ctx) {
+    // ctx: { fillH, fillV, maxW, inAutoLayout, absolute }
+    ctx = ctx || {};
+    const relX = node.box.x - (parentBox ? parentBox.x : 0);
+    const relY = node.box.y - (parentBox ? parentBox.y : 0);
+    const s = node.s || emptyStyle();
+    const out = {
+      id: node.id,
+      name: node.name || 'Frame',
+      x: this.pos(relX),
+      y: this.pos(relY),
+      width: Math.max(1, node.box.w),
+      height: Math.max(1, node.box.h),
+      absolute: !!ctx.absolute,
+      opacity: s.opacity === undefined || isNaN(s.opacity) ? 1 : s.opacity,
+      semantic: node.semantic,
+      tag: node.tag,
+    };
+
+    if (node.kind === 'text') return this.convertText(node, out, ctx);
+    if (node.kind === 'image') {
+      this.report.images++;
+      out.type = 'IMAGE';
+      out.image = { asset: node.image.asset, scaleMode: node.image.fit === 'contain' ? 'FIT' : 'FILL', placeholder: node.image.placeholder };
+      out.radius = this.radius(s.radius || [0, 0, 0, 0], node.box.w, node.box.h);
+      out.strokes = strokesFor(s);
+      out.effects = effectsFor(s);
+      return this.finishSizing(out, ctx, false, false);
+    }
+    if (node.kind === 'svg') {
+      this.report.images++;
+      out.type = 'SVG';
+      out.svg = node.svg;
+      return this.finishSizing(out, ctx, false, false);
+    }
+
+    // ---- frame
+    this.report.frames++;
+    out.type = 'FRAME';
+    out.fills = fillsFor(s);
+    out.strokes = strokesFor(s);
+    out.effects = effectsFor(s);
+    out.radius = this.radius(s.radius || [0, 0, 0, 0], node.box.w, node.box.h);
+    out.clip = !!s.overflowHidden || !!node.isRoot;
+    out.children = [];
+
+    const kids = node.children || [];
+    const flow = kids.filter((k) => !isAbs(k));
+    const abs = kids.filter(isAbs);
+    let dir = this.opts.autoLayout ? this.direction(node, flow) : { mode: 'NONE' };
+
+    if (dir.mode === 'NONE') {
+      out.layout = { mode: 'NONE' };
+      for (const k of kids) out.children.push(this.convertNode(k, node.box, { absolute: false }));
+      return this.finishSizing(out, ctx, false, false);
+    }
+
+    this.report.autoLayoutFrames++;
+    const V = dir.mode === 'VERTICAL';
+    const b = node.box;
+    const bw = s.bw || [0, 0, 0, 0];
+    const pad = s.pad || [0, 0, 0, 0];
+    const css = [pad[0] + bw[0], pad[1] + bw[1], pad[2] + bw[2], pad[3] + bw[3]]; // t r b l
+    const content = { x: b.x + css[3], y: b.y + css[0], w: b.w - css[1] - css[3], h: b.h - css[0] - css[2] };
+
+    // irregular gaps → nested groups (block flow only; flex gaps are uniform by construction unless margins)
+    let ordered = dir.ordered;
+    if (!dir.wrap && ordered.length > 2 && !(dir.isFlex && /space-/.test(s.justify))) {
+      ordered = groupIrregular(ordered, V ? 'V' : 'H', this.rules, this.report);
+    }
+
+    // ---- primary axis alignment
+    let primary = 'MIN';
+    let pushApart = false;
+    if (ordered !== dir.ordered && ordered.length === 2) {
+      const a = ordered[0].box,
+        c = ordered[1].box;
+      const between = V ? c.y - bottom(a) : c.x - right(a);
+      if (between >= 64) pushApart = true;
+    }
+    if (dir.isFlex) {
+      const j = s.justify;
+      if (/space-(between|around|evenly)/.test(j) && ordered.length > 1) primary = 'SPACE_BETWEEN';
+      else if (/center/.test(j)) primary = 'CENTER';
+      else if (/(flex-)?end|right/.test(j)) primary = 'MAX';
+    } else if (!V && /center/.test(s.textAlign)) primary = 'CENTER';
+    else if (!V && /right|end/.test(s.textAlign)) primary = 'MAX';
+    if (pushApart) primary = 'SPACE_BETWEEN';
+
+    // ---- gaps
+    let gap = 0,
+      crossGap = 0;
+    if (dir.wrap) {
+      const inRow = [];
+      for (const r of dir.rows) for (let i = 1; i < r.items.length; i++) inRow.push(r.items[i].box.x - right(r.items[i - 1].box));
+      const between = [];
+      for (let i = 1; i < dir.rows.length; i++) between.push(dir.rows[i].top - dir.rows[i - 1].bottom);
+      gap = inRow.length ? modeSnapped(inRow, this.rules) : this.space(s.colGap);
+      crossGap = between.length ? modeSnapped(between, this.rules) : this.space(s.rowGap);
+    } else if (ordered.length > 1) {
+      const gaps = [];
+      for (let i = 1; i < ordered.length; i++) {
+        const a = ordered[i - 1].box,
+          c = ordered[i].box;
+        gaps.push(V ? c.y - bottom(a) : c.x - right(a));
+      }
+      gap = modeSnapped(gaps, this.rules);
+      if (Math.max(...gaps) - Math.min(...gaps) > 4) this.report.irregular = (this.report.irregular || 0) + 1;
+    }
+
+    // ---- padding (measured on the primary axis, CSS on the cross axis)
+    const first = ordered[0].box,
+      last = ordered[ordered.length - 1].box;
+    const ext = union(ordered);
+    let padT, padR, padB, padL;
+    let hugMain;
+    // main axis: start slack / end slack decide padding and whether the frame hugs its content
+    const startSlack = V ? first.y - b.y : first.x - b.x;
+    const endSlack = V ? bottom(b) - bottom(last) : right(b) - right(last);
+    const cssStart = V ? css[0] : css[3];
+    const cssEnd = V ? css[2] : css[1];
+    let mainStart = cssStart,
+      mainEnd = cssEnd;
+    if (primary === 'MIN') {
+      mainStart = startSlack;
+      hugMain = endSlack <= cssEnd + HUG_SLACK;
+      mainEnd = hugMain ? endSlack : cssEnd;
+    } else if (primary === 'CENTER') {
+      // an explicitly sized box (measured, not shrink-to-fit) keeps CSS padding and a fixed width
+      hugMain = Math.abs(endSlack - startSlack) < 2 && endSlack <= cssEnd + HUG_SLACK && !(!V && s.shrinkW === false);
+      if (hugMain) mainStart = mainEnd = Math.min(startSlack, endSlack);
+    } else hugMain = false;
+    if (dir.wrap) {
+      mainStart = startSlack;
+      mainEnd = cssEnd;
+      hugMain = false;
+    }
+    if (V) {
+      padT = mainStart;
+      padB = mainEnd;
+      padL = Math.min(css[3], ext.x - b.x);
+      padR = Math.min(css[1], right(b) - right(ext));
+    } else {
+      padL = mainStart;
+      padR = mainEnd;
+      padT = dir.wrap ? first.y - b.y : Math.min(css[0], ext.y - b.y);
+      padB = Math.min(css[2], bottom(b) - bottom(ext));
+    }
+    padT = Math.max(0, padT);
+    padR = Math.max(0, padR);
+    padB = Math.max(0, padB);
+    padL = Math.max(0, padL);
+
+    // ---- cross axis alignment + which children fill the cross axis
+    const cx0 = V ? b.x + padL : b.y + padT;
+    const cx1 = V ? right(b) - padR : bottom(b) - padB;
+    const offs = ordered.map((k) => {
+      const lo = (V ? k.box.x : k.box.y) - cx0;
+      const hi = cx1 - (V ? right(k.box) : bottom(k.box));
+      return { lo, hi };
+    });
+    // block text with side margins (e.g. <p style="margin:0 14px"> next to a full-bleed image):
+    // Figma has no per-child margins, so wrap it in a frame whose padding is the margin.
+    if (V && !dir.isFlex && !dir.wrap && ordered.length > 1) {
+      ordered = ordered.map((k, i) => {
+        const o = offs[i];
+        if (k.kind !== 'text' || o.lo <= TOL || o.hi <= TOL || /center/.test((k.text && k.text.align) || '')) return k;
+        if (!/^(P|H[1-6]|LI|BLOCKQUOTE|DIV|FIGCAPTION|DT|DD|LABEL)$/.test(k.tagName || k.tag)) return k;
+        offs[i] = { lo: 0, hi: 0 };
+        this.report.grouped++;
+        return {
+          id: k.id + '_m',
+          kind: 'frame',
+          tag: 'GROUP',
+          name: (k.tagName === 'P' ? 'Paragraph' : 'Text') + ' container',
+          synthetic: true,
+          box: { x: cx0, y: k.box.y, w: cx1 - cx0, h: k.box.h },
+          s: Object.assign(emptyStyle(), { pad: [0, o.hi, 0, o.lo] }),
+          children: [Object.assign({}, k, { s: Object.assign({}, k.s, { fillWidth: true }) })],
+        };
+      });
+    }
+    let counter = 'MIN';
+    if (dir.isFlex) {
+      const ai = s.alignItems;
+      if (/center/.test(ai)) counter = 'CENTER';
+      else if (/(flex-)?end/.test(ai)) counter = 'MAX';
+      else if (/baseline/.test(ai) && !V) counter = 'BASELINE';
+    } else if (!dir.wrap) {
+      const allMin = offs.every((o) => Math.abs(o.lo) <= TOL);
+      const allMax = offs.every((o) => Math.abs(o.hi) <= TOL);
+      const allCenter = offs.every((o) => Math.abs(o.lo - o.hi) <= 2);
+      if (!allMin && allCenter) counter = 'CENTER';
+      else if (!allMin && allMax) counter = 'MAX';
+      else if (!allMin) {
+        // shared extra indent → fold into padding
+        const minLo = Math.min(...offs.map((o) => o.lo));
+        if (minLo > TOL) {
+          if (V) padL += minLo;
+          else padT += minLo;
+          offs.forEach((o) => (o.lo -= minLo));
+        }
+      }
+    }
+    if (dir.wrap && /center/.test(s.justify)) primary = 'CENTER';
+
+    const stretchCross = dir.isFlex ? /stretch|normal/.test(s.alignItems) : true;
+
+    out.layout = {
+      mode: dir.mode,
+      wrap: !!dir.wrap,
+      padding: [this.space(padT), this.space(padR), this.space(padB), this.space(padL)],
+      gap: gap,
+      crossGap: crossGap,
+      primary,
+      counter,
+    };
+    if (primary === 'SPACE_BETWEEN') out.layout.gap = 0;
+
+    // ---- children
+    let anyFillH = false,
+      anyFillV = false;
+    ordered.forEach((k, i) => {
+      const o = offs[i];
+      const spansCross = Math.abs(o.lo) <= TOL && Math.abs(o.hi) <= TOL;
+      const kctx = { inAutoLayout: true };
+      const grow = k.s && k.s.grow > 0;
+      if (dir.wrap) {
+        // fixed tiles
+      } else if (V) {
+        kctx.fillH = spansCross && stretchCross && s.shrinkW !== true;
+        kctx.fillV = dir.isFlex && grow;
+        // centred block with max-width → FILL + maxWidth (exact CSS semantics)
+        if (!kctx.fillH && counter === 'CENTER' && !dir.isFlex && k.kind !== 'text' && k.box.w >= (cx1 - cx0) * 0.5) {
+          kctx.fillH = true;
+          kctx.maxW = k.box.w;
+        }
+        if (k.kind === 'text' && k.s && k.s.fillWidth) kctx.fillH = true;
+      } else {
+        kctx.fillH = dir.isFlex && grow;
+        kctx.fillV = spansCross && dir.isFlex && stretchCross && ordered.length > 1 && k.kind !== 'text';
+        if (k.kind === 'text' && k.s && k.s.fillWidth) kctx.fillH = true;
+      }
+      anyFillH = anyFillH || kctx.fillH;
+      anyFillV = anyFillV || kctx.fillV;
+      out.children.push(this.convertNode(k, b, kctx));
+    });
+    for (const k of abs) {
+      this.report.absolute++;
+      out.children.push(this.convertNode(k, b, { absolute: true }));
+    }
+
+    // ---- own HUG decision
+    let hugW, hugH;
+    const kidsExtentCross = V ? Math.max(...ordered.map((k) => k.box.w)) : Math.max(...ordered.map((k) => k.box.h));
+    const crossSize = V ? b.w : b.h;
+    const crossPads = V ? padL + padR : padT + padB;
+    const hugCross = Math.abs(kidsExtentCross + crossPads - crossSize) <= 2;
+    if (V) {
+      hugH = hugMain && !anyFillV;
+      hugW = hugCross && !anyFillH;
+    } else {
+      hugW = hugMain && !anyFillH && !dir.wrap;
+      hugH = (hugCross || dir.wrap) && !anyFillV;
+    }
+    if (s.shrinkW === true && !anyFillH && !dir.wrap) hugW = true;
+    if (s.shrinkW === false) hugW = false;
+    out._hasFillKids = { h: anyFillH, v: anyFillV };
+    return this.finishSizing(out, ctx, hugW, hugH);
+  };
+
+  Layout.prototype.convertText = function (node, out, ctx) {
+    this.report.texts++;
+    out.type = 'TEXT';
+    const segs = node.text.segments.map((sg) => {
+      let size = sg.size;
+      if (this.rules.snapType) {
+        const sn = G().snapFontSize(size);
+        this.note('type', size, sn);
+        size = sn;
+      }
+      let lh = sg.lineHeight;
+      if (lh && this.rules.snapType) {
+        const ratio = lh / sg.size;
+        const target = G().snapLineHeight(size * ratio);
+        this.note('type', lh, target);
+        lh = target;
+      }
+      return {
+        text: sg.text,
+        family: sg.family,
+        weight: sg.weight,
+        italic: sg.italic,
+        size,
+        lineHeight: lh,
+        letterSpacing: Math.round((sg.letterSpacing || 0) * 10) / 10,
+        color: sg.color,
+        decoration: sg.decoration,
+        textCase: sg.transform,
+      };
+    });
+    const align = node.text.align || 'start';
+    out.text = {
+      segments: segs,
+      align: /center/.test(align) ? 'CENTER' : /right|end/.test(align) ? 'RIGHT' : /justify/.test(align) ? 'JUSTIFIED' : 'LEFT',
+      lines: node.text.lines || 1,
+    };
+    // auto-resize behaviour
+    if (ctx.fillH) out.text.autoResize = 'HEIGHT';
+    else if ((node.text.lines || 1) <= 1) {
+      out.text.autoResize = 'WIDTH_AND_HEIGHT';
+      // a block-level single-line text that is wider than its glyphs keeps its width when not in auto layout
+      if (!ctx.inAutoLayout && node.textBox && node.box.w - node.textBox.w > 4) out.text.autoResize = 'HEIGHT';
+    } else out.text.autoResize = 'HEIGHT';
+    if (out.text.autoResize === 'WIDTH_AND_HEIGHT' && node.textBox && /center|right|end/.test(align) && !ctx.inAutoLayout) {
+      out.text.autoResize = 'HEIGHT';
+    }
+    const hugW = out.text.autoResize === 'WIDTH_AND_HEIGHT';
+    return this.finishSizing(out, ctx, hugW, true);
+  };
+
+  Layout.prototype.finishSizing = function (out, ctx, hugW, hugH) {
+    const auto = out.layout && out.layout.mode && out.layout.mode !== 'NONE';
+    const isText = out.type === 'TEXT';
+    const canHug = auto || isText;
+    out.sizingH = ctx.fillH && ctx.inAutoLayout ? 'FILL' : hugW && canHug ? 'HUG' : 'FIXED';
+    out.sizingV = ctx.fillV && ctx.inAutoLayout ? 'FILL' : hugH && canHug ? 'HUG' : 'FIXED';
+    if (ctx.maxW && out.sizingH === 'FILL') out.maxWidth = this.size(ctx.maxW);
+    if (out.sizingH === 'FIXED' && !isText) out.width = this.size(out.width);
+    else out.width = Math.max(1, Math.round(out.width));
+    if (out.sizingV === 'FIXED' && !isText) out.height = this.size(out.height);
+    else out.height = Math.max(1, Math.round(out.height));
+    if (isText && out.sizingH === 'FIXED') out.width = Math.ceil(out.width + 1); // avoid unexpected wrapping from font metric drift
+    delete out._hasFillKids;
+    return out;
+  };
+
+  /**
+   * raw extraction result → design document (before components/tokens)
+   */
+  function layout(extracted, rules, opts) {
+    const L = new Layout(rules, opts);
+    const raw = extracted.root;
+    const screen = (opts && opts.screen) || { width: extracted.width, height: extracted.height };
+    const rootOut = L.convertNode(raw, null, {});
+    rootOut.x = 0;
+    rootOut.y = 0;
+    rootOut.width = screen.width;
+    rootOut.sizingH = 'FIXED';
+    rootOut.isScreen = true;
+    if (rootOut.layout && rootOut.layout.mode === 'VERTICAL') {
+      rootOut.sizingV = 'HUG';
+      rootOut.minHeight = screen.height;
+      rootOut.height = Math.max(screen.height, Math.round(raw.box.h));
+    } else {
+      rootOut.sizingV = 'FIXED';
+      rootOut.height = Math.max(screen.height, L.size(raw.box.h));
+    }
+    return { root: rootOut, report: L.report };
+  }
+
+  H2F.layout = layout;
+  H2F._layoutInternals = { stackedV, rowH, wrapRows, groupIrregular, modeSnapped, union, emptyStyle, fillsFor, strokesFor, effectsFor };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/*
+ * H2F core — components.js
+ * Finds repeated structures in the design tree and marks them as components.
+ *   - structural signature = node type + visual style + layout + children signatures
+ *     (text content and image sources are ignored → they become instance overrides)
+ *   - a signature seen ≥ 2 times becomes a component; buttons / inputs always do
+ *   - nested structure that only ever appears inside one parent component is not split out
+ *   - components with the same family name (e.g. "Button") are grouped as variants
+ * Pure, no DOM.
+ */
+(function (root) {
+  const H2F = (root.H2F = root.H2F || {});
+
+  const q = (v) => Math.round((v || 0) * 100) / 100;
+  const col = (c) => (c ? [q(c.r), q(c.g), q(c.b), q(c.a === undefined ? 1 : c.a)].join(',') : '-');
+
+  function paintSig(p) {
+    if (!p) return '';
+    if (p.type === 'SOLID') return 'S' + col({ ...p.color, a: p.opacity });
+    if (p.type === 'IMAGE') return 'I'; // image source is an override
+    return p.type + p.angle + (p.stops || []).map((s) => col(s.color) + '@' + q(s.position)).join(';');
+  }
+
+  function textSig(n) {
+    return n.text.segments
+      .map((s) => [s.family && s.family[0], s.weight, s.italic ? 'i' : '', s.size, s.lineHeight, s.letterSpacing, col(s.color), s.decoration, s.textCase].join('|'))
+      .filter((v, i, a) => a.indexOf(v) === i) // style set, not run count
+      .join('+') + '/' + n.text.align;
+  }
+
+  /** Signature of a component root: its own sizing is excluded (instances may HUG, FILL or be resized). */
+  function rootSignature(n) {
+    const full = signature(n);
+    if (n.type !== 'FRAME') return full;
+    return full.replace(/^F\(((?:[^|]*\|){11})[^|]*\|[^)]*\)/, (m, head) => 'F(' + head + '*|*)');
+  }
+
+  function signature(n) {
+    if (n._sig) return n._sig;
+    let sig;
+    if (n.type === 'TEXT') sig = 'T(' + textSig(n) + ')' + n.sizingH;
+    else if (n.type === 'SVG') sig = 'V(' + n.width + 'x' + n.height + ':' + hash(n.svg || '') + ')';
+    else if (n.type === 'IMAGE') sig = 'I(' + (n.sizingH === 'FIXED' ? n.width : n.sizingH) + 'x' + (n.sizingV === 'FIXED' ? n.height : n.sizingV) + ':' + (n.radius || []).join(',') + ')';
+    else {
+      const l = n.layout || {};
+      sig =
+        'F(' +
+        [
+          n.tag,
+          (n.fills || []).map(paintSig).join(';'),
+          n.strokes ? n.strokes.weight + paintSig(n.strokes.paints[0]) : '',
+          (n.radius || []).join(','),
+          (n.effects || []).map((e) => e.type + e.offset?.y + e.radius).join(';'),
+          l.mode,
+          l.wrap ? 'w' : '',
+          (l.padding || []).join(','),
+          l.gap,
+          l.primary,
+          l.counter,
+          n.sizingH === 'FIXED' ? 'W' + n.width : n.sizingH,
+          n.sizingV === 'FIXED' ? 'H' + n.height : n.sizingV,
+        ].join('|') +
+        ')[' +
+        (n.children || []).map(signature).join(',') +
+        ']';
+    }
+    n._sig = sig;
+    return sig;
+  }
+
+  function hash(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36);
+  }
+
+  function weight(n) {
+    return 1 + (n.children || []).reduce((a, c) => a + weight(c), 0);
+  }
+
+  function hasVisual(n) {
+    return (n.fills && n.fills.length) || n.strokes || (n.effects && n.effects.length);
+  }
+
+  function walk(n, fn, parent) {
+    fn(n, parent);
+    for (const c of n.children || []) walk(c, fn, n);
+  }
+
+  /** Primary = most saturated/dark solid fill; then Secondary, Tertiary; stroke-only = Outline; no fill = Ghost. */
+  function rankVariants(nodes) {
+    const out = new Map();
+    const scored = [];
+    for (const n of nodes) {
+      const f = (n.fills || []).find((p) => p.type === 'SOLID' && (p.opacity === undefined || p.opacity > 0.05));
+      if (!f) {
+        out.set(n, n.strokes ? 'Outline' : 'Ghost');
+        continue;
+      }
+      const { s, l } = H2F.grid.rgbToHsl(f.color);
+      scored.push([n, s * (1 - Math.abs(l - 0.45))]);
+    }
+    scored.sort((a, b) => b[1] - a[1]);
+    const names = ['Primary', 'Secondary', 'Tertiary', 'Quaternary'];
+    scored.forEach(([n], i) => out.set(n, names[i] || 'Style ' + (i + 1)));
+    // labels must be unique; let the caller disambiguate duplicates
+    return out;
+  }
+
+  const HUE_STATE = { green: 'Success', lime: 'Success', teal: 'Success', yellow: 'Warning', amber: 'Warning', orange: 'Warning', red: 'Danger', rose: 'Danger', pink: 'Danger', blue: 'Info', cyan: 'Info', indigo: 'Info' };
+
+  /** Non-button families: hue → Success/Warning/Danger/Info; otherwise most used = Default, filled outlier = Active. */
+  function stateVariants(nodes, counts) {
+    const out = new Map();
+    const fillOf = (n) => (n.fills || []).find((p) => p.type === 'SOLID');
+    const hues = nodes.map((n) => {
+      const f = fillOf(n);
+      return f ? H2F.grid.colorName(f.color).split('/')[0] : null;
+    });
+    const states = hues.map((h) => h && HUE_STATE[h]);
+    if (states.every(Boolean) && new Set(states).size === states.length) {
+      nodes.forEach((n, i) => out.set(n, states[i]));
+      return out;
+    }
+    let def = 0;
+    counts.forEach((c, i) => {
+      if (c > counts[def]) def = i;
+    });
+    const used = new Set(['Default']);
+    nodes.forEach((n, i) => {
+      if (i === def) return out.set(n, 'Default');
+      let label = states[i] || (fillOf(n) && !fillOf(nodes[def]) ? 'Active' : 'Variant ' + (i + 1));
+      if (used.has(label)) label += ' ' + (i + 1);
+      used.add(label);
+      out.set(n, label);
+    });
+    return out;
+  }
+
+  function variantLabel(n, i) {
+    const f = (n.fills || []).find((p) => p.type === 'SOLID');
+    if (f && H2F.grid) {
+      const name = H2F.grid.colorName(f.color);
+      return name.replace('/', ' ').replace(/^\w/, (c) => c.toUpperCase());
+    }
+    if (n.strokes) return 'Outline';
+    if (!f) return 'Ghost';
+    return 'Style ' + (i + 1);
+  }
+
+  /**
+   * Mark components in a design document (mutates). Returns { components, count }.
+   */
+  function detectComponents(doc, opts) {
+    opts = Object.assign({ minCount: 2, alwaysSemantic: true }, opts || {});
+    const rootNode = doc.root;
+    const occ = new Map(); // sig → nodes
+    walk(rootNode, (n) => {
+      if (n === rootNode || n.type !== 'FRAME') return;
+      const w = weight(n);
+      if (w < 2) return;
+      if (!hasVisual(n) && w < 3) return;
+      const sig = rootSignature(n);
+      n._rsig = sig;
+      if (!occ.has(sig)) occ.set(sig, []);
+      occ.get(sig).push(n);
+    });
+
+    const candidates = new Set();
+    for (const [sig, nodes] of occ) {
+      const sem = nodes[0].semantic;
+      if (nodes.length >= opts.minCount) candidates.add(sig);
+      else if (opts.alwaysSemantic && (sem === 'button' || sem === 'input')) candidates.add(sig);
+    }
+    // singletons that look like a repeated family member (same name, tag and child shape) join it as a variant
+    const shape = (n) => n.tag + '|' + (n.children || []).map((c) => c.type).join(',');
+    const families = new Map();
+    const familyAdded = new Set();
+    for (const sig of candidates) {
+      const n = occ.get(sig)[0];
+      families.set(baseName(n) + '|' + shape(n), true);
+    }
+    for (const [sig, nodes] of occ) {
+      if (candidates.has(sig)) continue;
+      if (families.has(baseName(nodes[0]) + '|' + shape(nodes[0]))) {
+        candidates.add(sig);
+        familyAdded.add(sig);
+      }
+    }
+
+    // drop candidates that are only ever structure of exactly one parent component
+    const ancestorOf = new Map(); // sig → Set(ancestor sig)
+    (function mark(n, anc) {
+      const sig = n._rsig;
+      let next = anc;
+      if (sig && candidates.has(sig) && n !== rootNode) {
+        if (!ancestorOf.has(sig)) ancestorOf.set(sig, new Set());
+        ancestorOf.get(sig).add(anc || 'ROOT');
+        next = sig;
+      }
+      for (const c of n.children || []) mark(c, next);
+    })(rootNode, null);
+    for (const [sig, ancs] of ancestorOf) {
+      if (ancs.size === 1) {
+        const a = [...ancs][0];
+        if (a !== 'ROOT' && occ.get(a) && occ.get(sig).length === occ.get(a).length) {
+          const sem = occ.get(sig)[0].semantic;
+          if (sem !== 'button' && sem !== 'input' && !familyAdded.has(sig)) candidates.delete(sig);
+        }
+      }
+    }
+
+    // name components
+    const comps = {};
+    const usedNames = new Map();
+    let idx = 0;
+    for (const sig of candidates) {
+      const nodes = occ.get(sig);
+      const first = nodes[0];
+      const key = 'c' + ++idx;
+      let family = baseName(first);
+      comps[key] = { key, family, name: family, count: nodes.length, sig };
+      for (const n of nodes) n.componentKey = key;
+      usedNames.set(family, (usedNames.get(family) || []).concat(key));
+    }
+    // variants for families with >1 distinct component
+    for (const [family, keys] of usedNames) {
+      if (keys.length === 1) continue;
+      const labels = new Set();
+      const firsts = keys.map((k) => occ.get(comps[k].sig)[0]);
+      const ranked = firsts[0].semantic === 'button' ? rankVariants(firsts) : stateVariants(firsts, keys.map((k) => occ.get(comps[k].sig).length));
+      keys.forEach((k, i) => {
+        const first = occ.get(comps[k].sig)[0];
+        let label = ranked.get(first) || variantLabel(first, i);
+        while (labels.has(label)) label += ' ' + (i + 1);
+        labels.add(label);
+        comps[k].variant = label;
+        comps[k].set = family;
+        comps[k].name = family + '/' + label;
+      });
+    }
+    // text component properties (for standalone components): up to 3 text layers
+    for (const k of Object.keys(comps)) {
+      const first = occ.get(comps[k].sig)[0];
+      const texts = [];
+      walk(first, (n) => {
+        if (n.type === 'TEXT' && texts.length < 3) texts.push(n);
+      });
+      comps[k].textProps = texts.map((t, i) => (texts.length === 1 ? 'Label' : i === 0 ? 'Title' : 'Text ' + i));
+    }
+    // clean temp signatures
+    walk(rootNode, (n) => {
+      delete n._sig;
+      delete n._rsig;
+    });
+    doc.components = comps;
+    return { components: comps, count: Object.keys(comps).length };
+  }
+
+  function baseName(n) {
+    if (n.semantic === 'button') return 'Button';
+    if (n.semantic === 'input') return 'Input';
+    if (n.semantic === 'checkbox') return 'Checkbox';
+    let name = (n.name || 'Component').replace(/\s+\d+$/, '');
+    if (/^(Frame|Group|Div|Span)$/i.test(name)) {
+      if (n.tag === 'LI') return 'List item';
+      if (n.effects && n.effects.length && n.radius && n.radius.some((r) => r > 0)) return 'Card';
+      if (n.fills && n.fills.length && n.radius && n.radius.some((r) => r > 0)) return 'Card';
+      return 'Item';
+    }
+    if (name === 'Article' || name === 'List item' || name === 'Link') return name;
+    return name;
+  }
+
+  H2F.detectComponents = detectComponents;
+  H2F._componentInternals = { signature, weight };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/*
+ * H2F core — tokens.js
+ * Collects design tokens from the design tree and names them:
+ *   colors  → color/blue/500 …   (Figma color variables)
+ *   spacing → space/16 …          (Figma number variables, scope GAP)
+ *   radius  → radius/8, radius/full (number variables, scope CORNER_RADIUS)
+ *   text    → Heading/32 Bold …   (Figma text styles)
+ * Near-identical colours are merged. Pure, no DOM.
+ */
+(function (root) {
+  const H2F = (root.H2F = root.H2F || {});
+
+  function walk(n, fn) {
+    fn(n);
+    for (const c of n.children || []) walk(c, fn);
+  }
+
+  function hexOf(c) {
+    return H2F.grid.toHex(c);
+  }
+
+  function collectTokens(doc) {
+    const G = H2F.grid;
+    const colorUse = new Map(); // hex → {color, count}
+    const addColor = (c) => {
+      if (!c) return;
+      const h = hexOf(c);
+      const e = colorUse.get(h) || { color: { r: c.r, g: c.g, b: c.b }, count: 0 };
+      e.count++;
+      colorUse.set(h, e);
+    };
+    const spacing = new Set();
+    const radii = new Set();
+    const typo = new Map();
+
+    walk(doc.root, (n) => {
+      for (const f of n.fills || []) if (f.type === 'SOLID') addColor(f.color);
+      if (n.strokes) for (const p of n.strokes.paints) if (p.type === 'SOLID') addColor(p.color);
+      if (n.layout && n.layout.mode && n.layout.mode !== 'NONE') {
+        for (const p of n.layout.padding) if (p > 0) spacing.add(p);
+        if (n.layout.gap > 0) spacing.add(n.layout.gap);
+        if (n.layout.crossGap > 0) spacing.add(n.layout.crossGap);
+      }
+      for (const r of n.radius || []) if (r > 0) radii.add(r);
+      if (n.type === 'TEXT') {
+        for (const s of n.text.segments) {
+          addColor(s.color);
+          const key = [s.family[0], s.weight, s.italic ? 1 : 0, s.size, s.lineHeight || 'auto', s.letterSpacing].join('|');
+          const e = typo.get(key) || { family: s.family, weight: s.weight, italic: s.italic, size: s.size, lineHeight: s.lineHeight, letterSpacing: s.letterSpacing, count: 0 };
+          e.count++;
+          typo.set(key, e);
+        }
+      }
+    });
+
+    // ---- merge near-identical colours into the most used one
+    const entries = [...colorUse.entries()].sort((a, b) => b[1].count - a[1].count);
+    const canonical = new Map(); // hex → canonical hex
+    const kept = [];
+    for (const [h, e] of entries) {
+      const near = kept.find((k) => G.colorDistance(k.color, e.color) < 0.03);
+      if (near) {
+        canonical.set(h, near.hex);
+        near.count += e.count;
+      } else {
+        kept.push({ hex: h, color: e.color, count: e.count });
+        canonical.set(h, h);
+      }
+    }
+    const names = new Set();
+    const colors = kept.map((k) => {
+      let name = 'color/' + G.colorName(k.color);
+      let i = 2;
+      const base = name;
+      while (names.has(name)) name = base + '-' + i++;
+      names.add(name);
+      return { name, hex: k.hex, color: k.color, count: k.count };
+    });
+    const byHex = new Map(colors.map((c) => [c.hex, c]));
+    const tokenFor = (c) => {
+      if (!c) return null;
+      const can = canonical.get(hexOf(c));
+      const t = can && byHex.get(can);
+      return t ? t.name : null;
+    };
+
+    // ---- text styles
+    const tnames = new Set();
+    const text = [...typo.values()]
+      .sort((a, b) => b.size - a.size || b.weight - a.weight)
+      .map((t) => {
+        let name = `${G.typeRole(t.size)}/${t.size} ${G.weightName(t.weight)}${t.italic ? ' Italic' : ''}`;
+        if (tnames.has(name)) name += ` · ${t.lineHeight ? t.lineHeight : 'auto'}`;
+        let i = 2;
+        const base = name;
+        while (tnames.has(name)) name = base + ' ' + i++;
+        tnames.add(name);
+        return Object.assign({ name }, t);
+      });
+    const textKey = (s) => [s.family[0], s.weight, s.italic ? 1 : 0, s.size, s.lineHeight || 'auto', s.letterSpacing].join('|');
+    const textByKey = new Map(text.map((t) => [[t.family[0], t.weight, t.italic ? 1 : 0, t.size, t.lineHeight || 'auto', t.letterSpacing].join('|'), t.name]));
+
+    // ---- annotate nodes with token references
+    walk(doc.root, (n) => {
+      for (const f of n.fills || []) if (f.type === 'SOLID') f.token = tokenFor(f.color);
+      if (n.strokes) for (const p of n.strokes.paints) if (p.type === 'SOLID') p.token = tokenFor(p.color);
+      if (n.type === 'TEXT') for (const s of n.text.segments) {
+        s.colorToken = tokenFor(s.color);
+        s.textStyle = textByKey.get(textKey(s));
+      }
+    });
+
+    const spacingTokens = [...spacing].sort((a, b) => a - b).map((v) => ({ name: 'space/' + v, value: v }));
+    const radiusTokens = [...radii].sort((a, b) => a - b).map((v) => ({ name: v >= G.PILL ? 'radius/full' : 'radius/' + v, value: v }));
+    doc.tokens = { colors, text, spacing: spacingTokens, radius: radiusTokens };
+    return doc.tokens;
+  }
+
+  H2F.collectTokens = collectTokens;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/*
+ * H2F core — pipeline.js
+ * Glue: HTML → extract → layout → components → tokens → H2F document.
+ * Also: screen presets, JSON (de)serialisation and a design-rule audit.
+ *
+ * H2F document (format "h2f", version 1) — the contract between the website,
+ * the plugin UI and the plugin main thread:
+ *   { format, version, meta:{name, screen:{width,height,label}, rules, source},
+ *     root: DesignNode, components:{key:{name,family,variant,set,textProps}},
+ *     tokens:{colors,text,spacing,radius}, assets:{id:{kind,mime,bytes|svg}}, report }
+ */
+(function (root) {
+  const H2F = (root.H2F = root.H2F || {});
+
+  H2F.VERSION = '1.0.0';
+
+  H2F.SCREENS = [
+    { id: 'iphone-16', label: 'iPhone 16 / 15', group: 'Mobile', width: 393, height: 852 },
+    { id: 'iphone-se', label: 'iPhone SE', group: 'Mobile', width: 375, height: 667 },
+    { id: 'iphone-pro-max', label: 'iPhone 16 Pro Max', group: 'Mobile', width: 440, height: 956 },
+    { id: 'android', label: 'Android (Compact)', group: 'Mobile', width: 360, height: 800 },
+    { id: 'android-m', label: 'Android (Medium)', group: 'Mobile', width: 412, height: 917 },
+    { id: 'ipad-mini', label: 'iPad mini', group: 'Tablet', width: 744, height: 1133 },
+    { id: 'ipad', label: 'iPad Pro 11"', group: 'Tablet', width: 834, height: 1194 },
+    { id: 'laptop', label: 'Laptop', group: 'Desktop', width: 1280, height: 832 },
+    { id: 'desktop', label: 'Desktop', group: 'Desktop', width: 1440, height: 1024 },
+    { id: 'desktop-hd', label: 'Desktop HD', group: 'Desktop', width: 1920, height: 1080 },
+  ];
+
+  function buildDoc(extracted, opts) {
+    opts = opts || {};
+    const rules = Object.assign({}, H2F.grid.DEFAULT_RULES, opts.rules || {});
+    const screen = opts.screen || { width: extracted.width, height: extracted.height };
+    const { root: tree, report } = H2F.layout(extracted, rules, { autoLayout: opts.autoLayout !== false, screen });
+    tree.name = opts.name || tree.name || 'Screen';
+    const doc = {
+      format: 'h2f',
+      version: 1,
+      meta: { name: tree.name, screen, rules, source: opts.source || 'html', generator: 'html-to-figma ' + H2F.VERSION },
+      root: tree,
+      components: {},
+      tokens: { colors: [], text: [], spacing: [], radius: [] },
+      assets: extracted.assets || {},
+      report: Object.assign(report, { warnings: extracted.warnings || [] }),
+    };
+    if (opts.components !== false) H2F.detectComponents(doc);
+    H2F.collectTokens(doc);
+    doc.report.components = Object.keys(doc.components).length;
+    doc.report.audit = audit(doc);
+    return doc;
+  }
+
+  async function convertHTML(html, opts) {
+    const screen = opts.screen;
+    const extracted = await H2F.extractHTML(html, {
+      width: screen.width,
+      height: screen.height,
+      runScripts: !!opts.runScripts,
+      baseUrl: opts.baseUrl,
+      name: opts.name,
+    });
+    if (!extracted.root) throw new Error('Nothing visible was found in that HTML.');
+    return buildDoc(extracted, opts);
+  }
+
+  // ------------------------------------------------------------ audit
+  /** Checks the finished tree against the grid rules. Returns {checked, violations[], score}. */
+  function audit(doc) {
+    const base = doc.meta.rules.base || 8;
+    const ok = (v) => v === 0 || v % 4 === 0 && (base === 4 || v < 16 || v % 8 === 0) || v >= H2F.grid.PILL;
+    let checked = 0;
+    const violations = [];
+    (function walk(n, path) {
+      const p = path + '/' + n.name;
+      if (n.layout && n.layout.mode !== 'NONE' && n.layout.mode) {
+        n.layout.padding.forEach((v, i) => {
+          checked++;
+          if (!ok(v)) violations.push({ path: p, prop: ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'][i], value: v });
+        });
+        checked++;
+        if (!ok(n.layout.gap)) violations.push({ path: p, prop: 'gap', value: n.layout.gap });
+        if (n.layout.wrap) {
+          checked++;
+          if (!ok(n.layout.crossGap)) violations.push({ path: p, prop: 'rowGap', value: n.layout.crossGap });
+        }
+      }
+      (n.radius || []).forEach((v) => {
+        checked++;
+        if (!ok(v)) violations.push({ path: p, prop: 'radius', value: v });
+      });
+      for (const c of n.children || []) walk(c, p);
+    })(doc.root, '');
+    return { checked, violations: violations.slice(0, 200), violationCount: violations.length, score: checked ? Math.round((100 * (checked - violations.length)) / checked) : 100 };
+  }
+
+  // ------------------------------------------------------------ (de)serialisation
+  function b64encode(bytes) {
+    let s = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) s += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    return typeof btoa !== 'undefined' ? btoa(s) : Buffer.from(bytes).toString('base64');
+  }
+
+  function b64decode(str) {
+    if (typeof atob === 'undefined') return new Uint8Array(Buffer.from(str, 'base64'));
+    const bin = atob(str);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function serialize(doc, pretty) {
+    const assets = {};
+    for (const [k, a] of Object.entries(doc.assets || {})) {
+      assets[k] = a.bytes ? { kind: a.kind, mime: a.mime, b64: b64encode(a.bytes) } : a;
+    }
+    return JSON.stringify(Object.assign({}, doc, { assets }), null, pretty ? 2 : 0);
+  }
+
+  function deserialize(str) {
+    const doc = typeof str === 'string' ? JSON.parse(str) : str;
+    if (!doc || doc.format !== 'h2f') throw new Error('Not an html-to-figma (.h2f.json) document');
+    for (const a of Object.values(doc.assets || {})) {
+      if (a.b64) {
+        a.bytes = b64decode(a.b64);
+        delete a.b64;
+      }
+    }
+    return doc;
+  }
+
+  H2F.buildDoc = buildDoc;
+  H2F.convertHTML = convertHTML;
+  H2F.audit = audit;
+  H2F.serialize = serialize;
+  H2F.deserialize = deserialize;
+  H2F.b64encode = b64encode;
+  H2F.b64decode = b64decode;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/*
+ * H2F core — ai.js
+ * Image (screenshot / mockup) → grid-aligned, flexbox HTML using Claude's vision,
+ * which then flows through the normal HTML → Figma pipeline.
+ *
+ * Runs in the browser with the user's own Anthropic API key (never sent anywhere
+ * except api.anthropic.com). This uses a raw fetch because the plugin UI and the
+ * website are single-file, bundler-free pages; it mirrors the Messages API exactly.
+ */
+(function (root) {
+  const H2F = (root.H2F = root.H2F || {});
+
+  const DEFAULT_MODEL = 'claude-opus-5-5';
+  const MAX_EDGE = 1568; // vision models downscale beyond this anyway
+
+  /** Downscale + re-encode an image (Blob/File or data URL) → { media_type, data(base64), width, height } */
+  async function prepareImage(input) {
+    const blob = typeof input === 'string' ? await (await fetch(input)).blob() : input;
+    const bmp = await createImageBitmap(blob);
+    const scale = Math.min(1, MAX_EDGE / Math.max(bmp.width, bmp.height));
+    const w = Math.round(bmp.width * scale),
+      h = Math.round(bmp.height * scale);
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bmp, 0, 0, w, h);
+    const dataUrl = c.toDataURL('image/png');
+    let media_type = 'image/png',
+      data = dataUrl.split(',')[1];
+    if (data.length > 4.5e6) {
+      media_type = 'image/jpeg';
+      data = c.toDataURL('image/jpeg', 0.88).split(',')[1];
+    }
+    return { media_type, data, width: bmp.width, height: bmp.height };
+  }
+
+  function buildPrompt(opts) {
+    const base = opts.base || 8;
+    const half = base === 8 ? ' (4px is allowed for values under 16px)' : '';
+    return `Rebuild this UI screenshot as a single, self-contained HTML document that will be imported into Figma as editable layers with auto layout.
+
+Target screen: ${opts.width}px wide × ${opts.height}px tall. Lay it out for exactly that width.
+
+Rules — follow all of them:
+1. Layout: use flexbox for every container (display:flex + flex-direction + gap). Avoid floats, CSS grid templates and absolute positioning (only use position:absolute for genuinely overlapping things such as badges or overlays). Use gap for spacing between siblings instead of margins.
+2. Spacing grid: every padding, gap, margin and border-radius value must be a multiple of ${base}px${half}. Pills may use border-radius:9999px.
+3. Typography: font sizes from this scale only: 12, 14, 16, 18, 20, 24, 28, 32, 40, 48, 56, 64. Line heights must be multiples of 4px, written in px. If you recognise the typeface use it via a Google Fonts <link>; otherwise use Inter.
+4. Components: elements that repeat (cards, list rows, nav items, buttons, inputs, chips) must use identical markup and identical class names so they are detected as components. Use real <button> and <input> elements for buttons and fields.
+5. Naming: use meaningful class names (e.g. "pricing-card", "nav-item", "hero") and add data-name="…" to major sections — they become Figma layer names.
+6. Content: copy all visible text exactly. Recreate icons as small inline <svg> elements. For photos/illustrations use a <div data-name="Image"> with the dominant colour as background and the correct size.
+7. Colours: match the screenshot closely; define them once as CSS custom properties in :root and reuse them.
+8. Output ONLY the HTML document, starting with <!doctype html>. No explanations, no markdown fences.`;
+  }
+
+  function extractHTML(text) {
+    const fence = text.match(/```(?:html)?\s*([\s\S]*?)```/i);
+    let html = fence ? fence[1] : text;
+    const start = html.search(/<!doctype html|<html/i);
+    if (start > 0) html = html.slice(start);
+    return html.trim();
+  }
+
+  /**
+   * @param {Blob|string} image  File/Blob or data URL
+   * @param {{apiKey:string, width:number, height:number, base?:4|8, model?:string, notes?:string, signal?:AbortSignal}} opts
+   * @returns {Promise<string>} HTML
+   */
+  async function imageToHTML(image, opts) {
+    if (!opts.apiKey) throw new Error('An Anthropic API key is required for AI image conversion.');
+    const img = await prepareImage(image);
+    const prompt = buildPrompt(opts) + (opts.notes ? `\n\nExtra notes from the designer: ${opts.notes}` : '');
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: opts.signal,
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': opts.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'server-side-fallback-2026-07-01',
+        // required for calling the API straight from a browser with a user-supplied key
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: opts.model || DEFAULT_MODEL,
+        max_tokens: 16000,
+        output_config: { effort: opts.effort || 'medium' },
+        fallbacks: 'default',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: img.media_type, data: img.data } },
+              { type: 'text', text: prompt },
+            ],
+          },
+        ],
+      }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = (body.error && body.error.message) || res.statusText;
+      if (res.status === 401) throw new Error('Invalid Anthropic API key.');
+      if (res.status === 429) throw new Error('Rate limited by the Anthropic API — try again shortly.');
+      throw new Error(`Anthropic API error ${res.status}: ${msg}`);
+    }
+    if (body.stop_reason === 'refusal') {
+      throw new Error('The model declined this image' + (body.stop_details && body.stop_details.explanation ? ': ' + body.stop_details.explanation : '.'));
+    }
+    const text = (body.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n');
+    if (!text) throw new Error('The model returned no HTML.');
+    if (body.stop_reason === 'max_tokens') console.warn('[h2f] AI output hit max_tokens; HTML may be truncated.');
+    return extractHTML(text);
+  }
+
+  H2F.ai = { imageToHTML, prepareImage, buildPrompt, extractHTML, DEFAULT_MODEL };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+(function(root){ (root.H2F = root.H2F || {}).SAMPLES = {"pricing":{"label":"Pricing page (desktop)","screen":"desktop","html":"<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>Pricing</title>\n<style>\n  :root { --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --brand:#4f46e5; --bg:#f8fafc; }\n  * { box-sizing: border-box; }\n  body { margin:0; font-family: Inter, system-ui, sans-serif; color:var(--ink); background:var(--bg); }\n  .nav { display:flex; justify-content:space-between; align-items:center; padding:18px 40px; background:#fff; border-bottom:1px solid var(--line); }\n  .logo { font-weight:700; font-size:19px; }\n  .links { display:flex; gap:26px; }\n  .links a { color:var(--muted); text-decoration:none; font-size:15px; }\n  .hero { display:flex; flex-direction:column; align-items:center; gap:14px; padding:70px 24px 50px; text-align:center; }\n  .eyebrow { color:var(--brand); font-weight:600; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }\n  h1 { margin:0; font-size:46px; line-height:54px; }\n  .hero p { margin:0; max-width:560px; color:var(--muted); font-size:17px; line-height:27px; }\n  .plans { display:flex; gap:22px; justify-content:center; padding:0 40px 80px; }\n  .plan { display:flex; flex-direction:column; gap:18px; width:300px; padding:30px; background:#fff; border:1px solid var(--line); border-radius:15px; box-shadow:0 1px 3px rgba(15,23,42,.08); }\n  .plan h3 { margin:0; font-size:18px; }\n  .price { font-size:38px; font-weight:700; }\n  .price span { font-size:15px; color:var(--muted); font-weight:400; }\n  .features { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }\n  .features li { display:flex; gap:10px; align-items:center; font-size:15px; color:#334155; }\n  .btn { display:inline-flex; justify-content:center; padding:11px 18px; border-radius:9px; font-weight:600; font-size:15px; border:0; background:var(--brand); color:#fff; }\n  .btn.secondary { background:#eef2ff; color:var(--brand); }\n</style>\n</head>\n<body>\n  <nav class=\"nav\" data-name=\"Navigation\">\n    <div class=\"logo\">Acme</div>\n    <div class=\"links\"><a href=\"#\">Product</a><a href=\"#\">Pricing</a><a href=\"#\">Docs</a><a href=\"#\">Blog</a></div>\n    <button class=\"btn\">Sign up</button>\n  </nav>\n  <header class=\"hero\">\n    <div class=\"eyebrow\">Pricing</div>\n    <h1>Plans that scale with you</h1>\n    <p>Start free, upgrade when you need more seats, storage and the controls your team asks for.</p>\n  </header>\n  <section class=\"plans\">\n    <div class=\"plan\">\n      <h3>Starter</h3>\n      <div class=\"price\">$0 <span>/ month</span></div>\n      <ul class=\"features\">\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>3 projects</li>\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>1 GB storage</li>\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>Community support</li>\n      </ul>\n      <button class=\"btn secondary\">Get started</button>\n    </div>\n    <div class=\"plan\">\n      <h3>Pro</h3>\n      <div class=\"price\">$24 <span>/ month</span></div>\n      <ul class=\"features\">\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>Unlimited projects</li>\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>100 GB storage</li>\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>Priority support</li>\n      </ul>\n      <button class=\"btn\">Start trial</button>\n    </div>\n    <div class=\"plan\">\n      <h3>Enterprise</h3>\n      <div class=\"price\">$99 <span>/ month</span></div>\n      <ul class=\"features\">\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>SSO &amp; audit logs</li>\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>Unlimited storage</li>\n        <li><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M3 8l3 3 7-7\" stroke=\"#4f46e5\" stroke-width=\"2\" fill=\"none\"/></svg>Dedicated manager</li>\n      </ul>\n      <button class=\"btn secondary\">Contact sales</button>\n    </div>\n  </section>\n</body>\n</html>\n"},"login":{"label":"Sign-in screen (mobile)","screen":"iphone-16","html":"<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>Sign in</title>\n<style>\n  * { box-sizing: border-box; }\n  body { margin:0; font-family: Inter, system-ui, sans-serif; background:#fff; color:#111827; }\n  .screen { display:flex; flex-direction:column; gap:30px; padding:62px 22px 34px; min-height:100vh; }\n  .brand { width:50px; height:50px; border-radius:13px; background:linear-gradient(135deg,#6366f1,#ec4899); }\n  .titles { display:flex; flex-direction:column; gap:6px; }\n  h1 { margin:0; font-size:29px; line-height:35px; }\n  .sub { margin:0; color:#6b7280; font-size:15px; line-height:22px; }\n  form { display:flex; flex-direction:column; gap:18px; }\n  .field { display:flex; flex-direction:column; gap:7px; }\n  label { font-size:13px; font-weight:600; color:#374151; }\n  input { height:46px; padding:0 14px; border:1px solid #d1d5db; border-radius:10px; font-size:15px; font-family:inherit; }\n  .row { display:flex; justify-content:space-between; align-items:center; font-size:13px; }\n  .row a { color:#4f46e5; text-decoration:none; font-weight:600; }\n  .primary { height:50px; border:0; border-radius:11px; background:#4f46e5; color:#fff; font-size:16px; font-weight:600; font-family:inherit; }\n  .divider { display:flex; align-items:center; gap:12px; color:#9ca3af; font-size:13px; }\n  .divider::before, .divider::after { content:\"\"; flex:1; height:1px; background:#e5e7eb; }\n  .social { display:flex; gap:12px; }\n  .social button { flex:1; height:46px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font-size:15px; font-weight:500; font-family:inherit; }\n  .foot { text-align:center; font-size:14px; color:#6b7280; margin-top:auto; }\n  .foot a { color:#4f46e5; font-weight:600; text-decoration:none; }\n</style>\n</head>\n<body>\n  <main class=\"screen\" data-name=\"Sign in\">\n    <div class=\"brand\" data-name=\"Logo\"></div>\n    <div class=\"titles\">\n      <h1>Welcome back</h1>\n      <p class=\"sub\">Sign in to continue to your workspace.</p>\n    </div>\n    <form>\n      <div class=\"field\"><label>Email</label><input placeholder=\"you@company.com\"></div>\n      <div class=\"field\"><label>Password</label><input type=\"password\" placeholder=\"••••••••\"></div>\n      <div class=\"row\"><span>Remember me</span><a href=\"#\">Forgot password?</a></div>\n      <button class=\"primary\" type=\"button\">Sign in</button>\n    </form>\n    <div class=\"divider\">or</div>\n    <div class=\"social\"><button>Google</button><button>Apple</button></div>\n    <p class=\"foot\">New here? <a href=\"#\">Create an account</a></p>\n  </main>\n</body>\n</html>\n"},"dashboard":{"label":"Dashboard list (laptop)","screen":"laptop","html":"<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>Projects</title>\n<style>\n  * { box-sizing: border-box; }\n  body { margin:0; font-family: Inter, system-ui, sans-serif; color:#18181b; background:#fafafa; display:flex; min-height:100vh; }\n  aside { width:236px; padding:22px 14px; background:#18181b; color:#e4e4e7; display:flex; flex-direction:column; gap:6px; }\n  .ws { font-weight:700; font-size:15px; padding:6px 10px 18px; color:#fff; }\n  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:7px; font-size:14px; color:#a1a1aa; }\n  .nav-item.active { background:#27272a; color:#fff; }\n  .dot { width:8px; height:8px; border-radius:50%; background:currentColor; }\n  .content { flex:1; padding:30px 38px; display:flex; flex-direction:column; gap:22px; }\n  .top { display:flex; justify-content:space-between; align-items:center; }\n  .top h1 { margin:0; font-size:23px; }\n  .search { width:260px; height:38px; border:1px solid #e4e4e7; border-radius:9px; padding:0 12px; font:inherit; font-size:14px; }\n  .stats { display:flex; gap:18px; }\n  .stat { flex:1; background:#fff; border:1px solid #e4e4e7; border-radius:13px; padding:18px; display:flex; flex-direction:column; gap:6px; }\n  .stat small { color:#71717a; font-size:13px; }\n  .stat b { font-size:27px; }\n  .table { background:#fff; border:1px solid #e4e4e7; border-radius:13px; overflow:hidden; }\n  .tr { display:flex; align-items:center; gap:14px; padding:13px 18px; border-bottom:1px solid #f4f4f5; font-size:14px; }\n  .tr:last-child { border-bottom:0; }\n  .tr .name { flex:1; font-weight:500; }\n  .avatar { width:30px; height:30px; border-radius:50%; background:#e0e7ff; color:#4338ca; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }\n  .badge { padding:3px 9px; border-radius:999px; font-size:12px; font-weight:500; background:#dcfce7; color:#166534; }\n  .badge.warn { background:#fef9c3; color:#854d0e; }\n</style>\n</head>\n<body>\n  <aside data-name=\"Sidebar\">\n    <div class=\"ws\">Northwind</div>\n    <div class=\"nav-item active\"><span class=\"dot\"></span>Projects</div>\n    <div class=\"nav-item\"><span class=\"dot\"></span>Team</div>\n    <div class=\"nav-item\"><span class=\"dot\"></span>Reports</div>\n    <div class=\"nav-item\"><span class=\"dot\"></span>Settings</div>\n  </aside>\n  <div class=\"content\">\n    <div class=\"top\"><h1>Projects</h1><input class=\"search\" placeholder=\"Search projects…\"></div>\n    <div class=\"stats\">\n      <div class=\"stat\"><small>Active</small><b>24</b></div>\n      <div class=\"stat\"><small>Due this week</small><b>7</b></div>\n      <div class=\"stat\"><small>Completed</small><b>132</b></div>\n    </div>\n    <div class=\"table\">\n      <div class=\"tr\"><div class=\"avatar\">AK</div><div class=\"name\">Website redesign</div><span class=\"badge\">On track</span></div>\n      <div class=\"tr\"><div class=\"avatar\">JL</div><div class=\"name\">Mobile onboarding</div><span class=\"badge warn\">At risk</span></div>\n      <div class=\"tr\"><div class=\"avatar\">MR</div><div class=\"name\">Billing migration</div><span class=\"badge\">On track</span></div>\n      <div class=\"tr\"><div class=\"avatar\">SO</div><div class=\"name\">Design system v2</div><span class=\"badge\">On track</span></div>\n    </div>\n  </div>\n</body>\n</html>\n"}}; })(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const state = { src: 'html', screen: H2F.SCREENS[0], base: 8, image: null, imageName: 'Screenshot', key: '' };
+  $('#ver').textContent = 'v' + H2F.VERSION;
+
+  const send = (msg) => parent.postMessage({ pluginMessage: msg }, '*');
+  const status = (t, err) => { const s = $('#status'); s.textContent = t; s.className = 'status' + (err ? ' err' : ''); };
+  const bar = (pct) => { $('#bar').style.display = pct == null ? 'none' : 'block'; $('#bar i').style.width = (pct || 0) + '%'; };
+
+  // ---- source tabs
+  $$('#srcTabs button').forEach((b) => b.onclick = () => {
+    state.src = b.dataset.src;
+    $$('#srcTabs button').forEach((x) => x.classList.toggle('on', x === b));
+    $$('.pane').forEach((p) => p.classList.toggle('on', p.dataset.pane === state.src));
+    $('#screenSection').style.opacity = state.src === 'json' ? .5 : 1;
+  });
+
+  // ---- samples
+  for (const [id, s] of Object.entries(H2F.SAMPLES || {})) {
+    const o = document.createElement('option'); o.value = id; o.textContent = s.label; $('#sample').appendChild(o);
+  }
+  $('#sample').onchange = (e) => {
+    const s = H2F.SAMPLES[e.target.value]; if (!s) return;
+    $('#htmlInput').value = s.html;
+    const p = H2F.SCREENS.find((x) => x.id === s.screen); if (p) selectScreen(p);
+  };
+
+  // ---- drop zones
+  function dropZone(zone, input, onFile) {
+    zone.onclick = () => input.click();
+    input.onchange = () => input.files[0] && onFile(input.files[0]);
+    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('over'); };
+    zone.ondragleave = () => zone.classList.remove('over');
+    zone.ondrop = (e) => { e.preventDefault(); zone.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) onFile(f); };
+  }
+  dropZone($('#htmlDrop'), $('#htmlFile'), async (f) => { $('#htmlInput').value = await f.text(); state.htmlName = f.name.replace(/\.html?$/i, ''); status('Loaded ' + f.name); });
+  dropZone($('#jsonDrop'), $('#jsonFile'), async (f) => { $('#jsonInput').value = await f.text(); status('Loaded ' + f.name); });
+  const setImage = (f) => {
+    state.image = f; state.imageName = (f.name || 'Screenshot').replace(/\.\w+$/, '');
+    const url = URL.createObjectURL(f);
+    $('#imgDrop').innerHTML = `<img src="${url}"><span class="small">${f.name || 'Pasted image'} · click to replace</span>`;
+    $('#imgDrop').appendChild($('#imgFile'));
+    const img = new Image(); img.onload = () => { state.imageSize = { w: img.naturalWidth, h: img.naturalHeight }; }; img.src = url;
+  };
+  dropZone($('#imgDrop'), $('#imgFile'), setImage);
+  document.addEventListener('paste', (e) => {
+    const item = [...(e.clipboardData || {}).items || []].find((i) => i.type.startsWith('image/'));
+    if (item) { setImage(item.getAsFile()); $$('#srcTabs button')[1].click(); }
+  });
+  $$('input[name=imgMode]').forEach((r) => r.onchange = () => { $('#aiOpts').style.display = r.value === 'ai' && r.checked ? 'flex' : 'none'; });
+
+  // ---- screen presets
+  function renderPresets() {
+    const box = $('#presets'); box.innerHTML = '';
+    let group = '';
+    for (const p of H2F.SCREENS) {
+      if (p.group !== group) { group = p.group; const l = document.createElement('div'); l.className = 'group-label'; l.textContent = group; box.appendChild(l); }
+      const b = document.createElement('button');
+      b.className = 'preset' + (state.screen.id === p.id ? ' on' : '');
+      b.innerHTML = `<b>${p.label}</b><span>${p.width} × ${p.height}</span>`;
+      b.onclick = () => selectScreen(p);
+      box.appendChild(b);
+    }
+  }
+  function selectScreen(p) { state.screen = p; $('#cw').value = p.width; $('#ch').value = p.height; renderPresets(); savePrefs(); }
+  const custom = () => { const w = +$('#cw').value, h = +$('#ch').value; if (w >= 240 && h >= 240) { state.screen = { id: 'custom', label: 'Custom', width: Math.round(w / 4) * 4, height: Math.round(h / 4) * 4 }; renderPresets(); savePrefs(); } };
+  $('#cw').onchange = custom; $('#ch').onchange = custom;
+
+  // ---- rules
+  $$('#baseSeg button').forEach((b) => b.onclick = () => { state.base = +b.dataset.base; $$('#baseSeg button').forEach((x) => x.classList.toggle('on', x === b)); savePrefs(); });
+  const rules = () => ({ base: state.base, snapSpacing: $('#snapSpacing').checked, snapRadius: $('#snapRadius').checked, snapSizes: $('#snapSizes').checked, snapType: $('#snapType').checked, halfStep: true });
+  const options = () => ({ autoLayout: $('#optAuto').checked, components: $('#optComp').checked, tokens: $('#optTokens').checked });
+
+  function savePrefs() { send({ type: 'save-settings', prefs: { screen: state.screen, base: state.base } }); }
+  $('#apiKey').onchange = () => send({ type: 'save-settings', key: $('#apiKey').value.trim() });
+
+  // ---- convert
+  async function convertHTMLToDoc(html, name, source) {
+    status('Rendering HTML at ' + state.screen.width + ' × ' + state.screen.height + '…'); bar(10);
+    const o = options();
+    const doc = await H2F.convertHTML(html, {
+      screen: { width: state.screen.width, height: state.screen.height, label: state.screen.label },
+      rules: rules(), autoLayout: o.autoLayout, components: o.components,
+      runScripts: $('#runScripts').checked, baseUrl: $('#baseUrl').value.trim() || undefined,
+      name: name || 'Screen', source,
+    });
+    return doc;
+  }
+
+  $('#go').onclick = async () => {
+    const btn = $('#go'); btn.disabled = true; $('#result').classList.remove('on');
+    try {
+      let doc;
+      if (state.src === 'html') {
+        const html = $('#htmlInput').value.trim();
+        if (!html) throw new Error('Paste or upload some HTML first.');
+        const title = (html.match(/<title>([^<]*)<\/title>/i) || [])[1];
+        doc = await convertHTMLToDoc(html, state.htmlName || title || 'Screen', 'html');
+      } else if (state.src === 'image') {
+        if (!state.image) throw new Error('Add an image first.');
+        const mode = $$('input[name=imgMode]').find((r) => r.checked).value;
+        if (mode === 'ref') {
+          const bytes = new Uint8Array(await state.image.arrayBuffer());
+          const sz = state.imageSize || { w: state.screen.width, h: state.screen.height };
+          send({ type: 'place-image', bytes, width: sz.w, height: sz.h, name: state.imageName, screen: state.screen });
+          return;
+        }
+        const key = $('#apiKey').value.trim();
+        if (!key) throw new Error('Add your Anthropic API key to rebuild images as layers.');
+        status('Claude is reading the image… (this can take a minute)'); bar(5);
+        const html = await H2F.ai.imageToHTML(state.image, { apiKey: key, width: state.screen.width, height: state.screen.height, base: state.base, notes: $('#aiNotes').value.trim() });
+        $('#htmlInput').value = html; // keep it editable / re-runnable from the HTML tab
+        doc = await convertHTMLToDoc(html, state.imageName, 'image');
+      } else {
+        const txt = $('#jsonInput').value.trim();
+        if (!txt) throw new Error('Drop or paste a .h2f.json export first.');
+        doc = H2F.deserialize(txt);
+      }
+      status('Building in Figma…'); bar(40);
+      const o = options();
+      // structured clone keeps image bytes as Uint8Array (figma.createImage needs that)
+      send({ type: 'build', doc, options: { components: o.components, tokens: o.tokens } });
+      state.lastDoc = doc;
+    } catch (e) {
+      console.error(e); status(e.message || String(e), true); bar(null); btn.disabled = false;
+    }
+  };
+
+  function showResult(sum) {
+    $('#go').disabled = false; bar(null);
+    if (sum.placed) { status('Reference image placed.'); return; }
+    const d = state.lastDoc || { report: {} };
+    const r = d.report || {};
+    const sn = r.snapped || {};
+    const tiles = [
+      [sum.frames, 'frames'], [r.autoLayoutFrames ?? '–', 'auto layout'], [sum.texts, 'text layers'],
+      [sum.components, 'components'], [sum.instances, 'instances'], [(sum.variables || 0) + (sum.textStyles || 0), 'vars + styles'],
+    ];
+    $('#stats').innerHTML = tiles.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+    $('#resTitle').textContent = '✓ ' + sum.name + ' — ' + sum.width + ' × ' + Math.round(sum.height);
+    const snapTotal = (sn.spacing || 0) + (sn.radius || 0) + (sn.size || 0) + (sn.type || 0);
+    $('#resNote').innerHTML = r.audit
+      ? `Grid score <span class="pill">${r.audit.score}%</span> on a ${d.meta.rules.base}pt grid · ${snapTotal} values snapped · ${r.grouped || 0} spacing groups created`
+      : '';
+    const w = [...(sum.warnings || []), ...((r.warnings) || [])];
+    $('#warnings').innerHTML = w.map((x) => `<li>${String(x).replace(/</g, '&lt;')}</li>`).join('');
+    $('#warnBox').style.display = w.length ? 'block' : 'none';
+    $('#result').classList.add('on');
+    status('Done. Select the frame in the canvas to inspect auto layout.');
+  }
+
+  window.onmessage = (e) => {
+    const m = e.data && e.data.pluginMessage; if (!m) return;
+    if (m.type === 'progress') { status(m.text); bar(40 + (m.pct || 0) * 0.6); }
+    if (m.type === 'done') showResult(m.summary);
+    if (m.type === 'error') { status(m.message, true); bar(null); $('#go').disabled = false; }
+    if (m.type === 'settings') {
+      if (m.key) $('#apiKey').value = m.key;
+      const p = m.prefs || {};
+      if (p.screen) state.screen = p.screen;
+      if (p.base) { state.base = p.base; $$('#baseSeg button').forEach((x) => x.classList.toggle('on', +x.dataset.base === p.base)); }
+      selectScreen(state.screen);
+    }
+  };
+
+  selectScreen(state.screen);
+  send({ type: 'get-settings' });
+})();
+</script>
+</body>
+</html>

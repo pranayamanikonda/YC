@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML to Figma</title>
+<meta name="description" content="Turn HTML files and screenshots into Figma designs with auto layout, components, variables and a strict 4/8pt grid.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbfbfa; --surface: #ffffff; --surface-2: #f3f3f1; --line: #e6e5e1; --ink: #18181b; --ink-2: #5b5b61; --ink-3: #8b8b92;
+    --brand: #5b4cf5; --brand-2: #ece9ff; --ok: #138a4c; --warn: #b45309; --err: #c2410c; --al: #f24e1e; --comp: #9747ff;
+    --r-sm: 8px; --r: 12px; --r-lg: 16px; --shadow: 0 1px 2px rgba(24,24,27,.06), 0 4px 16px rgba(24,24,27,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#111113; --surface:#18181b; --surface-2:#222226; --line:#2e2e33; --ink:#f4f4f5; --ink-2:#b4b4bb; --ink-3:#7c7c85; --brand:#8b7fff; --brand-2:#2a2550; --shadow: 0 1px 2px rgba(0,0,0,.4); }
+  }
+  :root[data-theme="dark"] { --bg:#111113; --surface:#18181b; --surface-2:#222226; --line:#2e2e33; --ink:#f4f4f5; --ink-2:#b4b4bb; --ink-3:#7c7c85; --brand:#8b7fff; --brand-2:#2a2550; --shadow: 0 1px 2px rgba(0,0,0,.4); }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font: 15px/24px Inter, system-ui, sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brand); }
+  code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+  /* nav */
+  .topnav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .topnav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); text-decoration: none; }
+  .logo i { width: 24px; height: 24px; border-radius: 8px; background: conic-gradient(from 180deg, #f24e1e, #ff7262, #a259ff, #1abcfe, #0acf83, #f24e1e); display: inline-block; }
+  .topnav nav { display: flex; gap: 24px; }
+  .topnav nav a { color: var(--ink-2); text-decoration: none; font-size: 14px; }
+  .topnav nav a:hover { color: var(--ink); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: var(--r-sm); border: 1px solid transparent; background: var(--brand); color: #fff; font: inherit; font-weight: 600; font-size: 14px; text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .btn.sm { height: 32px; padding: 0 12px; font-size: 13px; }
+  /* hero */
+  .hero { padding: 80px 0 48px; text-align: center; }
+  .eyebrow { display: inline-flex; gap: 8px; align-items: center; padding: 4px 12px; border-radius: 999px; background: var(--brand-2); color: var(--brand); font-size: 13px; font-weight: 600; }
+  .hero h1 { margin: 24px auto 16px; max-width: 840px; font-size: clamp(36px, 6vw, 64px); line-height: 1.05; letter-spacing: -.03em; }
+  .hero p { margin: 0 auto 32px; max-width: 640px; color: var(--ink-2); font-size: 18px; line-height: 28px; }
+  .hero .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 32px; }
+  .chip { padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; color: var(--ink-2); background: var(--surface); }
+  /* app */
+  .app { display: grid; grid-template-columns: 360px 1fr; gap: 16px; padding: 24px 0 64px; align-items: start; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow); }
+  .side { padding: 8px 16px 16px; position: sticky; top: 80px; max-height: calc(100vh - 96px); overflow: auto; }
+  .side section { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .side section:last-child { border-bottom: 0; }
+  .side h3 { margin: 0 0 12px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); display: flex; gap: 8px; align-items: center; }
+  .side h3 .n { width: 20px; height: 20px; border-radius: 10px; background: var(--ink); color: var(--bg); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+  .seg { display: flex; padding: 4px; gap: 4px; border-radius: var(--r-sm); background: var(--surface-2); }
+  .seg button { flex: 1; height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .seg button.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+  textarea, input[type=text], input[type=password], input[type=number], select { width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; }
+  textarea { min-height: 160px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 18px; resize: vertical; }
+  .drop { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px; border: 1.5px dashed var(--line); border-radius: var(--r); text-align: center; color: var(--ink-2); font-size: 13px; cursor: pointer; }
+  .drop.over { border-color: var(--brand); background: var(--brand-2); }
+  .drop img { max-width: 100%; max-height: 180px; border-radius: 8px; }
+  .stack { display: flex; flex-direction: column; gap: 8px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .pane { display: none; } .pane.on { display: flex; flex-direction: column; gap: 8px; }
+  .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .preset { padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); text-align: left; font: inherit; cursor: pointer; }
+  .preset b { display: block; font-size: 13px; font-weight: 500; }
+  .preset span { font-size: 12px; color: var(--ink-3); }
+  .preset.on { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); background: var(--brand-2); }
+  .glabel { grid-column: 1/-1; font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+  label.check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; cursor: pointer; padding: 4px 0; }
+  label.check input { margin-top: 4px; accent-color: var(--brand); }
+  label.check small { display: block; color: var(--ink-3); font-size: 12px; line-height: 16px; }
+  .small { font-size: 12px; line-height: 16px; } .muted { color: var(--ink-3); }
+  .main { min-width: 0; overflow: hidden; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .tabs { display: flex; gap: 4px; }
+  .tabs button { height: 32px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .tabs button.on { background: var(--surface-2); color: var(--ink); }
+  .view { display: none; } .view.on { display: block; }
+  .canvas { background: var(--surface-2); background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 16px 16px; padding: 24px; overflow: auto; height: 720px; }
+  .canvas .stage { transform-origin: 0 0; display: inline-flex; gap: 32px; align-items: flex-start; }
+  .frame-label { font-size: 12px; color: var(--ink-3); margin-bottom: 8px; display: flex; gap: 8px; align-items: center; }
+  .artboard { background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08); position: relative; }
+  .artboard iframe { border: 0; display: block; background: #fff; }
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 640px; color: var(--ink-3); text-align: center; padding: 24px; }
+  .empty b { color: var(--ink); font-size: 16px; }
+  /* overlays */
+  .ov-al .al { outline: 1px dashed rgba(242,78,30,.6); outline-offset: -1px; }
+  .ov-comp .ci { box-shadow: inset 0 0 0 1.5px var(--comp) !important; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 16px; }
+  .stat { padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--r); }
+  .stat b { display: block; font-size: 24px; line-height: 32px; letter-spacing: -.02em; }
+  .stat span { font-size: 12px; color: var(--ink-3); }
+  .report { padding: 0 16px 16px; display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  .card { border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+  .card h4 { margin: 0 0 8px; font-size: 14px; }
+  .card ul { margin: 0; padding-left: 16px; color: var(--ink-2); font-size: 13px; line-height: 20px; }
+  .score { font-size: 40px; font-weight: 700; letter-spacing: -.03em; line-height: 48px; }
+  .bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; } .bar i { display: block; height: 100%; background: var(--ok); }
+  .tree { padding: 12px 16px; height: 720px; overflow: auto; font-size: 13px; line-height: 24px; }
+  .tree .node { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .tree .ico { width: 16px; text-align: center; color: var(--ink-3); font-size: 12px; }
+  .tree .meta { color: var(--ink-3); font-size: 12px; }
+  .tree .tag { font-size: 11px; padding: 0 6px; border-radius: 4px; line-height: 18px; }
+  .tag.al { background: #fde8e1; color: #b93a12; } .tag.c { background: #f1e8ff; color: #7a2fe0; } .tag.s { background: var(--surface-2); color: var(--ink-2); }
+  .tokens { padding: 16px; display: grid; gap: 24px; }
+  .tokens h4 { margin: 0 0 12px; font-size: 14px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .sw { display: flex; gap: 8px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: var(--r-sm); font-size: 12px; }
+  .sw i { width: 32px; height: 32px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); flex: none; }
+  .ts { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .scale { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+  .scale div { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: var(--ink-3); }
+  .scale i { display: block; background: var(--brand-2); border: 1px solid var(--brand); border-radius: 2px; }
+  .status { font-size: 13px; color: var(--ink-2); min-height: 20px; }
+  .status.err { color: var(--err); }
+  .progress { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; display: none; } .progress i { display: block; height: 100%; width: 40%; background: var(--brand); animation: slide 1.2s infinite ease-in-out; }
+  @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+  /* marketing sections */
+  .sec { padding: 72px 0; border-top: 1px solid var(--line); }
+  .sec h2 { margin: 0 0 8px; font-size: 32px; letter-spacing: -.02em; line-height: 40px; }
+  .sec .lead { margin: 0 0 40px; color: var(--ink-2); max-width: 640px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .feature { padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+  .feature h3 { margin: 12px 0 8px; font-size: 16px; }
+  .feature p { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 22px; }
+  .feature .ic { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--brand-2); color: var(--brand); font-weight: 700; }
+  .steps { counter-reset: s; display: grid; gap: 16px; }
+  .step { display: flex; gap: 16px; padding: 16px 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+  .step::before { counter-increment: s; content: counter(s); flex: none; width: 32px; height: 32px; border-radius: 16px; background: var(--ink); color: var(--bg); display: flex; align-items: center; justify-content: center; font-weight: 600; }
+  .step h4 { margin: 4px 0; } .step p { margin: 0; color: var(--ink-2); font-size: 14px; }
+  .gridviz { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .gridviz div { padding: 12px 8px; border: 1px solid var(--line); border-radius: var(--r-sm); text-align: center; font-size: 12px; background: var(--surface); }
+  .gridviz s { color: var(--err); }
+  .gridviz b { color: var(--ok); }
+  table.map { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  table.map th, table.map td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.map th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); background: var(--surface-2); }
+  footer.site { padding: 40px 0; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: var(--r-sm); font-size: 14px; transition: transform .2s; z-index: 50; }
+  .toast.on { transform: translateX(-50%) translateY(0); }
+  @media (max-width: 960px) {
+    .app { grid-template-columns: 1fr; }
+    .side { position: static; max-height: none; }
+    .grid3, .grid2, .report { grid-template-columns: 1fr; }
+    .topnav nav { display: none; }
+    .canvas, .tree { height: 520px; }
+  }
+  @media (max-width: 480px) { .wrap { padding: 0 16px; } .hero { padding: 48px 0 32px; } }
+</style>
+</head>
+<body>
+<header class="topnav">
+  <div class="wrap">
+    <a class="logo" href="#"><i></i>HTML to Figma</a>
+    <nav><a href="#app">Converter</a><a href="#how">How it works</a><a href="#principles">Design rules</a><a href="#plugin">Figma plugin</a><a href="#faq">FAQ</a></nav>
+    <a class="btn sm" href="#app">Open converter</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="eyebrow">Auto layout · Components · Variables · 4/8pt grid</span>
+    <h1>Turn HTML and screenshots into real Figma designs</h1>
+    <p>Not flat layers. Every flex container becomes auto layout, repeated UI becomes components with variants, colours and type become variables and styles — and every spacing value lands on your grid.</p>
+    <div class="ctas"><a class="btn" href="#app">Convert HTML now</a><a class="btn ghost" href="#plugin">Install the Figma plugin</a></div>
+    <div class="chips"><span class="chip">HUG / FILL / FIXED sizing</span><span class="chip">Wrap layouts</span><span class="chip">Text styles</span><span class="chip">Color variables</span><span class="chip">Component properties</span><span class="chip">Gradients &amp; shadows</span><span class="chip">Inline SVG icons</span><span class="chip">Screenshot → layers (AI)</span></div>
+  </div>
+
+  <!-- ================= CONVERTER ================= -->
+  <div class="app" id="app">
+    <aside class="panel side">
+      <section>
+        <h3><span class="n">1</span>Source</h3>
+        <div class="seg" id="srcSeg"><button data-src="html" class="on">HTML</button><button data-src="image">Image</button></div>
+        <div class="pane on" data-pane="html" style="margin-top:12px">
+          <div class="drop" id="htmlDrop"><b>Drop an .html file</b><span>or click to browse · or paste below</span><input type="file" id="htmlFile" accept=".html,.htm" hidden></div>
+          <textarea id="htmlInput" placeholder="<!doctype html>…" spellcheck="false"></textarea>
+          <select id="sample"><option value="">Load a sample…</option></select>
+          <details><summary class="small muted">Advanced</summary>
+            <div class="stack" style="margin-top:8px">
+              <input type="text" id="baseUrl" placeholder="Base URL for relative assets (optional)">
+              <label class="check"><input type="checkbox" id="runScripts"><span>Run page scripts<small>For JS-rendered pages. Only for HTML you trust.</small></span></label>
+            </div>
+          </details>
+        </div>
+        <div class="pane" data-pane="image" style="margin-top:12px">
+          <div class="drop" id="imgDrop"><b>Drop a screenshot or mockup</b><span>PNG / JPG / WebP · click · or paste</span><input type="file" id="imgFile" accept="image/*" hidden></div>
+          <input type="password" id="apiKey" placeholder="Anthropic API key (sk-ant-…)" autocomplete="off">
+          <span class="small muted">Used only in your browser to call api.anthropic.com. Optionally remembered on this device.</span>
+          <label class="check"><input type="checkbox" id="rememberKey"><span>Remember key on this device</span></label>
+          <input type="text" id="aiNotes" placeholder="Notes for the AI (optional)">
+        </div>
+      </section>
+      <section>
+        <h3><span class="n">2</span>Screen size</h3>
+        <div class="presets" id="presets"></div>
+        <div class="row" style="margin-top:8px"><span class="small muted">Custom</span><input type="number" id="cw" step="4" min="240"><span class="muted">×</span><input type="number" id="ch" step="4" min="240"></div>
+      </section>
+      <section>
+        <h3><span class="n">3</span>Design rules</h3>
+        <div class="row" style="justify-content:space-between;margin-bottom:8px"><span style="font-size:14px">Spacing grid</span><div class="seg" id="baseSeg" style="width:140px"><button data-base="4">4 pt</button><button data-base="8" class="on">8 pt</button></div></div>
+        <label class="check"><input type="checkbox" id="snapSpacing" checked><span>Snap padding &amp; gaps</span></label>
+        <label class="check"><input type="checkbox" id="snapRadius" checked><span>Snap corner radius</span></label>
+        <label class="check"><input type="checkbox" id="snapSizes" checked><span>Snap fixed sizes &amp; positions</span></label>
+        <label class="check"><input type="checkbox" id="snapType" checked><span>Type scale + 4pt line heights</span></label>
+        <label class="check"><input type="checkbox" id="optAuto" checked><span>Auto layout</span></label>
+        <label class="check"><input type="checkbox" id="optComp" checked><span>Components &amp; variants</span></label>
+      </section>
+      <section class="stack">
+        <button class="btn" id="go">Convert</button>
+        <div class="progress" id="progress"><i></i></div>
+        <div class="status" id="status">Pick a source and a screen size.</div>
+      </section>
+    </aside>
+
+    <div class="panel main">
+      <div class="toolbar">
+        <div class="tabs" id="viewTabs">
+          <button data-view="preview" class="on">Preview</button>
+          <button data-view="layers">Layers</button>
+          <button data-view="tokens">Tokens</button>
+          <button data-view="report">Grid report</button>
+        </div>
+        <div class="row">
+          <label class="check small" title="Outline auto layout frames"><input type="checkbox" id="ovAl">Auto layout</label>
+          <label class="check small" title="Outline component instances"><input type="checkbox" id="ovComp">Components</label>
+          <select id="zoom" style="width:88px"><option value="fit">Fit</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option></select>
+          <button class="btn ghost sm" id="copyBtn" disabled>Copy for Figma</button>
+          <button class="btn sm" id="dlBtn" disabled>Download .h2f.json</button>
+        </div>
+      </div>
+      <div class="view on" data-view="preview">
+        <div class="canvas" id="canvas"><div class="empty" id="emptyState"><b>Your design will appear here</b><span>Left: the original HTML. Right: the Figma result, rendered from the generated auto layout tree.</span></div></div>
+      </div>
+      <div class="view" data-view="layers"><div class="tree" id="tree"></div></div>
+      <div class="view" data-view="tokens"><div class="tokens" id="tokens"></div></div>
+      <div class="view" data-view="report"><div id="report"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MARKETING ================= -->
+<section class="sec" id="how"><div class="wrap">
+  <h2>How it works</h2>
+  <p class="lead">The converter renders your HTML in a real browser engine at the exact screen size you choose, reads every computed style and box, and rebuilds the page the way a designer would in Figma.</p>
+  <div class="steps">
+    <div class="step"><div><h4>Render at your screen size</h4><p>The page is laid out in an isolated iframe at e.g. 393 × 852 or 1440 × 1024, so media queries, <code>vh</code> units and web fonts resolve exactly like on that device.</p></div></div>
+    <div class="step"><div><h4>Infer auto layout</h4><p>Flexbox maps directly (direction, gap, justify, align, wrap, grow). Block flow and grids are analysed geometrically — stacked children become vertical auto layout, rows become horizontal, tiles become wrap. Margins fold into padding and gap. Irregular spacing is regrouped so each stack has one consistent gap.</p></div></div>
+    <div class="step"><div><h4>Decide sizing</h4><p>Children spanning their parent become <b>Fill container</b>, content-sized boxes become <b>Hug contents</b>, everything else stays <b>Fixed</b>. Centred max-width containers become Fill + max width. Text gets the right auto-resize mode.</p></div></div>
+    <div class="step"><div><h4>Snap to the grid</h4><p>Padding, gaps, radius, fixed sizes and positions are snapped to your 4pt or 8pt grid; font sizes to a type scale; line heights to 4pt. The report lists every value that moved.</p></div></div>
+    <div class="step"><div><h4>Build the system</h4><p>Repeated structures become components (similar ones become variants with TEXT properties), colours become variables, typography becomes text styles, spacing and radius become number variables — all bound to the layers.</p></div></div>
+  </div>
+</div></section>
+
+<section class="sec" id="principles"><div class="wrap">
+  <h2>Design rules, enforced</h2>
+  <p class="lead">On an 8pt grid every spacing value is a multiple of 8, with 4 allowed as a half-step below 16 for tight UI (icon gaps, chips). On a 4pt grid everything is a multiple of 4. Radii follow the same steps; pills stay pills.</p>
+  <div class="gridviz">
+    <div><s>13px</s> → <b>12</b></div><div><s>18px</s> → <b>16</b></div><div><s>22px</s> → <b>24</b></div><div><s>26px</s> → <b>24</b></div><div><s>30px</s> → <b>32</b></div><div><s>38px</s> → <b>40</b></div><div><s>radius 15</s> → <b>16</b></div><div><s>radius 9</s> → <b>8</b></div><div><s>font 15</s> → <b>15</b></div><div><s>font 19</s> → <b>18</b></div><div><s>lh 27</s> → <b>28</b></div><div><s>999px</s> → <b>pill</b></div>
+  </div>
+  <div style="margin-top:32px">
+    <table class="map">
+      <tr><th>CSS</th><th>Figma</th></tr>
+      <tr><td><code>display:flex; flex-direction:column</code></td><td>Auto layout · vertical</td></tr>
+      <tr><td><code>gap</code>, consistent margins between siblings</td><td>Item spacing (snapped, bound to <code>space/*</code> variable)</td></tr>
+      <tr><td><code>padding</code> + <code>border-width</code> + first/last child margins</td><td>Padding (snapped)</td></tr>
+      <tr><td><code>justify-content: space-between | center | flex-end</code></td><td>Primary alignment: Space between / Center / Max</td></tr>
+      <tr><td><code>align-items</code>, <code>stretch</code></td><td>Counter alignment, children set to Fill</td></tr>
+      <tr><td><code>flex-wrap: wrap</code>, multi-column <code>grid</code></td><td>Wrap with row gap</td></tr>
+      <tr><td><code>flex-grow: 1</code></td><td>Fill container on the primary axis</td></tr>
+      <tr><td><code>max-width</code> + <code>margin: 0 auto</code></td><td>Fill + max width, centred</td></tr>
+      <tr><td><code>position: absolute | fixed</code></td><td>Absolute position inside auto layout</td></tr>
+      <tr><td><code>border-radius</code>, <code>box-shadow</code>, <code>filter: blur</code>, <code>backdrop-filter</code></td><td>Corner radius, drop/inner shadow, layer/background blur</td></tr>
+      <tr><td><code>linear-gradient</code>, <code>background-image: url()</code></td><td>Gradient fill, image fill</td></tr>
+      <tr><td>Inline formatting (<code>&lt;strong&gt;</code>, <code>&lt;a&gt;</code>…)</td><td>One text layer with styled ranges + text styles</td></tr>
+      <tr><td>Repeated markup</td><td>Component + instances with overrides; variants for siblings of the same family</td></tr>
+    </table>
+  </div>
+</div></section>
+
+<section class="sec" id="plugin"><div class="wrap">
+  <h2>The Figma plugin</h2>
+  <p class="lead">The plugin runs the same engine inside Figma and builds the layers directly. Use it on its own, or export from this site and import the <code>.h2f.json</code>.</p>
+  <div class="grid3">
+    <div class="feature"><div class="ic">1</div><h3>Install (development)</h3><p>Download the <code>html-to-figma/plugin</code> folder. In the Figma desktop app: <b>Plugins → Development → Import plugin from manifest…</b> and pick <code>plugin/manifest.json</code>.</p></div>
+    <div class="feature"><div class="ic">2</div><h3>Convert</h3><p>Run <b>HTML to Figma</b>. Paste or drop HTML, a screenshot, or a JSON export from this site. Pick the screen size and grid, then press Convert.</p></div>
+    <div class="feature"><div class="ic">3</div><h3>Get a real file</h3><p>You get a screen frame with auto layout, a Components section with variants, a <b>Tokens</b> variable collection and text styles — reused across imports.</p></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="feature"><h3>Screenshot → editable layers</h3><p>Images are rebuilt by Claude into grid-aligned flexbox HTML (with repeated items written as identical markup), then flow through the same converter. Your API key stays on your device. Prefer tracing? Place the image as a reference frame instead.</p></div>
+    <div class="feature"><h3>Privacy</h3><p>HTML is rendered locally — in your browser or the plugin's iframe. Nothing is uploaded, except the image you explicitly send to the Anthropic API for AI rebuilding.</p></div>
+  </div>
+</div></section>
+
+<section class="sec" id="faq"><div class="wrap">
+  <h2>FAQ &amp; limits</h2>
+  <div class="grid2">
+    <div class="feature"><h3>Can it import a live URL?</h3><p>Browsers block reading other sites' HTML (CORS). Save the page (⌘S → "Webpage, Complete") or copy its HTML from DevTools and drop it here; set a Base URL so relative images and CSS resolve.</p></div>
+    <div class="feature"><h3>Fonts</h3><p>Fonts are matched by family and weight against what's available in Figma (Google Fonts are built in). Generic stacks like <code>system-ui</code> fall back to Inter.</p></div>
+    <div class="feature"><h3>What isn't converted?</h3><p><code>::before/::after</code> content, CSS transforms (kept as their bounding box), animations, hover states, and complex <code>grid-template-areas</code> (imported as wrap or absolute).</p></div>
+    <div class="feature"><h3>Why do some gaps change?</h3><p>Figma stacks have a single gap. When CSS margins differ between siblings, tightly-spaced runs are grouped (e.g. "Heading group") and the remaining gaps are normalised to the most common grid value. See the Grid report.</p></div>
+  </div>
+</div></section>
+
+<footer class="site"><div class="wrap row" style="justify-content:space-between;flex-wrap:wrap">
+  <span>HTML to Figma · open source · engine <span id="ver"></span></span>
+  <span>Runs entirely in your browser.</span>
+</div></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/*__H2F_CORE__*/
+</script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} } };
+  const state = { src: 'html', screen: H2F.SCREENS.find((s) => s.id === 'desktop'), base: 8, doc: null, html: '', image: null, imageName: 'Screenshot', urls: [] };
+  $('#ver').textContent = 'v' + H2F.VERSION;
+
+  const toast = (t) => { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('on'), 2000); };
+  const status = (t, err) => { const s = $('#status'); s.textContent = t; s.className = 'status' + (err ? ' err' : ''); };
+  const busy = (on) => { $('#progress').style.display = on ? 'block' : 'none'; $('#go').disabled = on; };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // ---------- source
+  $$('#srcSeg button').forEach((b) => b.onclick = () => {
+    state.src = b.dataset.src;
+    $$('#srcSeg button').forEach((x) => x.classList.toggle('on', x === b));
+    $$('.side .pane').forEach((p) => p.classList.toggle('on', p.dataset.pane === state.src));
+  });
+  for (const [id, s] of Object.entries(H2F.SAMPLES)) { const o = document.createElement('option'); o.value = id; o.textContent = s.label; $('#sample').appendChild(o); }
+  $('#sample').onchange = (e) => { const s = H2F.SAMPLES[e.target.value]; if (!s) return; $('#htmlInput').value = s.html; const p = H2F.SCREENS.find((x) => x.id === s.screen); if (p) selectScreen(p); };
+  function dropZone(zone, input, onFile) {
+    zone.onclick = () => input.click();
+    input.onchange = () => input.files[0] && onFile(input.files[0]);
+    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('over'); };
+    zone.ondragleave = () => zone.classList.remove('over');
+    zone.ondrop = (e) => { e.preventDefault(); zone.classList.remove('over'); e.dataTransfer.files[0] && onFile(e.dataTransfer.files[0]); };
+  }
+  dropZone($('#htmlDrop'), $('#htmlFile'), async (f) => { $('#htmlInput').value = await f.text(); state.htmlName = f.name.replace(/\.html?$/i, ''); status('Loaded ' + f.name); });
+  const setImage = (f) => {
+    state.image = f; state.imageName = (f.name || 'Screenshot').replace(/\.\w+$/, '');
+    const url = URL.createObjectURL(f);
+    $('#imgDrop').innerHTML = `<img src="${url}" alt=""><span>${esc(f.name || 'Pasted image')} · click to replace</span>`;
+    $('#imgDrop').appendChild($('#imgFile'));
+  };
+  dropZone($('#imgDrop'), $('#imgFile'), setImage);
+  document.addEventListener('paste', (e) => {
+    const it = [...((e.clipboardData || {}).items || [])].find((i) => i.type.startsWith('image/'));
+    if (it) { setImage(it.getAsFile()); $$('#srcSeg button')[1].click(); }
+  });
+  const savedKey = store.get('h2f.key'); if (savedKey) { $('#apiKey').value = savedKey; $('#rememberKey').checked = true; }
+  $('#rememberKey').onchange = () => store.set('h2f.key', $('#rememberKey').checked ? $('#apiKey').value.trim() : null);
+  $('#apiKey').onchange = () => { if ($('#rememberKey').checked) store.set('h2f.key', $('#apiKey').value.trim()); };
+
+  // ---------- screens
+  function renderPresets() {
+    const box = $('#presets'); box.innerHTML = ''; let g = '';
+    for (const p of H2F.SCREENS) {
+      if (p.group !== g) { g = p.group; box.insertAdjacentHTML('beforeend', `<div class="glabel">${g}</div>`); }
+      const b = document.createElement('button'); b.className = 'preset' + (p.id === state.screen.id ? ' on' : '');
+      b.innerHTML = `<b>${p.label}</b><span>${p.width} × ${p.height}</span>`; b.onclick = () => selectScreen(p); box.appendChild(b);
+    }
+  }
+  function selectScreen(p) { state.screen = p; $('#cw').value = p.width; $('#ch').value = p.height; renderPresets(); store.set('h2f.screen', JSON.stringify(p)); }
+  const custom = () => { const w = +$('#cw').value, h = +$('#ch').value; if (w >= 240 && h >= 240) selectScreen({ id: 'custom', label: 'Custom', width: Math.round(w / 4) * 4, height: Math.round(h / 4) * 4 }); };
+  $('#cw').onchange = custom; $('#ch').onchange = custom;
+  try { const s = JSON.parse(store.get('h2f.screen')); if (s && s.width) state.screen = s; } catch (e) {}
+  selectScreen(state.screen);
+  $$('#baseSeg button').forEach((b) => b.onclick = () => { state.base = +b.dataset.base; $$('#baseSeg button').forEach((x) => x.classList.toggle('on', x === b)); });
+
+  // ---------- convert
+  $('#go').onclick = async () => {
+    busy(true);
+    try {
+      let html, name, source = 'html';
+      if (state.src === 'html') {
+        html = $('#htmlInput').value.trim();
+        if (!html) throw new Error('Paste, drop or load some HTML first.');
+        name = state.htmlName || (html.match(/<title>([^<]*)<\/title>/i) || [])[1] || 'Screen';
+      } else {
+        if (!state.image) throw new Error('Add an image first.');
+        const key = $('#apiKey').value.trim();
+        if (!key) throw new Error('Add your Anthropic API key to rebuild the image as layers.');
+        status('Claude is reading the image… this can take a minute.');
+        html = await H2F.ai.imageToHTML(state.image, { apiKey: key, width: state.screen.width, height: state.screen.height, base: state.base, notes: $('#aiNotes').value.trim() });
+        $('#htmlInput').value = html; name = state.imageName; source = 'image';
+      }
+      status(`Rendering at ${state.screen.width} × ${state.screen.height}…`);
+      const doc = await H2F.convertHTML(html, {
+        screen: { width: state.screen.width, height: state.screen.height, label: state.screen.label },
+        rules: { base: state.base, snapSpacing: $('#snapSpacing').checked, snapRadius: $('#snapRadius').checked, snapSizes: $('#snapSizes').checked, snapType: $('#snapType').checked },
+        autoLayout: $('#optAuto').checked, components: $('#optComp').checked,
+        runScripts: $('#runScripts').checked, baseUrl: $('#baseUrl').value.trim() || undefined, name, source,
+      });
+      state.doc = doc; state.html = html;
+      renderAll();
+      const r = doc.report;
+      status(`Done · ${r.autoLayoutFrames} auto layout frames · ${r.components} components · grid score ${r.audit.score}%`);
+      $('#copyBtn').disabled = $('#dlBtn').disabled = false;
+    } catch (e) { console.error(e); status(e.message || String(e), true); }
+    busy(false);
+  };
+
+  // ---------- export
+  $('#dlBtn').onclick = () => {
+    const blob = new Blob([H2F.serialize(state.doc)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = (state.doc.meta.name || 'design').replace(/[^\w-]+/g, '-').toLowerCase() + '.h2f.json'; a.click();
+    toast('Downloaded — import it in the plugin’s “From website” tab');
+  };
+  $('#copyBtn').onclick = async () => {
+    try { await navigator.clipboard.writeText(H2F.serialize(state.doc)); toast('Copied — paste into the plugin’s “From website” tab'); }
+    catch (e) { toast('Clipboard blocked — use Download instead'); }
+  };
+
+  // ---------- views
+  $$('#viewTabs button').forEach((b) => b.onclick = () => {
+    $$('#viewTabs button').forEach((x) => x.classList.toggle('on', x === b));
+    $$('.main .view').forEach((v) => v.classList.toggle('on', v.dataset.view === b.dataset.view));
+  });
+  $('#ovAl').onchange = () => $('#canvas').classList.toggle('ov-al', $('#ovAl').checked);
+  $('#ovComp').onchange = () => $('#canvas').classList.toggle('ov-comp', $('#ovComp').checked);
+  $('#zoom').onchange = () => fitZoom();
+  window.addEventListener('resize', () => fitZoom());
+
+  function renderAll() { renderPreview(); renderTree(); renderTokens(); renderReport(); }
+
+  // ---------- preview: render the design tree with Figma auto layout semantics
+  const css = (c, a) => `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(c.b * 255)},${a === undefined ? (c.a === undefined ? 1 : c.a) : a})`;
+  function assetURL(id) {
+    const a = state.doc.assets[id]; if (!a) return null;
+    if (a._url) return a._url;
+    if (a.kind === 'svg') a._url = URL.createObjectURL(new Blob([a.svg], { type: 'image/svg+xml' }));
+    else if (a.bytes) a._url = URL.createObjectURL(new Blob([a.bytes], { type: a.mime }));
+    state.urls.push(a._url); return a._url;
+  }
+  function paintCSS(fills) {
+    const layers = [];
+    for (const p of [...(fills || [])].reverse()) {
+      if (p.type === 'SOLID') layers.push(`linear-gradient(${css(p.color, p.opacity)},${css(p.color, p.opacity)})`);
+      else if (p.type === 'GRADIENT_LINEAR') layers.push(`linear-gradient(${p.angle}deg,${p.stops.map((s) => css(s.color) + ' ' + s.position * 100 + '%').join(',')})`);
+      else if (p.type === 'GRADIENT_RADIAL') layers.push(`radial-gradient(${p.stops.map((s) => css(s.color) + ' ' + s.position * 100 + '%').join(',')})`);
+      else if (p.type === 'IMAGE') { const u = assetURL(p.asset); if (u) layers.push(`url("${u}") center/${p.scaleMode === 'FIT' ? 'contain' : 'cover'} no-repeat`); }
+    }
+    return layers.join(',');
+  }
+  const JUST = { MIN: 'flex-start', CENTER: 'center', MAX: 'flex-end', SPACE_BETWEEN: 'space-between' };
+  const ALIGN = { MIN: 'flex-start', CENTER: 'center', MAX: 'flex-end', BASELINE: 'baseline' };
+
+  function renderNode(n, parent) {
+    const el = document.createElement(n.type === 'TEXT' ? 'div' : 'div');
+    const st = el.style;
+    st.boxSizing = 'border-box'; st.flexShrink = '0'; st.position = 'relative';
+    const pAuto = parent && parent.layout && parent.layout.mode && parent.layout.mode !== 'NONE';
+    const pDir = pAuto ? parent.layout.mode : null;
+    if (!pAuto || n.absolute) {
+      if (parent) { st.position = 'absolute'; st.left = n.x + 'px'; st.top = n.y + 'px'; }
+    }
+    // sizing
+    const setAxis = (axis, mode, size) => {
+      const prop = axis === 'H' ? 'width' : 'height';
+      if (mode === 'FIXED') st[prop] = size + 'px';
+      else if (mode === 'FILL' && pAuto && !n.absolute) {
+        const main = (pDir === 'HORIZONTAL') === (axis === 'H');
+        if (main) { st.flexGrow = '1'; st.flexBasis = '0'; st[axis === 'H' ? 'minWidth' : 'minHeight'] = '0'; }
+        else st.alignSelf = 'stretch';
+      }
+    };
+    setAxis('H', n.sizingH, n.width); setAxis('V', n.sizingV, n.height);
+    if (n.maxWidth) st.maxWidth = n.maxWidth + 'px';
+    if (n.minHeight) st.minHeight = n.minHeight + 'px';
+    if (n.opacity !== undefined && n.opacity < 1) st.opacity = n.opacity;
+    if (n.componentKey) { el.classList.add('ci'); el.title = 'Instance of ' + state.doc.components[n.componentKey].name; }
+
+    if (n.type === 'TEXT') {
+      const t = n.text;
+      st.textAlign = { LEFT: 'left', CENTER: 'center', RIGHT: 'right', JUSTIFIED: 'justify' }[t.align];
+      st.whiteSpace = t.autoResize === 'WIDTH_AND_HEIGHT' ? 'pre' : 'pre-wrap';
+      st.overflowWrap = 'break-word';
+      for (const s of t.segments) {
+        const sp = document.createElement('span');
+        sp.textContent = s.text;
+        Object.assign(sp.style, {
+          fontFamily: (s.family || []).map((f) => /\s/.test(f) ? `"${f}"` : f).join(',') + ',Inter,sans-serif', fontWeight: s.weight, fontStyle: s.italic ? 'italic' : 'normal',
+          fontSize: s.size + 'px', lineHeight: s.lineHeight ? s.lineHeight + 'px' : 'normal', letterSpacing: (s.letterSpacing || 0) + 'px', color: css(s.color),
+          textDecoration: s.decoration === 'UNDERLINE' ? 'underline' : s.decoration === 'STRIKETHROUGH' ? 'line-through' : 'none',
+          textTransform: { UPPER: 'uppercase', LOWER: 'lowercase', TITLE: 'capitalize' }[s.textCase] || 'none',
+        });
+        el.appendChild(sp);
+      }
+      return el;
+    }
+    if (n.type === 'SVG') { el.innerHTML = n.svg; const s = el.firstElementChild; if (s) { s.setAttribute('width', '100%'); s.setAttribute('height', '100%'); s.style.display = 'block'; } st.width = n.width + 'px'; st.height = n.height + 'px'; return el; }
+    if (n.type === 'IMAGE') {
+      const u = n.image.asset && assetURL(n.image.asset);
+      st.background = u ? `url("${u}") center/${n.image.scaleMode === 'FIT' ? 'contain' : 'cover'} no-repeat` : '#e5e7eb';
+      applyBox(el, n); return el;
+    }
+    applyBox(el, n);
+    const l = n.layout || {};
+    if (l.mode && l.mode !== 'NONE') {
+      el.classList.add('al');
+      st.display = 'flex'; st.flexDirection = l.mode === 'VERTICAL' ? 'column' : 'row';
+      if (l.wrap) { st.flexWrap = 'wrap'; st.rowGap = l.crossGap + 'px'; st.columnGap = l.gap + 'px'; }
+      else st.gap = l.gap + 'px';
+      st.padding = l.padding.map((p) => p + 'px').join(' ');
+      st.justifyContent = JUST[l.primary] || 'flex-start';
+      st.alignItems = ALIGN[l.counter] || 'flex-start';
+      el.title = (el.title ? el.title + ' · ' : '') + `${l.mode.toLowerCase()} · gap ${l.gap} · pad ${l.padding.join('/')}`;
+    }
+    if (n.clip) st.overflow = 'hidden';
+    for (const c of n.children || []) el.appendChild(renderNode(c, n));
+    return el;
+  }
+  function applyBox(el, n) {
+    const st = el.style;
+    const bg = paintCSS(n.fills); if (bg) st.background = bg;
+    if (n.radius) st.borderRadius = n.radius.map((r) => Math.min(r, 9999) + 'px').join(' ');
+    const shadows = [];
+    if (n.strokes) {
+      const c = n.strokes.paints[0];
+      const w = n.strokes.weights || [n.strokes.weight, n.strokes.weight, n.strokes.weight, n.strokes.weight];
+      const col = css(c.color, c.opacity);
+      if (n.strokes.dashed) { st.outline = `${w[0]}px dashed ${col}`; st.outlineOffset = -w[0] + 'px'; }
+      else { if (w[0]) shadows.push(`inset 0 ${w[0]}px 0 0 ${col}`); if (w[2]) shadows.push(`inset 0 -${w[2]}px 0 0 ${col}`); if (w[3]) shadows.push(`inset ${w[3]}px 0 0 0 ${col}`); if (w[1]) shadows.push(`inset -${w[1]}px 0 0 0 ${col}`); }
+    }
+    for (const e of n.effects || []) {
+      if (e.type === 'DROP_SHADOW') shadows.push(`${e.offset.x}px ${e.offset.y}px ${e.radius}px ${e.spread}px ${css(e.color)}`);
+      if (e.type === 'INNER_SHADOW') shadows.push(`inset ${e.offset.x}px ${e.offset.y}px ${e.radius}px ${e.spread}px ${css(e.color)}`);
+      if (e.type === 'LAYER_BLUR') st.filter = `blur(${e.radius}px)`;
+      if (e.type === 'BACKGROUND_BLUR') st.backdropFilter = `blur(${e.radius}px)`;
+    }
+    if (shadows.length) st.boxShadow = shadows.join(',');
+  }
+
+  function renderPreview() {
+    const d = state.doc, W = d.meta.screen.width;
+    const canvas = $('#canvas'); canvas.innerHTML = '';
+    const stage = document.createElement('div'); stage.className = 'stage';
+    // original
+    const left = document.createElement('div');
+    left.innerHTML = `<div class="frame-label">Original HTML · ${W}px</div>`;
+    const ab1 = document.createElement('div'); ab1.className = 'artboard';
+    const ifr = document.createElement('iframe'); ifr.setAttribute('sandbox', 'allow-same-origin');
+    ifr.style.width = W + 'px'; ifr.style.height = d.root.height + 'px';
+    ifr.srcdoc = state.html; ab1.appendChild(ifr); left.appendChild(ab1);
+    // figma
+    const right = document.createElement('div');
+    right.innerHTML = `<div class="frame-label">Figma result · ${esc(d.meta.name)} · ${W} × ${d.root.height}</div>`;
+    const ab2 = document.createElement('div'); ab2.className = 'artboard'; ab2.style.width = W + 'px';
+    const rootEl = renderNode(d.root, null);
+    ab2.appendChild(rootEl); right.appendChild(ab2);
+    stage.append(left, right); canvas.appendChild(stage);
+    requestAnimationFrame(() => { ifr.style.height = Math.max(rootEl.offsetHeight, d.meta.screen.height) + 'px'; fitZoom(); });
+  }
+  function fitZoom() {
+    const stage = $('#canvas .stage'); if (!stage) return;
+    let z = $('#zoom').value;
+    if (z === 'fit') { const avail = $('#canvas').clientWidth - 48; z = Math.min(1, avail / stage.scrollWidth); }
+    stage.style.transform = `scale(${z})`;
+  }
+
+  // ---------- layers tree
+  function renderTree() {
+    const out = [];
+    const icon = (n) => n.type === 'TEXT' ? 'T' : n.type === 'SVG' ? '✦' : n.type === 'IMAGE' ? '▣' : n.componentKey ? '◇' : n.layout && n.layout.mode === 'VERTICAL' ? '↓' : n.layout && n.layout.mode === 'HORIZONTAL' ? (n.layout.wrap ? '⤶' : '→') : '#';
+    (function walk(n, depth) {
+      const l = n.layout || {};
+      const tags = [];
+      if (n.componentKey) tags.push(`<span class="tag c">${esc(state.doc.components[n.componentKey].name)}</span>`);
+      if (l.mode && l.mode !== 'NONE') tags.push(`<span class="tag al">${l.mode === 'VERTICAL' ? 'V' : 'H'}${l.wrap ? ' wrap' : ''} · gap ${l.gap} · ${l.padding.join('/')}</span>`);
+      tags.push(`<span class="tag s">${(n.sizingH || 'FIXED')[0] + n.sizingH.slice(1).toLowerCase()} × ${(n.sizingV || 'FIXED')[0] + n.sizingV.slice(1).toLowerCase()}</span>`);
+      const label = n.type === 'TEXT' ? n.text.segments.map((s) => s.text).join('').slice(0, 48) : n.name;
+      out.push(`<div class="node" style="padding-left:${depth * 16}px"><span class="ico">${icon(n)}</span><span>${esc(label)}</span>${tags.join('')}</div>`);
+      for (const c of n.children || []) walk(c, depth + 1);
+    })(state.doc.root, 0);
+    $('#tree').innerHTML = out.join('');
+  }
+
+  // ---------- tokens
+  function renderTokens() {
+    const t = state.doc.tokens;
+    const comps = Object.values(state.doc.components);
+    $('#tokens').innerHTML = `
+      <div><h4>Color variables · ${t.colors.length}</h4><div class="swatches">${t.colors.map((c) => `<div class="sw"><i style="background:${c.hex}"></i><div><div>${esc(c.name)}</div><div class="muted mono">${c.hex} · ${c.count}×</div></div></div>`).join('')}</div></div>
+      <div><h4>Text styles · ${t.text.length}</h4>${t.text.map((s) => `<div class="ts"><span style="font-family:${esc(s.family[0])},Inter;font-weight:${s.weight};font-size:${Math.min(s.size, 40)}px;line-height:1.2">${esc(s.name)}</span><span class="muted mono small">${esc(s.family[0])} · ${s.size}/${s.lineHeight || 'auto'} · ${s.count}×</span></div>`).join('')}</div>
+      <div><h4>Spacing variables · ${t.spacing.length}</h4><div class="scale">${t.spacing.map((s) => `<div><i style="width:${Math.min(s.value, 96)}px;height:${Math.min(s.value, 96)}px"></i>${s.value}</div>`).join('')}</div></div>
+      <div><h4>Radius variables · ${t.radius.length}</h4><div class="scale">${t.radius.map((r) => `<div><i style="width:40px;height:40px;border-radius:${Math.min(r.value, 20)}px"></i>${r.value >= 9999 ? 'full' : r.value}</div>`).join('')}</div></div>
+      <div><h4>Components · ${comps.length}</h4><div class="swatches">${comps.map((c) => `<div class="sw"><i style="background:var(--brand-2);display:flex;align-items:center;justify-content:center;color:var(--comp)">◇</i><div><div>${esc(c.name)}</div><div class="muted small">${c.count} instance${c.count > 1 ? 's' : ''}${c.textProps && c.textProps.length && !c.set ? ' · props: ' + c.textProps.join(', ') : ''}</div></div></div>`).join('')}</div></div>`;
+  }
+
+  // ---------- report
+  function renderReport() {
+    const d = state.doc, r = d.report, a = r.audit, s = r.snapped;
+    $('#report').innerHTML = `
+      <div class="stats">
+        ${[[r.frames, 'frames'], [r.autoLayoutFrames, 'auto layout frames'], [r.texts, 'text layers'], [r.images, 'images & icons'], [r.components, 'components'], [d.tokens.colors.length + d.tokens.text.length, 'variables + styles']].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('')}
+      </div>
+      <div class="report">
+        <div class="card"><h4>Grid compliance (${d.meta.rules.base}pt)</h4><div class="score">${a.score}%</div><div class="bar"><i style="width:${a.score}%"></i></div><p class="small muted">${a.checked} spacing/radius values checked · ${a.violationCount} off-grid</p>
+          ${a.violations.length ? `<ul>${a.violations.slice(0, 8).map((v) => `<li>${esc(v.path.split('/').slice(-2).join(' / '))}: ${v.prop} = ${v.value}</li>`).join('')}</ul>` : ''}</div>
+        <div class="card"><h4>Values snapped to the grid</h4><ul><li>${s.spacing} padding / gap values</li><li>${s.radius} corner radii</li><li>${s.size} fixed sizes</li><li>${s.type} font sizes / line heights</li><li>${r.grouped} spacing groups created for irregular margins</li></ul>
+          ${r.examples.length ? `<p class="small muted" style="margin:8px 0 0">e.g. ${r.examples.slice(0, 6).map(esc).join(' · ')}</p>` : ''}</div>
+        <div class="card"><h4>Layout</h4><ul><li>${r.autoLayoutFrames} of ${r.frames} frames use auto layout</li><li>${r.absolute} absolutely positioned layers</li><li>${r.irregular || 0} stacks had uneven spacing (normalised)</li></ul></div>
+        <div class="card"><h4>Warnings</h4>${r.warnings.length ? `<ul>${r.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>` : '<p class="small muted">None</p>'}</div>
+      </div>`;
+  }
+})();
+</script>
+</body>
+</html>

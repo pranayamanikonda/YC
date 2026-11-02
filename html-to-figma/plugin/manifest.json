@@ -1,0 +1,13 @@
+{
+  "name": "HTML to Figma — Auto Layout & Components",
+  "id": "html-to-figma-grid",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "Imported HTML can reference stylesheets, web fonts and images on any domain; they are fetched in the UI iframe so the page renders faithfully. Image-to-design calls api.anthropic.com with the user's own key."
+  }
+}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Sign in</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Inter, system-ui, sans-serif; background:#fff; color:#111827; }
+  .screen { display:flex; flex-direction:column; gap:30px; padding:62px 22px 34px; min-height:100vh; }
+  .brand { width:50px; height:50px; border-radius:13px; background:linear-gradient(135deg,#6366f1,#ec4899); }
+  .titles { display:flex; flex-direction:column; gap:6px; }
+  h1 { margin:0; font-size:29px; line-height:35px; }
+  .sub { margin:0; color:#6b7280; font-size:15px; line-height:22px; }
+  form { display:flex; flex-direction:column; gap:18px; }
+  .field { display:flex; flex-direction:column; gap:7px; }
+  label { font-size:13px; font-weight:600; color:#374151; }
+  input { height:46px; padding:0 14px; border:1px solid #d1d5db; border-radius:10px; font-size:15px; font-family:inherit; }
+  .row { display:flex; justify-content:space-between; align-items:center; font-size:13px; }
+  .row a { color:#4f46e5; text-decoration:none; font-weight:600; }
+  .primary { height:50px; border:0; border-radius:11px; background:#4f46e5; color:#fff; font-size:16px; font-weight:600; font-family:inherit; }
+  .divider { display:flex; align-items:center; gap:12px; color:#9ca3af; font-size:13px; }
+  .divider::before, .divider::after { content:""; flex:1; height:1px; background:#e5e7eb; }
+  .social { display:flex; gap:12px; }
+  .social button { flex:1; height:46px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font-size:15px; font-weight:500; font-family:inherit; }
+  .foot { text-align:center; font-size:14px; color:#6b7280; margin-top:auto; }
+  .foot a { color:#4f46e5; font-weight:600; text-decoration:none; }
+</style>
+</head>
+<body>
+  <main class="screen" data-name="Sign in">
+    <div class="brand" data-name="Logo"></div>
+    <div class="titles">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to continue to your workspace.</p>
+    </div>
+    <form>
+      <div class="field"><label>Email</label><input placeholder="you@company.com"></div>
+      <div class="field"><label>Password</label><input type="password" placeholder="••••••••"></div>
+      <div class="row"><span>Remember me</span><a href="#">Forgot password?</a></div>
+      <button class="primary" type="button">Sign in</button>
+    </form>
+    <div class="divider">or</div>
+    <div class="social"><button>Google</button><button>Apple</button></div>
+    <p class="foot">New here? <a href="#">Create an account</a></p>
+  </main>
+</body>
+</html>
