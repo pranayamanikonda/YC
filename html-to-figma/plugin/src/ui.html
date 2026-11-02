@@ -1,0 +1,372 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: var(--figma-color-bg, #fff);
+    --bg2: var(--figma-color-bg-secondary, #f5f5f5);
+    --bg3: var(--figma-color-bg-tertiary, #e6e6e6);
+    --fg: var(--figma-color-text, #1e1e1e);
+    --fg2: var(--figma-color-text-secondary, #6b6b6b);
+    --line: var(--figma-color-border, #e6e6e6);
+    --brand: var(--figma-color-bg-brand, #0d99ff);
+    --brand-fg: var(--figma-color-text-onbrand, #fff);
+    --ok: var(--figma-color-text-success, #14ae5c);
+    --warn: var(--figma-color-text-warning, #b86200);
+    --err: var(--figma-color-text-danger, #dc3412);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 12px/16px Inter, system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 2; }
+  header h1 { margin: 0; font-size: 13px; font-weight: 600; }
+  header .ver { color: var(--fg2); font-size: 11px; }
+  main { padding: 0 16px 96px; }
+  section { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  h2 { margin: 0 0 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--fg2); display: flex; gap: 8px; align-items: center; }
+  h2 .n { display: inline-flex; width: 16px; height: 16px; border-radius: 8px; background: var(--fg); color: var(--bg); align-items: center; justify-content: center; font-size: 10px; }
+  .tabs { display: flex; gap: 4px; padding: 4px; background: var(--bg2); border-radius: 8px; margin-bottom: 12px; }
+  .tabs button { flex: 1; padding: 6px 8px; border: 0; border-radius: 4px; background: transparent; color: var(--fg2); font: inherit; font-weight: 500; cursor: pointer; }
+  .tabs button.on { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  textarea, input[type=text], input[type=password], input[type=number], select { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); font: inherit; }
+  textarea { min-height: 120px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; resize: vertical; }
+  .drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--fg2); text-align: center; cursor: pointer; }
+  .drop.over { border-color: var(--brand); background: var(--bg2); }
+  .drop img { max-width: 100%; max-height: 160px; border-radius: 4px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .stack { display: flex; flex-direction: column; gap: 8px; }
+  .muted { color: var(--fg2); }
+  .small { font-size: 11px; }
+  .pane { display: none; }
+  .pane.on { display: flex; flex-direction: column; gap: 8px; }
+  .presets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .preset { display: flex; flex-direction: column; gap: 0; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); text-align: left; font: inherit; cursor: pointer; }
+  .preset b { font-weight: 500; }
+  .preset span { color: var(--fg2); font-size: 11px; }
+  .preset.on { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+  .group-label { grid-column: 1 / -1; color: var(--fg2); font-size: 11px; margin-top: 4px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .seg button { padding: 4px 12px; border: 0; background: var(--bg); color: var(--fg); font: inherit; cursor: pointer; }
+  .seg button.on { background: var(--fg); color: var(--bg); }
+  label.check { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; cursor: pointer; }
+  label.check input { margin: 2px 0 0; }
+  label.check small { display: block; color: var(--fg2); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px; background: var(--bg); border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+  .btn { padding: 8px 16px; border: 0; border-radius: 6px; background: var(--brand); color: var(--brand-fg); font: inherit; font-weight: 600; cursor: pointer; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.ghost { background: var(--bg2); color: var(--fg); font-weight: 500; }
+  .bar { height: 4px; border-radius: 2px; background: var(--bg3); overflow: hidden; display: none; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .2s; }
+  .status { font-size: 11px; color: var(--fg2); min-height: 16px; }
+  .status.err { color: var(--err); }
+  .result { display: none; padding: 12px; border-radius: 8px; background: var(--bg2); gap: 8px; flex-direction: column; }
+  .result.on { display: flex; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat { padding: 8px; border-radius: 6px; background: var(--bg); }
+  .stat b { display: block; font-size: 16px; line-height: 20px; }
+  .stat span { color: var(--fg2); font-size: 10px; }
+  details summary { cursor: pointer; color: var(--fg2); }
+  details ul { margin: 4px 0 0; padding-left: 16px; color: var(--fg2); font-size: 11px; }
+  .pill { display: inline-block; padding: 0 6px; border-radius: 8px; background: var(--bg3); font-size: 10px; }
+  a { color: var(--brand); }
+</style>
+</head>
+<body>
+<header>
+  <h1>HTML → Figma</h1>
+  <span class="ver" id="ver"></span>
+</header>
+<main>
+  <!-- 1. Source -->
+  <section>
+    <h2><span class="n">1</span>Source</h2>
+    <div class="tabs" id="srcTabs">
+      <button data-src="html" class="on">HTML</button>
+      <button data-src="image">Image</button>
+      <button data-src="json">Paste from website</button>
+    </div>
+
+    <div class="pane on" data-pane="html">
+      <div class="drop" id="htmlDrop">
+        <b>Drop an .html file</b><span class="small">or click to upload · or paste markup below</span>
+        <input type="file" id="htmlFile" accept=".html,.htm,text/html" hidden>
+      </div>
+      <textarea id="htmlInput" placeholder="<!doctype html>&#10;<html>…"></textarea>
+      <div class="row">
+        <select id="sample"><option value="">Load a sample…</option></select>
+      </div>
+      <details>
+        <summary class="small">Advanced</summary>
+        <div class="stack" style="margin-top:8px">
+          <input type="text" id="baseUrl" placeholder="Base URL for relative images/CSS (optional)">
+          <label class="check"><input type="checkbox" id="runScripts"><span>Run page scripts<small>Needed for JS-rendered markup. Only enable for HTML you trust.</small></span></label>
+        </div>
+      </details>
+    </div>
+
+    <div class="pane" data-pane="image">
+      <div class="drop" id="imgDrop">
+        <b>Drop a screenshot or mockup</b><span class="small">PNG, JPG, WebP · click to upload · or paste (⌘V)</span>
+        <input type="file" id="imgFile" accept="image/*" hidden>
+      </div>
+      <div class="stack">
+        <label class="check"><input type="radio" name="imgMode" value="ai" checked><span>Rebuild as editable layers (AI)<small>Claude reads the image and writes grid-aligned flexbox HTML, which becomes auto layout + components.</small></span></label>
+        <label class="check"><input type="radio" name="imgMode" value="ref"><span>Place as reference image<small>A locked-size frame at your screen width to trace over.</small></span></label>
+      </div>
+      <div class="stack" id="aiOpts">
+        <input type="password" id="apiKey" placeholder="Anthropic API key (sk-ant-…)" autocomplete="off">
+        <span class="small muted">Stored only in this plugin's local storage, sent only to api.anthropic.com.</span>
+        <input type="text" id="aiNotes" placeholder="Notes for the AI (optional) — e.g. 'font is Manrope'">
+      </div>
+    </div>
+
+    <div class="pane" data-pane="json">
+      <div class="drop" id="jsonDrop">
+        <b>Press ⌘V / Ctrl V anywhere here</b><span class="small">after “Copy for plugin” on the website — it builds straight away. Or drop a .h2f.json file.</span>
+        <input type="file" id="jsonFile" accept=".json,application/json" hidden>
+      </div>
+      <textarea id="jsonInput" placeholder="…or paste the copied design JSON"></textarea>
+    </div>
+  </section>
+
+  <!-- 2. Screen size -->
+  <section id="screenSection">
+    <h2><span class="n">2</span>Screen size</h2>
+    <div class="presets" id="presets"></div>
+    <div class="row" style="margin-top:8px">
+      <span class="muted">Custom</span>
+      <input type="number" id="cw" min="240" max="3840" step="4" style="width:80px"> ×
+      <input type="number" id="ch" min="240" max="8000" step="4" style="width:80px">
+    </div>
+  </section>
+
+  <!-- 3. Design rules -->
+  <section>
+    <h2><span class="n">3</span>Design rules</h2>
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <span>Spacing grid</span>
+      <div class="seg" id="baseSeg"><button data-base="4">4 pt</button><button data-base="8" class="on">8 pt</button></div>
+    </div>
+    <div class="grid2">
+      <label class="check"><input type="checkbox" id="snapSpacing" checked><span>Snap padding &amp; gaps</span></label>
+      <label class="check"><input type="checkbox" id="snapRadius" checked><span>Snap corner radius</span></label>
+      <label class="check"><input type="checkbox" id="snapSizes" checked><span>Snap fixed sizes</span></label>
+      <label class="check"><input type="checkbox" id="snapType" checked><span>Type scale &amp; 4pt line-height</span></label>
+    </div>
+    <div class="grid2" style="margin-top:4px">
+      <label class="check"><input type="checkbox" id="optAuto" checked><span>Auto layout</span></label>
+      <label class="check"><input type="checkbox" id="optComp" checked><span>Components &amp; variants</span></label>
+      <label class="check"><input type="checkbox" id="optTokens" checked><span>Variables &amp; text styles</span></label>
+    </div>
+  </section>
+
+  <div class="result" id="result">
+    <b id="resTitle">Done</b>
+    <div class="stats" id="stats"></div>
+    <div class="small muted" id="resNote"></div>
+    <details id="warnBox"><summary class="small">Warnings</summary><ul id="warnings"></ul></details>
+  </div>
+</main>
+<footer>
+  <div class="bar" id="bar"><i></i></div>
+  <div class="status" id="status">Choose a source and a screen size, or press ⌘V to paste a design copied from the website.</div>
+  <button class="btn" id="go">Convert to Figma</button>
+</footer>
+
+<script>
+/*__H2F_CORE__*/
+</script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const state = { src: 'html', screen: H2F.SCREENS[0], base: 8, image: null, imageName: 'Screenshot', key: '' };
+  $('#ver').textContent = 'v' + H2F.VERSION;
+
+  const send = (msg) => parent.postMessage({ pluginMessage: msg }, '*');
+  const status = (t, err) => { const s = $('#status'); s.textContent = t; s.className = 'status' + (err ? ' err' : ''); };
+  const bar = (pct) => { $('#bar').style.display = pct == null ? 'none' : 'block'; $('#bar i').style.width = (pct || 0) + '%'; };
+
+  // ---- source tabs
+  $$('#srcTabs button').forEach((b) => b.onclick = () => {
+    state.src = b.dataset.src;
+    $$('#srcTabs button').forEach((x) => x.classList.toggle('on', x === b));
+    $$('.pane').forEach((p) => p.classList.toggle('on', p.dataset.pane === state.src));
+    $('#screenSection').style.opacity = state.src === 'json' ? .5 : 1;
+  });
+
+  // ---- samples
+  for (const [id, s] of Object.entries(H2F.SAMPLES || {})) {
+    const o = document.createElement('option'); o.value = id; o.textContent = s.label; $('#sample').appendChild(o);
+  }
+  $('#sample').onchange = (e) => {
+    const s = H2F.SAMPLES[e.target.value]; if (!s) return;
+    $('#htmlInput').value = s.html;
+    const p = H2F.SCREENS.find((x) => x.id === s.screen); if (p) selectScreen(p);
+  };
+
+  // ---- drop zones
+  function dropZone(zone, input, onFile) {
+    zone.onclick = () => input.click();
+    input.onchange = () => input.files[0] && onFile(input.files[0]);
+    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('over'); };
+    zone.ondragleave = () => zone.classList.remove('over');
+    zone.ondrop = (e) => { e.preventDefault(); zone.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) onFile(f); };
+  }
+  dropZone($('#htmlDrop'), $('#htmlFile'), async (f) => { $('#htmlInput').value = await f.text(); state.htmlName = f.name.replace(/\.html?$/i, ''); status('Loaded ' + f.name); });
+  dropZone($('#jsonDrop'), $('#jsonFile'), async (f) => { $('#jsonInput').value = await f.text(); status('Loaded ' + f.name); });
+  const setImage = (f) => {
+    state.image = f; state.imageName = (f.name || 'Screenshot').replace(/\.\w+$/, '');
+    const url = URL.createObjectURL(f);
+    $('#imgDrop').innerHTML = `<img src="${url}"><span class="small">${f.name || 'Pasted image'} · click to replace</span>`;
+    $('#imgDrop').appendChild($('#imgFile'));
+    const img = new Image(); img.onload = () => { state.imageSize = { w: img.naturalWidth, h: img.naturalHeight }; }; img.src = url;
+  };
+  dropZone($('#imgDrop'), $('#imgFile'), setImage);
+  // Paste anywhere in the plugin window: an image, a design copied from the website (builds at once), or HTML.
+  document.addEventListener('paste', (e) => {
+    const cd = e.clipboardData;
+    if (!cd) return;
+    const item = [...(cd.items || [])].find((i) => i.type.startsWith('image/'));
+    if (item) { e.preventDefault(); setImage(item.getAsFile()); $$('#srcTabs button')[1].click(); return; }
+    const text = (cd.getData('text/plain') || '').trim();
+    if (!text) return;
+    if (text.startsWith('{') && /"format"\s*:\s*"h2f"/.test(text.slice(0, 200))) {
+      e.preventDefault();
+      $$('#srcTabs button')[2].click();
+      $('#jsonInput').value = text;
+      status('Design pasted from the website. Building…');
+      if (!$('#go').disabled) $('#go').click();
+      return;
+    }
+    const inField = document.activeElement && /TEXTAREA|INPUT/.test(document.activeElement.tagName);
+    if (!inField && /^<(!doctype|html|head|body|main|div|section|header|nav)/i.test(text)) {
+      e.preventDefault();
+      $$('#srcTabs button')[0].click();
+      $('#htmlInput').value = text;
+      status('HTML pasted. Pick a screen size and press Convert.');
+    }
+  });
+  $$('input[name=imgMode]').forEach((r) => r.onchange = () => { $('#aiOpts').style.display = r.value === 'ai' && r.checked ? 'flex' : 'none'; });
+
+  // ---- screen presets
+  function renderPresets() {
+    const box = $('#presets'); box.innerHTML = '';
+    let group = '';
+    for (const p of H2F.SCREENS) {
+      if (p.group !== group) { group = p.group; const l = document.createElement('div'); l.className = 'group-label'; l.textContent = group; box.appendChild(l); }
+      const b = document.createElement('button');
+      b.className = 'preset' + (state.screen.id === p.id ? ' on' : '');
+      b.innerHTML = `<b>${p.label}</b><span>${p.width} × ${p.height}</span>`;
+      b.onclick = () => selectScreen(p);
+      box.appendChild(b);
+    }
+  }
+  function selectScreen(p) { state.screen = p; $('#cw').value = p.width; $('#ch').value = p.height; renderPresets(); savePrefs(); }
+  const custom = () => { const w = +$('#cw').value, h = +$('#ch').value; if (w >= 240 && h >= 240) { state.screen = { id: 'custom', label: 'Custom', width: Math.round(w / 4) * 4, height: Math.round(h / 4) * 4 }; renderPresets(); savePrefs(); } };
+  $('#cw').onchange = custom; $('#ch').onchange = custom;
+
+  // ---- rules
+  $$('#baseSeg button').forEach((b) => b.onclick = () => { state.base = +b.dataset.base; $$('#baseSeg button').forEach((x) => x.classList.toggle('on', x === b)); savePrefs(); });
+  const rules = () => ({ base: state.base, snapSpacing: $('#snapSpacing').checked, snapRadius: $('#snapRadius').checked, snapSizes: $('#snapSizes').checked, snapType: $('#snapType').checked, halfStep: true });
+  const options = () => ({ autoLayout: $('#optAuto').checked, components: $('#optComp').checked, tokens: $('#optTokens').checked });
+
+  function savePrefs() { send({ type: 'save-settings', prefs: { screen: state.screen, base: state.base } }); }
+  $('#apiKey').onchange = () => send({ type: 'save-settings', key: $('#apiKey').value.trim() });
+
+  // ---- convert
+  async function convertHTMLToDoc(html, name, source) {
+    status('Rendering HTML at ' + state.screen.width + ' × ' + state.screen.height + '…'); bar(10);
+    const o = options();
+    const doc = await H2F.convertHTML(html, {
+      screen: { width: state.screen.width, height: state.screen.height, label: state.screen.label },
+      rules: rules(), autoLayout: o.autoLayout, components: o.components,
+      runScripts: $('#runScripts').checked, baseUrl: $('#baseUrl').value.trim() || undefined,
+      name: name || 'Screen', source,
+    });
+    return doc;
+  }
+
+  $('#go').onclick = async () => {
+    const btn = $('#go'); btn.disabled = true; $('#result').classList.remove('on');
+    try {
+      let doc;
+      if (state.src === 'html') {
+        const html = $('#htmlInput').value.trim();
+        if (!html) throw new Error('Paste or upload some HTML first.');
+        const title = (html.match(/<title>([^<]*)<\/title>/i) || [])[1];
+        doc = await convertHTMLToDoc(html, state.htmlName || title || 'Screen', 'html');
+      } else if (state.src === 'image') {
+        if (!state.image) throw new Error('Add an image first.');
+        const mode = $$('input[name=imgMode]').find((r) => r.checked).value;
+        if (mode === 'ref') {
+          const bytes = new Uint8Array(await state.image.arrayBuffer());
+          const sz = state.imageSize || { w: state.screen.width, h: state.screen.height };
+          send({ type: 'place-image', bytes, width: sz.w, height: sz.h, name: state.imageName, screen: state.screen });
+          return;
+        }
+        const key = $('#apiKey').value.trim();
+        if (!key) throw new Error('Add your Anthropic API key to rebuild images as layers.');
+        status('Claude is reading the image… (this can take a minute)'); bar(5);
+        const html = await H2F.ai.imageToHTML(state.image, { apiKey: key, width: state.screen.width, height: state.screen.height, base: state.base, notes: $('#aiNotes').value.trim() });
+        $('#htmlInput').value = html; // keep it editable / re-runnable from the HTML tab
+        doc = await convertHTMLToDoc(html, state.imageName, 'image');
+      } else {
+        const txt = $('#jsonInput').value.trim();
+        if (!txt) throw new Error('Drop or paste a .h2f.json export first.');
+        doc = H2F.deserialize(txt);
+      }
+      status('Building in Figma…'); bar(40);
+      const o = options();
+      // structured clone keeps image bytes as Uint8Array (figma.createImage needs that)
+      send({ type: 'build', doc, options: { components: o.components, tokens: o.tokens } });
+      state.lastDoc = doc;
+    } catch (e) {
+      console.error(e); status(e.message || String(e), true); bar(null); btn.disabled = false;
+    }
+  };
+
+  function showResult(sum) {
+    $('#go').disabled = false; bar(null);
+    if (sum.placed) { status('Reference image placed.'); return; }
+    const d = state.lastDoc || { report: {} };
+    const r = d.report || {};
+    const sn = r.snapped || {};
+    const tiles = [
+      [sum.frames, 'frames'], [r.autoLayoutFrames ?? '–', 'auto layout'], [sum.texts, 'text layers'],
+      [sum.components, 'components'], [sum.instances, 'instances'], [(sum.variables || 0) + (sum.textStyles || 0), 'vars + styles'],
+    ];
+    $('#stats').innerHTML = tiles.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+    $('#resTitle').textContent = '✓ ' + sum.name + ' — ' + sum.width + ' × ' + Math.round(sum.height);
+    const snapTotal = (sn.spacing || 0) + (sn.radius || 0) + (sn.size || 0) + (sn.type || 0);
+    $('#resNote').innerHTML = r.audit
+      ? `Grid score <span class="pill">${r.audit.score}%</span> on a ${d.meta.rules.base}pt grid · ${snapTotal} values snapped · ${r.grouped || 0} spacing groups created`
+      : '';
+    const w = [...(sum.warnings || []), ...((r.warnings) || [])];
+    $('#warnings').innerHTML = w.map((x) => `<li>${String(x).replace(/</g, '&lt;')}</li>`).join('');
+    $('#warnBox').style.display = w.length ? 'block' : 'none';
+    $('#result').classList.add('on');
+    status('Done. Select the frame in the canvas to inspect auto layout.');
+  }
+
+  window.onmessage = (e) => {
+    const m = e.data && e.data.pluginMessage; if (!m) return;
+    if (m.type === 'progress') { status(m.text); bar(40 + (m.pct || 0) * 0.6); }
+    if (m.type === 'done') showResult(m.summary);
+    if (m.type === 'error') { status(m.message, true); bar(null); $('#go').disabled = false; }
+    if (m.type === 'settings') {
+      if (m.key) $('#apiKey').value = m.key;
+      const p = m.prefs || {};
+      if (p.screen) state.screen = p.screen;
+      if (p.base) { state.base = p.base; $$('#baseSeg button').forEach((x) => x.classList.toggle('on', +x.dataset.base === p.base)); }
+      selectScreen(state.screen);
+    }
+  };
+
+  selectScreen(state.screen);
+  send({ type: 'get-settings' });
+})();
+</script>
+</body>
+</html>

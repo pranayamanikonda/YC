@@ -9,6 +9,10 @@ The `qm` deployment CLI and the portable deployment-directory contract.
   semver-stable `@yc-software/qm/contract` export and the static, offline `qm check`
   gate. See [`cli/README.md`](cli/README.md).
 
+- **[`html-to-figma/`](html-to-figma/)** — HTML & screenshots → Figma designs with auto
+  layout, components/variants, variables and a 4/8pt grid. A website and a Figma plugin sharing
+  one engine. See [`html-to-figma/README.md`](html-to-figma/README.md).
+
 ## Quick start
 
 ```bash

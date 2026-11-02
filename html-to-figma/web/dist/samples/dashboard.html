@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Projects</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Inter, system-ui, sans-serif; color:#18181b; background:#fafafa; display:flex; min-height:100vh; }
+  aside { width:236px; padding:22px 14px; background:#18181b; color:#e4e4e7; display:flex; flex-direction:column; gap:6px; }
+  .ws { font-weight:700; font-size:15px; padding:6px 10px 18px; color:#fff; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:7px; font-size:14px; color:#a1a1aa; }
+  .nav-item.active { background:#27272a; color:#fff; }
+  .dot { width:8px; height:8px; border-radius:50%; background:currentColor; }
+  .content { flex:1; padding:30px 38px; display:flex; flex-direction:column; gap:22px; }
+  .top { display:flex; justify-content:space-between; align-items:center; }
+  .top h1 { margin:0; font-size:23px; }
+  .search { width:260px; height:38px; border:1px solid #e4e4e7; border-radius:9px; padding:0 12px; font:inherit; font-size:14px; }
+  .stats { display:flex; gap:18px; }
+  .stat { flex:1; background:#fff; border:1px solid #e4e4e7; border-radius:13px; padding:18px; display:flex; flex-direction:column; gap:6px; }
+  .stat small { color:#71717a; font-size:13px; }
+  .stat b { font-size:27px; }
+  .table { background:#fff; border:1px solid #e4e4e7; border-radius:13px; overflow:hidden; }
+  .tr { display:flex; align-items:center; gap:14px; padding:13px 18px; border-bottom:1px solid #f4f4f5; font-size:14px; }
+  .tr:last-child { border-bottom:0; }
+  .tr .name { flex:1; font-weight:500; }
+  .avatar { width:30px; height:30px; border-radius:50%; background:#e0e7ff; color:#4338ca; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .badge { padding:3px 9px; border-radius:999px; font-size:12px; font-weight:500; background:#dcfce7; color:#166534; }
+  .badge.warn { background:#fef9c3; color:#854d0e; }
+</style>
+</head>
+<body>
+  <aside data-name="Sidebar">
+    <div class="ws">Northwind</div>
+    <div class="nav-item active"><span class="dot"></span>Projects</div>
+    <div class="nav-item"><span class="dot"></span>Team</div>
+    <div class="nav-item"><span class="dot"></span>Reports</div>
+    <div class="nav-item"><span class="dot"></span>Settings</div>
+  </aside>
+  <div class="content">
+    <div class="top"><h1>Projects</h1><input class="search" placeholder="Search projects…"></div>
+    <div class="stats">
+      <div class="stat"><small>Active</small><b>24</b></div>
+      <div class="stat"><small>Due this week</small><b>7</b></div>
+      <div class="stat"><small>Completed</small><b>132</b></div>
+    </div>
+    <div class="table">
+      <div class="tr"><div class="avatar">AK</div><div class="name">Website redesign</div><span class="badge">On track</span></div>
+      <div class="tr"><div class="avatar">JL</div><div class="name">Mobile onboarding</div><span class="badge warn">At risk</span></div>
+      <div class="tr"><div class="avatar">MR</div><div class="name">Billing migration</div><span class="badge">On track</span></div>
+      <div class="tr"><div class="avatar">SO</div><div class="name">Design system v2</div><span class="badge">On track</span></div>
+    </div>
+  </div>
+</body>
+</html>
