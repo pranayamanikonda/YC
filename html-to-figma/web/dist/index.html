@@ -200,7 +200,7 @@
   .custom { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 8px; align-items: center; }
   .custom input { font-family: var(--f-mono); font-size: 13px; text-align: center; }
 
-  .run { padding: 16px; display: flex; flex-direction: column; gap: 12px; position: sticky; bottom: 0; background: var(--sheet); }
+  .run { padding: 16px; display: flex; flex-direction: column; gap: 12px; position: sticky; top: 0; z-index: 3; background: var(--sheet); border-bottom: 1px solid var(--rule); }
   .stages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
   .stage { display: flex; flex-direction: column; gap: 4px; }
   .stage i { display: block; height: 4px; border-radius: 2px; background: var(--sheet-3); overflow: hidden; position: relative; }
@@ -218,6 +218,11 @@
   .toolbar .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .toolbar .toggle { padding: 0 4px; font-size: 13px; gap: 8px; }
   #zoom { width: 88px; height: 32px; padding-block: 4px; font-size: 13px; }
+  .pasteguide { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border-bottom: 1px solid var(--rule); }
+  .pasteguide div { display: flex; flex-direction: column; gap: 2px; padding: 8px 16px; background: var(--sheet); font-size: 12px; line-height: 18px; color: var(--ink-2); }
+  .pasteguide b { color: var(--ink); font-size: 13px; }
+  .pasteguide kbd { font-size: 11px; line-height: 16px; }
+  @media (max-width: 720px) { .pasteguide { grid-template-columns: 1fr; } }
   .view { display: none; } .view.on { display: block; animation: rise .3s var(--ease); }
   .canvas { position: relative; height: 760px; overflow: auto; padding: 32px; background-color: var(--sheet-2); background-image: radial-gradient(var(--dot) 1px, transparent 1px); background-size: 16px 16px; transition: background-size .4s var(--ease); }
   .canvas.g4 { background-size: 8px 8px; }
@@ -414,6 +419,14 @@
     <!-- ================= CONVERTER ================= -->
     <section class="workspace" id="app" aria-label="Converter">
       <aside class="inspector">
+        <div class="run">
+          <button class="btn lg" id="go">Convert to Figma <span class="arrow">→</span></button>
+          <div class="stages" id="stages" aria-hidden="true">
+            <div class="stage"><i></i><span>Render</span></div><div class="stage"><i></i><span>Layout</span></div><div class="stage"><i></i><span>Snap</span></div><div class="stage"><i></i><span>Components</span></div><div class="stage"><i></i><span>Tokens</span></div>
+          </div>
+          <div class="status" id="status" role="status">Pick a source and a screen size.</div>
+          <div id="progress" hidden></div>
+        </div>
         <div class="panel">
           <div class="panel-h"><h3>Source</h3><div class="seg" id="srcSeg" style="width:148px"><span class="thumb"></span><button data-src="html" class="on">HTML</button><button data-src="image">Image</button></div></div>
           <div class="pane on" data-pane="html">
@@ -456,14 +469,6 @@
             <label class="toggle"><span>Components &amp; variants</span><input type="checkbox" id="optComp" checked><span class="sw"></span></label>
           </div>
         </div>
-        <div class="run">
-          <button class="btn lg" id="go">Convert to Figma <span class="arrow">→</span></button>
-          <div class="stages" id="stages" aria-hidden="true">
-            <div class="stage"><i></i><span>Render</span></div><div class="stage"><i></i><span>Layout</span></div><div class="stage"><i></i><span>Snap</span></div><div class="stage"><i></i><span>Components</span></div><div class="stage"><i></i><span>Tokens</span></div>
-          </div>
-          <div class="status" id="status" role="status">Pick a source and a screen size.</div>
-          <div id="progress" hidden></div>
-        </div>
       </aside>
 
       <div class="canvas-col">
@@ -476,9 +481,14 @@
             <label class="toggle" title="Outline every auto layout frame"><span>Outlines</span><input type="checkbox" id="ovAl"><span class="sw"></span></label>
             <label class="toggle" title="Outline component instances"><span>Components</span><input type="checkbox" id="ovComp"><span class="sw"></span></label>
             <select id="zoom" aria-label="Zoom"><option value="fit">Fit</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option></select>
-            <button class="btn ghost sm" id="copyBtn" disabled>Copy for Figma</button>
-            <button class="btn sm" id="dlBtn" disabled>Download .h2f.json</button>
+            <button class="btn sm" id="svgBtn" disabled title="Paste straight onto the Figma canvas: layers and text, no auto layout">Copy SVG for canvas</button>
+            <button class="btn ghost sm" id="copyBtn" disabled title="Paste inside the HTML to Figma plugin: auto layout, components, variables">Copy for plugin</button>
+            <button class="btn ghost sm" id="dlBtn" disabled>Download .h2f.json</button>
           </div>
+        </div>
+        <div class="pasteguide" id="pasteGuide">
+          <div><b>Paste on the canvas</b><span>Copy SVG, click your Figma file, press <kbd>⌘V</kbd> / <kbd>Ctrl V</kbd>. You get named layers and editable text.</span></div>
+          <div><b>Paste in the plugin</b><span>Copy for plugin, open <b>HTML to Figma</b> in Figma, press <kbd>⌘V</kbd> in its window. You get auto layout, components and variables.</span></div>
         </div>
         <div class="view on" data-view="preview"><div class="canvas" id="canvas"><div class="empty"><span>Converting the sample…</span></div></div></div>
         <div class="view" data-view="layers"><div class="tree" id="tree"></div></div>
@@ -2967,7 +2977,7 @@ Rules — follow all of them:
       renderAll();
       const r = doc.report;
       status(`Done · ${r.autoLayoutFrames} auto layout frames · ${r.components} components · grid score ${r.audit.score}%`);
-      $('#copyBtn').disabled = $('#dlBtn').disabled = false;
+      $('#copyBtn').disabled = $('#dlBtn').disabled = $('#svgBtn').disabled = false;
     } catch (e) { console.error(e); setStage(-1); status(e.message || String(e), true); }
     btn.disabled = false; btn.classList.remove('busy');
   }
@@ -2980,8 +2990,23 @@ Rules — follow all of them:
     a.download = (state.doc.meta.name || 'design').replace(/[^\w-]+/g, '-').toLowerCase() + '.h2f.json'; a.click();
     toast('Downloaded. Import it in the plugin’s From website tab');
   };
+  async function copyText(text, okMsg) {
+    try { await navigator.clipboard.writeText(text); toast(okMsg); return; }
+    catch (e) {
+      let ta = document.getElementById('jsonOut');
+      if (!ta) { ta = document.createElement('textarea'); ta.id = 'jsonOut'; ta.readOnly = true; ta.style.cssText = 'margin:8px;width:calc(100% - 16px);height:160px'; $('.canvas-col .toolbar').after(ta); }
+      ta.value = text; ta.focus(); ta.select();
+      toast('Clipboard blocked. It is selected below, press Ctrl+C or ⌘C');
+    }
+  }
+  $('#svgBtn').onclick = () => {
+    if ($('[data-view=preview]').classList.contains('on') === false) $$('#viewTabs button')[0].click();
+    clearInspect(true);
+    const svg = toSVG();
+    copyText(svg, 'SVG copied. Click your Figma canvas and press ⌘V / Ctrl V');
+  };
   $('#copyBtn').onclick = async () => {
-    try { await navigator.clipboard.writeText(H2F.serialize(state.doc)); toast('Copied. Paste it in the plugin’s From website tab'); }
+    try { await navigator.clipboard.writeText(H2F.serialize(state.doc)); toast('Copied. In Figma, open the HTML to Figma plugin and press ⌘V'); }
     catch (e) {
       let ta = document.getElementById('jsonOut');
       if (!ta) { ta = document.createElement('textarea'); ta.id = 'jsonOut'; ta.readOnly = true; ta.style.cssText = 'margin:8px;width:calc(100% - 16px);height:160px'; $('.canvas-col .toolbar').after(ta); }
@@ -3145,7 +3170,7 @@ Rules — follow all of them:
   function showInspect(nid) {
     const rec = state.nodes[nid], ov = $('#inspect'), board = $('#figmaBoard');
     if (!rec || !ov || !board) return;
-    const z = state.zoom || 1, B = board.getBoundingClientRect();
+    const B = board.getBoundingClientRect(), z = B.width / board.offsetWidth || 1;
     const R = (el) => { const r = el.getBoundingClientRect(); return { x: (r.left - B.left) / z, y: (r.top - B.top) / z, w: r.width / z, h: r.height / z }; };
     const n = rec.n, b = R(rec.el), comp = n.componentKey ? ' comp' : '';
     const label = n.componentKey ? '◇ ' + state.doc.components[n.componentKey].name : n.type === 'TEXT' ? 'T  ' + n.text.segments.map((s) => s.text).join('').slice(0, 32) : n.name;
@@ -3171,6 +3196,150 @@ Rules — follow all of them:
     $$('.row.hot').forEach((x) => x.classList.remove('hot'));
     const row = $(`.row[data-nid="${nid}"]`); if (row) row.classList.add('hot');
   }
+
+  // ---------- SVG export: measured from the rendered Figma result, so it matches what you see
+  function toSVG() {
+    const board = $('#figmaBoard'); if (!board || !state.nodes.length) return '';
+    const B = board.getBoundingClientRect();
+    const z = B.width / board.offsetWidth || 1; // actual on-screen scale, also mid-transition
+    const R = (el) => { const r = el.getBoundingClientRect(); return { x: (r.left - B.left) / z, y: (r.top - B.top) / z, w: r.width / z, h: r.height / z }; };
+    const f = (v) => Math.round(v * 100) / 100;
+    const at = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    const hex = (c) => '#' + [c.r, c.g, c.b].map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0')).join('');
+    const kids = new Map();
+    for (const rec of state.nodes) { if (!kids.has(rec.parent)) kids.set(rec.parent, []); kids.get(rec.parent).push(rec); }
+    const defs = [];
+    let uid = 0;
+    const id = (p) => p + (++uid);
+    const imgData = (assetId) => {
+      const a = state.doc.assets[assetId]; if (!a) return null;
+      if (a.kind === 'svg') return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(a.svg)));
+      return a.bytes ? `data:${a.mime};base64,${H2F.b64encode(a.bytes)}` : null;
+    };
+    const shapeFor = (b, rad) => {
+      const [tl, tr, br, bl] = (rad || [0, 0, 0, 0]).map((r) => Math.min(r, b.w / 2, b.h / 2));
+      if (tl === tr && tr === br && br === bl) return { tag: 'rect', attrs: `x="${f(b.x)}" y="${f(b.y)}" width="${f(b.w)}" height="${f(b.h)}"${tl ? ` rx="${f(tl)}"` : ''}` };
+      const x = b.x, y = b.y, w = b.w, h = b.h;
+      const d = `M${f(x + tl)} ${f(y)}H${f(x + w - tr)}${tr ? `A${f(tr)} ${f(tr)} 0 0 1 ${f(x + w)} ${f(y + tr)}` : ''}V${f(y + h - br)}${br ? `A${f(br)} ${f(br)} 0 0 1 ${f(x + w - br)} ${f(y + h)}` : ''}H${f(x + bl)}${bl ? `A${f(bl)} ${f(bl)} 0 0 1 ${f(x)} ${f(y + h - bl)}` : ''}V${f(y + tl)}${tl ? `A${f(tl)} ${f(tl)} 0 0 1 ${f(x + tl)} ${f(y)}` : ''}Z`;
+      return { tag: 'path', attrs: `d="${d}"` };
+    };
+    const shadowFilter = (effects) => {
+      const sh = (effects || []).filter((e) => e.type === 'DROP_SHADOW');
+      if (!sh.length) return '';
+      const fid = id('shadow');
+      defs.push(`<filter id="${fid}" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">${sh.map((e) => `<feDropShadow dx="${e.offset.x}" dy="${e.offset.y}" stdDeviation="${f(e.radius / 2)}" flood-color="${hex(e.color)}" flood-opacity="${f(e.color.a)}"/>`).join('')}</filter>`);
+      return ` filter="url(#${fid})"`;
+    };
+    function paintShapes(n, b) {
+      let out = '';
+      const sh = shapeFor(b, n.radius);
+      const filt = shadowFilter(n.effects);
+      for (const p of n.fills || []) {
+        if (p.type === 'SOLID') out += `<${sh.tag} ${sh.attrs} fill="${hex(p.color)}"${p.opacity < 1 ? ` fill-opacity="${f(p.opacity)}"` : ''}${filt}/>`;
+        else if (p.type === 'GRADIENT_LINEAR' || p.type === 'GRADIENT_RADIAL') {
+          const gid = id('grad');
+          const stops = p.stops.map((st) => `<stop offset="${f(st.position)}" stop-color="${hex(st.color)}"${st.color.a < 1 ? ` stop-opacity="${f(st.color.a)}"` : ''}/>`).join('');
+          if (p.type === 'GRADIENT_LINEAR') {
+            const a = (p.angle - 90) * Math.PI / 180, dx = Math.cos(a) / 2, dy = Math.sin(a) / 2;
+            defs.push(`<linearGradient id="${gid}" x1="${f(.5 - dx)}" y1="${f(.5 - dy)}" x2="${f(.5 + dx)}" y2="${f(.5 + dy)}">${stops}</linearGradient>`);
+          } else defs.push(`<radialGradient id="${gid}">${stops}</radialGradient>`);
+          out += `<${sh.tag} ${sh.attrs} fill="url(#${gid})"${filt}/>`;
+        } else if (p.type === 'IMAGE') {
+          const href = imgData(p.asset); if (!href) continue;
+          const cid = id('clip'); defs.push(`<clipPath id="${cid}"><${sh.tag} ${sh.attrs}/></clipPath>`);
+          out += `<image href="${href}" x="${f(b.x)}" y="${f(b.y)}" width="${f(b.w)}" height="${f(b.h)}" preserveAspectRatio="xMidYMid ${p.scaleMode === 'FIT' ? 'meet' : 'slice'}" clip-path="url(#${cid})"/>`;
+        }
+        // only the first painted layer carries the shadow
+      }
+      if (!(n.fills || []).length && filt) out += `<${sh.tag} ${sh.attrs} fill="#000" fill-opacity="0.001"${filt}/>`;
+      if (n.strokes) {
+        const c = n.strokes.paints[0], w = n.strokes.weight;
+        const col = `stroke="${hex(c.color)}"${c.opacity < 1 ? ` stroke-opacity="${f(c.opacity)}"` : ''}`;
+        if (!n.strokes.weights) {
+          const ib = { x: b.x + w / 2, y: b.y + w / 2, w: Math.max(0, b.w - w), h: Math.max(0, b.h - w) };
+          const s2 = shapeFor(ib, (n.radius || []).map((r) => Math.max(0, r - w / 2)));
+          out += `<${s2.tag} ${s2.attrs} fill="none" ${col} stroke-width="${w}"${n.strokes.dashed ? ` stroke-dasharray="${n.strokes.dashed.join(' ')}"` : ''}/>`;
+        } else {
+          const [t, r, bt, l] = n.strokes.weights;
+          if (t) out += `<rect x="${f(b.x)}" y="${f(b.y)}" width="${f(b.w)}" height="${t}" fill="${hex(c.color)}"/>`;
+          if (bt) out += `<rect x="${f(b.x)}" y="${f(b.y + b.h - bt)}" width="${f(b.w)}" height="${bt}" fill="${hex(c.color)}"/>`;
+          if (l) out += `<rect x="${f(b.x)}" y="${f(b.y)}" width="${l}" height="${f(b.h)}" fill="${hex(c.color)}"/>`;
+          if (r) out += `<rect x="${f(b.x + b.w - r)}" y="${f(b.y)}" width="${r}" height="${f(b.h)}" fill="${hex(c.color)}"/>`;
+        }
+      }
+      return out;
+    }
+    function textSVG(rec) {
+      // one <text> per rendered line, one <tspan> per styled run
+      const lines = [];
+      for (const span of rec.el.children) {
+        const seg = rec.n.text.segments[[...rec.el.children].indexOf(span)];
+        const tn = span.firstChild; if (!tn) continue;
+        const str = tn.textContent, range = document.createRange();
+        let i = 0;
+        while (i < str.length) {
+          let j = i + 1;
+          range.setStart(tn, i); range.setEnd(tn, j);
+          const r0 = range.getClientRects()[0]; if (!r0) { i = j; continue; }
+          const top = Math.round(r0.top);
+          while (j < str.length) {
+            range.setStart(tn, j); range.setEnd(tn, j + 1);
+            const r1 = range.getClientRects()[0];
+            if (r1 && Math.abs(Math.round(r1.top) - top) > 2 && str[j] !== ' ') break;
+            j++;
+          }
+          range.setStart(tn, i); range.setEnd(tn, j);
+          const rb = range.getBoundingClientRect();
+          const chunk = str.slice(i, j).replace(/\n/g, '');
+          if (chunk.trim()) {
+            let line = lines.find((L) => Math.abs(L.top - top) <= 2);
+            if (!line) { line = { top, parts: [] }; lines.push(line); }
+            line.parts.push({ seg, text: chunk, x: (rb.left - B.left) / z, y: (rb.top - B.top) / z, h: rb.height / z });
+          }
+          i = j;
+        }
+      }
+      const caseOf = (seg, t) => seg.textCase === 'UPPER' ? t.toUpperCase() : seg.textCase === 'LOWER' ? t.toLowerCase() : t;
+      return lines.map((L) => {
+        const p0 = L.parts[0];
+        const base = p0.y + p0.h / 2 + p0.seg.size * 0.35; // optical baseline for Latin text
+        const leading = L.parts[0].text.match(/^\s*/)[0].length;
+        return `<text x="${f(p0.x)}" y="${f(base)}" xml:space="preserve">${L.parts.map((p, k) => {
+          const s = p.seg;
+          const txt = k === 0 ? p.text.slice(leading) : p.text;
+          return `<tspan${k ? ` x="${f(p.x)}"` : ''} font-family="${at((s.family || ['Inter'])[0])}" font-size="${s.size}" font-weight="${s.weight}"${s.italic ? ' font-style="italic"' : ''}${s.letterSpacing ? ` letter-spacing="${s.letterSpacing}"` : ''} fill="${hex(s.color)}"${s.color.a < 1 ? ` fill-opacity="${f(s.color.a)}"` : ''}${s.decoration === 'UNDERLINE' ? ' text-decoration="underline"' : ''}>${at(caseOf(s, txt))}</tspan>`;
+        }).join('')}</text>`;
+      }).join('');
+    }
+    function nodeSVG(rec) {
+      const n = rec.n, b = R(rec.el);
+      const name = at(n.componentKey ? state.doc.components[n.componentKey].name : n.type === 'TEXT' ? n.text.segments.map((s) => s.text).join('').slice(0, 40) : n.name);
+      const op = n.opacity !== undefined && n.opacity < 1 ? ` opacity="${f(n.opacity)}"` : '';
+      if (n.type === 'TEXT') return `<g id="${name}"${op}>${textSVG(rec)}</g>`;
+      if (n.type === 'SVG') {
+        const docSvg = new DOMParser().parseFromString(n.svg, 'image/svg+xml').documentElement;
+        if (docSvg.nodeName !== 'svg') return '';
+        docSvg.setAttribute('x', f(b.x)); docSvg.setAttribute('y', f(b.y)); docSvg.setAttribute('width', f(b.w)); docSvg.setAttribute('height', f(b.h));
+        docSvg.removeAttribute('xmlns');
+        return `<g id="${name}">${new XMLSerializer().serializeToString(docSvg).replace(/ xmlns="http:\/\/www\.w3\.org\/2000\/svg"/, '')}</g>`;
+      }
+      if (n.type === 'IMAGE') {
+        const href = n.image.asset && imgData(n.image.asset);
+        if (!href) return `<${shapeFor(b, n.radius).tag} id="${name}" ${shapeFor(b, n.radius).attrs} fill="#E5E7EB"/>`;
+        const cid = id('clip'); const sh = shapeFor(b, n.radius); defs.push(`<clipPath id="${cid}"><${sh.tag} ${sh.attrs}/></clipPath>`);
+        return `<image id="${name}" href="${href}" x="${f(b.x)}" y="${f(b.y)}" width="${f(b.w)}" height="${f(b.h)}" preserveAspectRatio="xMidYMid ${n.image.scaleMode === 'FIT' ? 'meet' : 'slice'}" clip-path="url(#${cid})"/>`;
+      }
+      let clip = '';
+      if (n.clip) { const cid = id('clip'); const sh = shapeFor(b, n.radius); defs.push(`<clipPath id="${cid}"><${sh.tag} ${sh.attrs}/></clipPath>`); clip = ` clip-path="url(#${cid})"`; }
+      const children = (kids.get(n) || []).map(nodeSVG).join('');
+      return `<g id="${name}"${op}>${paintShapes(n, b)}${clip ? `<g${clip}>${children}</g>` : children}</g>`;
+    }
+    const rootRec = state.nodes[0];
+    const rb = R(rootRec.el);
+    const body = nodeSVG(rootRec);
+    return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${Math.round(rb.w)}" height="${Math.round(rb.h)}" viewBox="0 0 ${f(rb.w)} ${f(rb.h)}">${defs.length ? `<defs>${defs.join('')}</defs>` : ''}${body}</svg>`;
+  }
+  window.__h2fToSVG = toSVG;
 
   // ---------- layers (linked to the canvas)
   function renderTree() {

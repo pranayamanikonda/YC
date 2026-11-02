@@ -84,7 +84,7 @@
     <div class="tabs" id="srcTabs">
       <button data-src="html" class="on">HTML</button>
       <button data-src="image">Image</button>
-      <button data-src="json">From website</button>
+      <button data-src="json">Paste from website</button>
     </div>
 
     <div class="pane on" data-pane="html">
@@ -123,7 +123,7 @@
 
     <div class="pane" data-pane="json">
       <div class="drop" id="jsonDrop">
-        <b>Drop a .h2f.json file</b><span class="small">Exported from the HTML → Figma website</span>
+        <b>Press ⌘V / Ctrl V anywhere here</b><span class="small">after “Copy for plugin” on the website — it builds straight away. Or drop a .h2f.json file.</span>
         <input type="file" id="jsonFile" accept=".json,application/json" hidden>
       </div>
       <textarea id="jsonInput" placeholder="…or paste the copied design JSON"></textarea>
@@ -170,7 +170,7 @@
 </main>
 <footer>
   <div class="bar" id="bar"><i></i></div>
-  <div class="status" id="status">Choose a source, a screen size and press Convert.</div>
+  <div class="status" id="status">Choose a source and a screen size, or press ⌘V to paste a design copied from the website.</div>
   <button class="btn" id="go">Convert to Figma</button>
 </footer>
 
@@ -2454,9 +2454,29 @@ Rules — follow all of them:
     const img = new Image(); img.onload = () => { state.imageSize = { w: img.naturalWidth, h: img.naturalHeight }; }; img.src = url;
   };
   dropZone($('#imgDrop'), $('#imgFile'), setImage);
+  // Paste anywhere in the plugin window: an image, a design copied from the website (builds at once), or HTML.
   document.addEventListener('paste', (e) => {
-    const item = [...(e.clipboardData || {}).items || []].find((i) => i.type.startsWith('image/'));
-    if (item) { setImage(item.getAsFile()); $$('#srcTabs button')[1].click(); }
+    const cd = e.clipboardData;
+    if (!cd) return;
+    const item = [...(cd.items || [])].find((i) => i.type.startsWith('image/'));
+    if (item) { e.preventDefault(); setImage(item.getAsFile()); $$('#srcTabs button')[1].click(); return; }
+    const text = (cd.getData('text/plain') || '').trim();
+    if (!text) return;
+    if (text.startsWith('{') && /"format"\s*:\s*"h2f"/.test(text.slice(0, 200))) {
+      e.preventDefault();
+      $$('#srcTabs button')[2].click();
+      $('#jsonInput').value = text;
+      status('Design pasted from the website. Building…');
+      if (!$('#go').disabled) $('#go').click();
+      return;
+    }
+    const inField = document.activeElement && /TEXTAREA|INPUT/.test(document.activeElement.tagName);
+    if (!inField && /^<(!doctype|html|head|body|main|div|section|header|nav)/i.test(text)) {
+      e.preventDefault();
+      $$('#srcTabs button')[0].click();
+      $('#htmlInput').value = text;
+      status('HTML pasted. Pick a screen size and press Convert.');
+    }
   });
   $$('input[name=imgMode]').forEach((r) => r.onchange = () => { $('#aiOpts').style.display = r.value === 'ai' && r.checked ? 'flex' : 'none'; });
 

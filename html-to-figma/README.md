@@ -8,7 +8,7 @@ There are two front ends on one shared engine:
 
 | | What it does |
 |---|---|
-| **Website** (`web/`) | Converts in the browser. Shows the original next to a preview of the Figma result, plus the layer tree, tokens and a grid-compliance report. Exports a `.h2f.json` file for the plugin. |
+| **Website** (`web/`) | Converts in the browser. Shows the original next to a preview of the Figma result, plus the layer tree, tokens and a grid-compliance report. **Copy SVG for canvas** pastes straight into a Figma file (named layers, editable text). **Copy for plugin** carries the full design (auto layout, components, variables) into the plugin. |
 | **Figma plugin** (`plugin/`) | Runs the same engine inside Figma and builds the layers directly from HTML, an image, or a `.h2f.json` exported from the website. |
 
 ```text
@@ -42,6 +42,13 @@ The end-to-end tests use Playwright's Chromium if it's installed (`require('play
 3. Run **Plugins → Development → HTML to Figma**.
 
 The built files (`plugin/dist/code.js`, `plugin/dist/ui.html`) are committed, so this works without a build step.
+
+## Getting a design into Figma
+
+Figma's own clipboard format is private, so a web page can't paste auto layout onto the canvas directly. You get two routes:
+
+- **Canvas paste:** on the website, press **Copy SVG for canvas**, click your Figma file and press ⌘V / Ctrl V. You get named layers, editable text, fills, gradients, borders, shadows and images. You don't get auto layout or components.
+- **Full fidelity:** on the website, press **Copy for plugin**. In Figma, run **HTML to Figma** and press ⌘V anywhere in the plugin window, and it builds straight away. Dropping a downloaded `.h2f.json` works too.
 
 ## Using it
 

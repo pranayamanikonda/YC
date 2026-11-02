@@ -185,3 +185,41 @@ test('image → AI request shape (intercepted) → HTML → design', { skip: !ch
   assert.match(res.html, /^<!doctype html>/);
   assert.ok(res.buttons.includes('Button'));
 });
+
+test('website: Copy SVG produces valid, renderable SVG with real text layers', { skip: !chromium && 'playwright not installed' }, async () => {
+  const p = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await p.goto(`http://localhost:${PORT}/`);
+  await p.waitForFunction(() => /^Done/.test(document.querySelector('#status').textContent), null, { timeout: 30000 });
+  const res = await p.evaluate(async () => {
+    const svg = window.__h2fToSVG();
+    const xml = new DOMParser().parseFromString(svg, 'image/svg+xml');
+    const err = xml.querySelector('parsererror');
+    const texts = [...xml.querySelectorAll('text')].map((t) => t.textContent);
+    const groups = xml.querySelectorAll('g[id]').length;
+    const ok = await new Promise((r) => { const i = new Image(); i.onload = () => r(i.naturalWidth); i.onerror = () => r(0); i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+    return { err: err && err.textContent, texts, groups, width: ok, root: xml.documentElement.getAttribute('width') };
+  });
+  assert.equal(res.err, null);
+  assert.ok(res.texts.includes('Plans that scale with you'), res.texts.slice(0, 5).join(' | '));
+  assert.ok(res.texts.some((t) => /Unlimited projects/.test(t)));
+  assert.ok(res.groups > 20, 'named groups: ' + res.groups);
+  assert.equal(res.root, '1440');
+  assert.equal(res.width, 1440, 'renders as an image');
+  await p.close();
+});
+
+test('plugin UI: pasting a design copied from the website builds it immediately', { skip: !chromium && 'playwright not installed' }, async () => {
+  const json = await convert('login');
+  const p = await browser.newPage();
+  await p.setContent(readFileSync(`${root}/plugin/dist/ui.html`, 'utf8'));
+  await p.evaluate(() => { window.__posted = []; window.parent.postMessage = (m) => window.__posted.push(m); });
+  await p.evaluate((text) => {
+    const dt = new DataTransfer();
+    dt.setData('text/plain', text);
+    document.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+  }, json);
+  await p.waitForFunction(() => window.__posted.some((m) => m.pluginMessage.type === 'build'), null, { timeout: 10000 });
+  const msg = await p.evaluate(() => window.__posted.find((m) => m.pluginMessage.type === 'build').pluginMessage);
+  assert.equal(msg.doc.meta.screen.width, 393);
+  await p.close();
+});
